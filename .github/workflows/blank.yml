@@ -41,8 +41,8 @@ jobs:
           JOBS="${JOBS:-4}"
 
           echo "[1] Cai goi (Ubuntu 18.04)"
-          apt-get update -y
-          apt-get install -y git-core gnupg flex bison build-essential zip curl zlib1g-dev \
+          apt-get update -qq
+          apt-get install -y -qq git-core gnupg flex bison build-essential zip curl zlib1g-dev \
             gcc-multilib g++-multilib libc6-dev-i386 lib32ncurses5-dev x11proto-core-dev \
             libx11-dev lib32z1-dev libgl1-mesa-dev libxml2-utils xsltproc unzip fontconfig \
             python openjdk-8-jdk bc rsync libssl-dev lzop schedtool locales ca-certificates \
@@ -61,10 +61,10 @@ jobs:
           mkdir -p /build/src && cd /build/src
           if [ ! -d .repo ]; then
             echo "[2] repo init $TAG"
-            repo init -u https://android.googlesource.com/platform/manifest -b "$TAG" --depth=1 --no-clone-bundle
+            repo init -q -u https://android.googlesource.com/platform/manifest -b "$TAG" --depth=1 --no-clone-bundle
           fi
           echo "[3] repo sync"
-          repo sync -c -j"$JOBS" --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune \
+          repo sync -q -c -j"$JOBS" --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune \
             || repo sync -c -j2 --force-sync --no-clone-bundle --no-tags
           df -h /build | tail -1
 
@@ -103,7 +103,10 @@ jobs:
           export _JAVA_OPTIONS="-Xmx10g"
           source build/envsetup.sh
           lunch "$TARGET"
-          make -j"$JOBS" systemimage || echo "make that bai (xem log o tren)"
+          # Log day du -> /build/make_full.log ; man hinh chi in moi 300 dong + dong loi (de trang web khong bi dung)
+          set +e
+          make -j"$JOBS" systemimage 2>&1 | tee /build/make_full.log | awk 'NR%300==0 || /FAILED|error:|Error [0-9]|No space/ {print; fflush()}'
+          set -e
 
           IMG="out/target/product/$PRODUCT_DIR/system.img"
           if [ -f "$IMG" ]; then
@@ -118,11 +121,14 @@ jobs:
       - name: Build AOSP trong Docker ubuntu:18.04
         run: |
           # Het gio thi tu dung truoc khi GitHub cat (de van upload log)
+          ( while true; do sleep 600; echo "[heartbeat $(date +%H:%M)] disk: $(df -h /build | tail -1 | awk '{print $3 " dung / " $4 " trong"}') | tien do: $(grep -o '\[ *[0-9]*% [0-9]*/[0-9]*\]' /build/make_full.log 2>/dev/null | tail -1)"; done ) &
+          HB=$!
           docker run --rm \
             -v /build:/build \
             -e JOBS="$(nproc)" \
             ubuntu:18.04 \
             bash -lc "timeout 335m bash /build/build.sh" 2>&1 | tee /build/ci_last.log || true
+          kill "$HB" 2>/dev/null || true
 
       - name: Ket qua
         if: always()
@@ -145,6 +151,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-log
-          path: /build/ci_last.log
+          path: |
+            /build/ci_last.log
+            /build/make_full.log
           if-no-files-found: ignore
           retention-days: 3
