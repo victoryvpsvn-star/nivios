@@ -2,6 +2,11 @@ name: Build Nivi (AOSP 9 GSI)
 
 on:
   workflow_dispatch:
+    inputs:
+      disable_dexpreopt:
+        description: 'Tat dexpreopt (tiet kiem dia + nhanh hon, nhung may boot cham hon lan dau)'
+        type: boolean
+        default: false
 
 permissions:
   contents: write                 # de day trang log len nhanh gh-pages
@@ -21,9 +26,9 @@ jobs:
         uses: easimon/maximize-build-space@master
         with:
           build-mount-path: /build
-          root-reserve-mb: 4096
-          temp-reserve-mb: 512
-          swap-size-mb: 4096
+          root-reserve-mb: 1024
+          temp-reserve-mb: 100
+          swap-size-mb: 2048
           remove-dotnet: 'true'
           remove-android: 'true'
           remove-haskell: 'true'
@@ -133,9 +138,9 @@ jobs:
 
           # ccache luu o /build/ccache (duoc cache giua cac lan chay)
           export USE_CCACHE=1 CCACHE_EXEC=/usr/bin/ccache CCACHE_DIR=/build/ccache
-          export CCACHE_COMPRESS=1 CCACHE_MAXSIZE=9G
+          export CCACHE_COMPRESS=1 CCACHE_MAXSIZE=6G
           mkdir -p "$CCACHE_DIR"
-          ccache -M 9G || true
+          ccache -M 6G || true
           ccache -s | head -5 || true
 
           git config --global user.name "nivi"
@@ -152,6 +157,12 @@ jobs:
           echo "[3] repo sync"
           repo sync -q -c -j"$JOBS" --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune \
             || repo sync -q -c -j2 --force-sync --no-clone-bundle --no-tags
+          echo "[3b] Don dep: xoa thu muc chi dung cho macOS / khong can cho GSI (tiet kiem dia)"
+          BEFORE=$(df -m /build | tail -1 | awk '{print $3}')
+          find prebuilts -maxdepth 5 -type d \( -name 'darwin-x86' -o -name 'darwin-x86_64' -o -name 'darwin-arm64' \) -prune -exec rm -rf {} + 2>/dev/null || true
+          rm -rf prebuilts/android-emulator 2>/dev/null || true
+          AFTER=$(df -m /build | tail -1 | awk '{print $3}')
+          echo "[3b] giai phong khoang $((BEFORE-AFTER)) MB"
           df -h /build | tail -1
 
           echo "[4] Prop Nivi"
@@ -180,6 +191,10 @@ jobs:
               ro.sys.fw.bg_apps_limit=64 \
               persist.sys.nivi.gamemode=1
           MK
+          if [ "${NO_DEXPREOPT:-false}" = "true" ]; then
+            echo "[4] TAT dexpreopt"
+            printf 'WITH_DEXPREOPT := false\nDONT_DEXPREOPT_PREBUILTS := true\n' >> vendor/nivi/nivi.mk
+          fi
           MK_FILE="build/make/target/product/$(echo "$TARGET" | cut -d- -f1).mk"
           grep -q nivi.mk "$MK_FILE" || echo '$(call inherit-product, vendor/nivi/nivi.mk)' >> "$MK_FILE"
 
@@ -214,6 +229,7 @@ jobs:
           docker run --rm \
             -v /build:/build \
             -e JOBS="$(nproc)" \
+            -e NO_DEXPREOPT="${{ inputs.disable_dexpreopt }}" \
             ubuntu:18.04 \
             bash -lc "timeout 330m bash /build/build.sh" 2>&1 | tee /build/ci_last.log || true
           kill "$HB" 2>/dev/null || true
