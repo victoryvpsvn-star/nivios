@@ -3,10 +3,18 @@ name: Build Nivi (AOSP 9 GSI)
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write                 # de day trang log len nhanh gh-pages
+
+env:
+  CACHE_KEY: ccache-nivi-${{ github.run_id }}   # moi lan chay 1 key moi, restore lay ban moi nhat
+
 jobs:
   build:
     runs-on: ubuntu-22.04
     timeout-minutes: 355          # gioi han cua GitHub la 360 phut / job
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       # Giai phong dia + gop 2 phan vung bang LVM, mount vao /build
       - name: Maximize build space
@@ -24,12 +32,83 @@ jobs:
 
       - name: Disk / CPU / RAM
         run: |
+          sudo chown -R "$USER":"$USER" /build
           df -h / /build /mnt || true
           nproc; free -g
 
+      # Lay lai ccache cua cac lan chay truoc (neu co)
+      - name: Restore ccache
+        uses: actions/cache/restore@v4
+        with:
+          path: /build/ccache
+          key: ${{ env.CACHE_KEY }}
+          restore-keys: |
+            ccache-nivi-
+
+      - name: Viet script trang log (publish.sh)
+        run: |
+          cat > /build/publish.sh <<'PUB_EOF'
+          #!/bin/bash
+          # Moi lan goi: day log.txt len nhanh "logs" (khong kich hoat deploy Pages).
+          # Trang index.html (chi day 1 lan len gh-pages) tu doc log.txt qua API moi 60 giay.
+          # Loi o day khong duoc lam hong build.
+          REMOTE="${REMOTE_URL:-https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git}"
+          REPO="${GITHUB_REPOSITORY:-owner/repo}"
+          PROG=$(grep -o '\[ *[0-9]*% [0-9]*/[0-9]*\]' /build/make_full.log 2>/dev/null | tail -1)
+          DISK=$(df -h /build | tail -1 | awk '{print $3 " dung / " $4 " trong"}')
+
+          L=/tmp/logrepo
+          mkdir -p "$L" && cd "$L" || exit 0
+          [ -d .git ] || { git init -q && git checkout -q -b logs; }
+          git config user.name "nivi-bot"; git config user.email "nivi-bot@localhost"
+          {
+            echo "cap nhat : $(date -u '+%F %T') UTC"
+            echo "tien do  : ${PROG:-chua bat dau make}"
+            echo "dia      : ${DISK}"
+            echo "-------------------------------------------"
+            tail -n 250 /build/ci_last.log 2>/dev/null
+          } > log.txt
+          git add -A
+          git commit -q -m "log $(date -u +%H:%M:%S)" 2>/dev/null || true
+          git push -q -f "$REMOTE" logs 2>&1 | tail -1 || true
+
+          if [ ! -f /tmp/pages_done ]; then
+            P=/tmp/pages
+            mkdir -p "$P" && cd "$P" || exit 0
+            [ -d .git ] || { git init -q && git checkout -q -b gh-pages; }
+            git config user.name "nivi-bot"; git config user.email "nivi-bot@localhost"
+            cat > index.html <<'HTML'
+          <!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+          <title>Nivi build log</title>
+          <body style="font:13px/1.4 monospace;background:#111;color:#ddd;margin:0;padding:12px">
+          <b>Nivi build</b> &middot; <span id="st">dang tai...</span> &middot; <a href="#" id="rl" style="color:#8cf">tai lai ngay</a>
+          <pre id="log" style="white-space:pre-wrap;word-break:break-all;margin-top:10px"></pre>
+          <script>
+          var REPO='__REPO__';
+          function tick(){
+            fetch('https://api.github.com/repos/'+REPO+'/contents/log.txt?ref=logs',{headers:{'Accept':'application/vnd.github.raw+json'},cache:'no-store'})
+              .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); })
+              .then(function(t){ document.getElementById('log').textContent=t; document.getElementById('st').textContent='da tai luc '+new Date().toLocaleTimeString()+' (tu dong moi 60s)'; })
+              .catch(function(e){ document.getElementById('st').textContent='loi: '+e.message+' - se thu lai'; });
+          }
+          document.getElementById('rl').onclick=function(e){ e.preventDefault(); tick(); };
+          tick(); setInterval(tick,60000);
+          </script>
+          HTML
+            sed -i "s#__REPO__#${REPO}#" index.html
+            touch .nojekyll
+            git add -A
+            git commit -q -m "page" 2>/dev/null || true
+            git push -q -f "$REMOTE" gh-pages 2>&1 | tail -1 && touch /tmp/pages_done
+          fi
+          exit 0
+          PUB_EOF
+          chmod +x /build/publish.sh
+          touch /build/ci_last.log
+          /build/publish.sh || true      # tao trang ngay tu dau
+
       - name: Viet script build
         run: |
-          sudo chown -R "$USER":"$USER" /build
           cat > /build/build.sh <<'BUILD_EOF'
           #!/bin/bash
           # Chay TRONG container ubuntu:18.04, thu muc lam viec /build
@@ -46,11 +125,18 @@ jobs:
             gcc-multilib g++-multilib libc6-dev-i386 lib32ncurses5-dev x11proto-core-dev \
             libx11-dev lib32z1-dev libgl1-mesa-dev libxml2-utils xsltproc unzip fontconfig \
             python openjdk-8-jdk bc rsync libssl-dev lzop schedtool locales ca-certificates \
-            python3 file
+            python3 file ccache
           locale-gen en_US.UTF-8
           export LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
           python --version
           java -version 2>&1 | head -1
+
+          # ccache luu o /build/ccache (duoc cache giua cac lan chay)
+          export USE_CCACHE=1 CCACHE_EXEC=/usr/bin/ccache CCACHE_DIR=/build/ccache
+          export CCACHE_COMPRESS=1 CCACHE_MAXSIZE=9G
+          mkdir -p "$CCACHE_DIR"
+          ccache -M 9G || true
+          ccache -s | head -5 || true
 
           git config --global user.name "nivi"
           git config --global user.email "nivi@localhost"
@@ -65,7 +151,7 @@ jobs:
           fi
           echo "[3] repo sync"
           repo sync -q -c -j"$JOBS" --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune \
-            || repo sync -c -j2 --force-sync --no-clone-bundle --no-tags
+            || repo sync -q -c -j2 --force-sync --no-clone-bundle --no-tags
           df -h /build | tail -1
 
           echo "[4] Prop Nivi"
@@ -103,10 +189,11 @@ jobs:
           export _JAVA_OPTIONS="-Xmx10g"
           source build/envsetup.sh
           lunch "$TARGET"
-          # Log day du -> /build/make_full.log ; man hinh chi in moi 300 dong + dong loi (de trang web khong bi dung)
+          # Log day du -> /build/make_full.log ; man hinh chi in moi 300 dong + dong loi
           set +e
           make -j"$JOBS" systemimage 2>&1 | tee /build/make_full.log | awk 'NR%300==0 || /FAILED|error:|Error [0-9]|No space/ {print; fflush()}'
           set -e
+          ccache -s | head -8 || true
 
           IMG="out/target/product/$PRODUCT_DIR/system.img"
           if [ -f "$IMG" ]; then
@@ -114,20 +201,21 @@ jobs:
             cp "$IMG" /build/out_nivi/Nivi-system.img
             echo "DONE: /build/out_nivi/Nivi-system.img"
           else
-            echo "KHONG co system.img - build chua xong hoac loi"; exit 1
+            echo "KHONG co system.img - build chua xong hoac loi (ccache da luu, chay lai de tiep tuc)"; exit 1
           fi
           BUILD_EOF
 
       - name: Build AOSP trong Docker ubuntu:18.04
         run: |
-          # Het gio thi tu dung truoc khi GitHub cat (de van upload log)
-          ( while true; do sleep 600; echo "[heartbeat $(date +%H:%M)] disk: $(df -h /build | tail -1 | awk '{print $3 " dung / " $4 " trong"}') | tien do: $(grep -o '\[ *[0-9]*% [0-9]*/[0-9]*\]' /build/make_full.log 2>/dev/null | tail -1)"; done ) &
+          # Vong lap day log moi 30 giay (trang web doc lai moi 60 giay)
+          ( while true; do sleep 30; /build/publish.sh; done ) &
           HB=$!
+          # Het gio thi tu dung truoc khi GitHub cat (de con thoi gian luu cache + upload)
           docker run --rm \
             -v /build:/build \
             -e JOBS="$(nproc)" \
             ubuntu:18.04 \
-            bash -lc "timeout 335m bash /build/build.sh" 2>&1 | tee /build/ci_last.log || true
+            bash -lc "timeout 330m bash /build/build.sh" 2>&1 | tee /build/ci_last.log || true
           kill "$HB" 2>/dev/null || true
 
       - name: Ket qua
@@ -135,7 +223,17 @@ jobs:
         run: |
           ls -lh /build/out_nivi 2>/dev/null || echo "CHUA CO system.img (build chua xong / loi)"
           tail -n 40 /build/ci_last.log || true
+          du -sh /build/ccache 2>/dev/null || true
           df -h /build || true
+          /build/publish.sh || true      # cap nhat trang log lan cuoi
+
+      # Luu ccache de lan chay sau dung tiep (luon chay, ke ca khi build chua xong)
+      - name: Save ccache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: /build/ccache
+          key: ${{ env.CACHE_KEY }}
 
       - name: Upload system.img
         if: always()
