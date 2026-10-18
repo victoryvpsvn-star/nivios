@@ -210,6 +210,14 @@ jobs:
           set -e
           ccache -s | head -8 || true
 
+          # Neu loi: in LOI DAU TIEN (kem 40 dong sau) ra man hinh de trang log hien du chi tiet
+          if [ ! -f "out/target/product/$PRODUCT_DIR/system.img" ]; then
+            echo "================ LOI DAU TIEN (FAILED) ================"
+            grep -n -m1 -B1 -A40 'FAILED:' /build/make_full.log 2>/dev/null | cut -c1-600 || true
+            echo "================ HET LOI DAU TIEN ================"
+            echo "[tien do cuoi] $(grep -o '\[ *[0-9]*% [0-9]*/[0-9]*\]' /build/make_full.log 2>/dev/null | tail -1)"
+          fi
+
           IMG="out/target/product/$PRODUCT_DIR/system.img"
           if [ -f "$IMG" ]; then
             mkdir -p /build/out_nivi
