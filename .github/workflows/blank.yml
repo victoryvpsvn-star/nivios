@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       disable_dexpreopt:
-        description: 'Tat dexpreopt (tiet kiem dia + nhanh hon, nhung may boot cham hon lan dau)'
+        description: 'Chi dexpreopt boot image + system_server (nhe hon, tiet kiem dia/thoi gian; APK dung dexpreopt it hon). Khong tat han dexpreopt vi Android 9 userdebug bat buoc'
         type: boolean
         default: false
 
@@ -192,8 +192,8 @@ jobs:
               persist.sys.nivi.gamemode=1
           MK
           if [ "${NO_DEXPREOPT:-false}" = "true" ]; then
-            echo "[4] TAT dexpreopt"
-            printf 'WITH_DEXPREOPT := false\nDONT_DEXPREOPT_PREBUILTS := true\n' >> vendor/nivi/nivi.mk
+            echo "[4] Che do nhe: chi dexpreopt boot image + system_server (van bat dexpreopt, userdebug yeu cau)"
+            printf 'WITH_DEXPREOPT := true\nWITH_DEXPREOPT_BOOT_IMG_AND_SYSTEM_SERVER_ONLY := true\n' >> vendor/nivi/nivi.mk
           fi
           MK_FILE="build/make/target/product/$(echo "$TARGET" | cut -d- -f1).mk"
           grep -q nivi.mk "$MK_FILE" || echo '$(call inherit-product, vendor/nivi/nivi.mk)' >> "$MK_FILE"
