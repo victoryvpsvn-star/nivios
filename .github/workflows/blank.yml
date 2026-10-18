@@ -1,0 +1,150 @@
+name: Build Nivi (AOSP 9 GSI)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 355          # gioi han cua GitHub la 360 phut / job
+    steps:
+      # Giai phong dia + gop 2 phan vung bang LVM, mount vao /build
+      - name: Maximize build space
+        uses: easimon/maximize-build-space@master
+        with:
+          build-mount-path: /build
+          root-reserve-mb: 4096
+          temp-reserve-mb: 512
+          swap-size-mb: 4096
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-haskell: 'true'
+          remove-codeql: 'true'
+          remove-docker-images: 'true'
+
+      - name: Disk / CPU / RAM
+        run: |
+          df -h / /build /mnt || true
+          nproc; free -g
+
+      - name: Viet script build
+        run: |
+          sudo chown -R "$USER":"$USER" /build
+          cat > /build/build.sh <<'BUILD_EOF'
+          #!/bin/bash
+          # Chay TRONG container ubuntu:18.04, thu muc lam viec /build
+          set -e
+          export DEBIAN_FRONTEND=noninteractive
+          TAG="android-9.0.0_r61"
+          TARGET="aosp_arm64_ab-userdebug"      # may A-only: aosp_arm64_a-userdebug
+          PRODUCT_DIR="generic_arm64_ab"        # may A-only: generic_arm64_a
+          JOBS="${JOBS:-4}"
+
+          echo "[1] Cai goi (Ubuntu 18.04)"
+          apt-get update -y
+          apt-get install -y git-core gnupg flex bison build-essential zip curl zlib1g-dev \
+            gcc-multilib g++-multilib libc6-dev-i386 lib32ncurses5-dev x11proto-core-dev \
+            libx11-dev lib32z1-dev libgl1-mesa-dev libxml2-utils xsltproc unzip fontconfig \
+            python openjdk-8-jdk bc rsync libssl-dev lzop schedtool locales ca-certificates \
+            python3 file
+          locale-gen en_US.UTF-8
+          export LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
+          python --version
+          java -version 2>&1 | head -1
+
+          git config --global user.name "nivi"
+          git config --global user.email "nivi@localhost"
+          git config --global color.ui false
+          curl -s https://storage.googleapis.com/git-repo-downloads/repo -o /usr/local/bin/repo
+          chmod +x /usr/local/bin/repo
+
+          mkdir -p /build/src && cd /build/src
+          if [ ! -d .repo ]; then
+            echo "[2] repo init $TAG"
+            repo init -u https://android.googlesource.com/platform/manifest -b "$TAG" --depth=1 --no-clone-bundle
+          fi
+          echo "[3] repo sync"
+          repo sync -c -j"$JOBS" --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune \
+            || repo sync -c -j2 --force-sync --no-clone-bundle --no-tags
+          df -h /build | tail -1
+
+          echo "[4] Prop Nivi"
+          mkdir -p vendor/nivi
+          cat > vendor/nivi/nivi.mk <<'MK'
+          PRODUCT_PROPERTY_OVERRIDES += \
+              ro.nivi.version=1.0 \
+              persist.sys.use_dithering=0 \
+              debug.sf.hw=1 \
+              debug.egl.hw=1 \
+              debug.performance.tuning=1 \
+              video.accelerate.hw=1 \
+              windowsmgr.max_events_per_sec=150 \
+              ro.min_pointer_dur=8 \
+              ro.max.fling_velocity=12000 \
+              ro.min.fling_velocity=8000 \
+              persist.sys.scrollingcache=3 \
+              pm.sleep_mode=1 \
+              wifi.supplicant_scan_interval=180 \
+              dalvik.vm.heapgrowthlimit=256m \
+              dalvik.vm.heapsize=512m \
+              dalvik.vm.heapminfree=4m \
+              dalvik.vm.heapstartsize=16m \
+              dalvik.vm.dex2oat-filter=speed \
+              dalvik.vm.image-dex2oat-filter=speed \
+              ro.sys.fw.bg_apps_limit=64 \
+              persist.sys.nivi.gamemode=1
+          MK
+          MK_FILE="build/make/target/product/$(echo "$TARGET" | cut -d- -f1).mk"
+          grep -q nivi.mk "$MK_FILE" || echo '$(call inherit-product, vendor/nivi/nivi.mk)' >> "$MK_FILE"
+
+          echo "[5] Build"
+          export ALLOW_MISSING_DEPENDENCIES=true BUILD_BROKEN_DUP_RULES=true
+          export BUILD_NUMBER="nivi.$(date +%Y%m%d)" BUILD_DISPLAY_ID="Nivi-1.0"
+          export _JAVA_OPTIONS="-Xmx10g"
+          source build/envsetup.sh
+          lunch "$TARGET"
+          make -j"$JOBS" systemimage || echo "make that bai (xem log o tren)"
+
+          IMG="out/target/product/$PRODUCT_DIR/system.img"
+          if [ -f "$IMG" ]; then
+            mkdir -p /build/out_nivi
+            cp "$IMG" /build/out_nivi/Nivi-system.img
+            echo "DONE: /build/out_nivi/Nivi-system.img"
+          else
+            echo "KHONG co system.img - build chua xong hoac loi"; exit 1
+          fi
+          BUILD_EOF
+
+      - name: Build AOSP trong Docker ubuntu:18.04
+        run: |
+          # Het gio thi tu dung truoc khi GitHub cat (de van upload log)
+          docker run --rm \
+            -v /build:/build \
+            -e JOBS="$(nproc)" \
+            ubuntu:18.04 \
+            bash -lc "timeout 335m bash /build/build.sh" 2>&1 | tee /build/ci_last.log || true
+
+      - name: Ket qua
+        if: always()
+        run: |
+          ls -lh /build/out_nivi 2>/dev/null || echo "CHUA CO system.img (build chua xong / loi)"
+          tail -n 40 /build/ci_last.log || true
+          df -h /build || true
+
+      - name: Upload system.img
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Nivi-system-img
+          path: /build/out_nivi/*.img
+          if-no-files-found: ignore
+          retention-days: 3
+
+      - name: Upload log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: /build/ci_last.log
+          if-no-files-found: ignore
+          retention-days: 3
