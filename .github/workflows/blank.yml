@@ -28,7 +28,7 @@ jobs:
           build-mount-path: /build
           root-reserve-mb: 1024
           temp-reserve-mb: 100
-          swap-size-mb: 2048
+          swap-size-mb: 4096
           remove-dotnet: 'true'
           remove-android: 'true'
           remove-haskell: 'true'
@@ -201,12 +201,12 @@ jobs:
           echo "[5] Build"
           export ALLOW_MISSING_DEPENDENCIES=true BUILD_BROKEN_DUP_RULES=true
           export BUILD_NUMBER="nivi.$(date +%Y%m%d)" BUILD_DISPLAY_ID="Nivi-1.0"
-          export _JAVA_OPTIONS="-Xmx10g"
+          export _JAVA_OPTIONS="-Xmx6g"
           source build/envsetup.sh
           lunch "$TARGET"
           # Log day du -> /build/make_full.log ; man hinh chi in moi 300 dong + dong loi
           set +e
-          make -j"$JOBS" systemimage 2>&1 | tee /build/make_full.log | awk 'NR%300==0 || /FAILED|error:|Error [0-9]|No space/ {print; fflush()}'
+          nice -n 10 make -j"$JOBS" systemimage 2>&1 | tee /build/make_full.log | awk 'NR%300==0 || /FAILED|error:|Error [0-9]|No space/ {print; fflush()}'
           set -e
           ccache -s | head -8 || true
 
@@ -226,9 +226,12 @@ jobs:
           ( while true; do sleep 30; /build/publish.sh; done ) &
           HB=$!
           # Het gio thi tu dung truoc khi GitHub cat (de con thoi gian luu cache + upload)
+          # Gioi han tai nguyen container de runner khong bi "bo doi" (mat ket noi voi GitHub)
+          JOBS_N=$(( $(nproc) > 3 ? $(nproc) - 1 : $(nproc) ))
           docker run --rm \
+            --memory=11g --memory-swap=15g --cpus="$JOBS_N" \
             -v /build:/build \
-            -e JOBS="$(nproc)" \
+            -e JOBS="$JOBS_N" \
             -e NO_DEXPREOPT="${{ inputs.disable_dexpreopt }}" \
             ubuntu:18.04 \
             bash -lc "timeout 330m bash /build/build.sh" 2>&1 | tee /build/ci_last.log || true
