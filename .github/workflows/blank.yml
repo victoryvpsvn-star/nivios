@@ -7,6 +7,10 @@ on:
         description: 'Chi dexpreopt boot image + system_server (nhe hon, tiet kiem dia/thoi gian; APK dung dexpreopt it hon). Khong tat han dexpreopt vi Android 9 userdebug bat buoc'
         type: boolean
         default: false
+      free_repo_dir:
+        description: 'Xoa thu muc .repo (lich su git) sau khi sync de tiet kiem nhieu GB dia. Tat neu build bao loi lien quan toi git'
+        type: boolean
+        default: true
 
 permissions:
   contents: write                 # de day trang log len nhanh gh-pages
@@ -138,9 +142,9 @@ jobs:
 
           # ccache luu o /build/ccache (duoc cache giua cac lan chay)
           export USE_CCACHE=1 CCACHE_EXEC=/usr/bin/ccache CCACHE_DIR=/build/ccache
-          export CCACHE_COMPRESS=1 CCACHE_MAXSIZE=6G
+          export CCACHE_COMPRESS=1 CCACHE_MAXSIZE=4G
           mkdir -p "$CCACHE_DIR"
-          ccache -M 6G || true
+          ccache -M 4G || true
           ccache -s | head -5 || true
 
           git config --global user.name "nivi"
@@ -164,6 +168,16 @@ jobs:
           AFTER=$(df -m /build | tail -1 | awk '{print $3}')
           echo "[3b] giai phong khoang $((BEFORE-AFTER)) MB"
           df -h /build | tail -1
+
+          if [ "${FREE_REPO:-true}" = "true" ]; then
+            echo "[3c] Xoa .repo (lich su git) de tiet kiem dia. Kich thuoc truoc khi xoa:"
+            du -sh .repo 2>/dev/null || true
+            B2=$(df -m /build | tail -1 | awk '{print $3}')
+            rm -rf .repo
+            A2=$(df -m /build | tail -1 | awk '{print $3}')
+            echo "[3c] giai phong khoang $((B2-A2)) MB"
+            df -h /build | tail -1
+          fi
 
           echo "[4] Prop Nivi"
           mkdir -p vendor/nivi
@@ -241,6 +255,7 @@ jobs:
             -v /build:/build \
             -e JOBS="$JOBS_N" \
             -e NO_DEXPREOPT="${{ inputs.disable_dexpreopt }}" \
+            -e FREE_REPO="${{ inputs.free_repo_dir }}" \
             ubuntu:18.04 \
             bash -lc "timeout 330m bash /build/build.sh" 2>&1 | tee /build/ci_last.log || true
           kill "$HB" 2>/dev/null || true
