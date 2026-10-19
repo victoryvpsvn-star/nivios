@@ -1723,8 +1723,13 @@ jobs:
           if (-not $ok) { throw "Khong tai duoc Npcap SDK tu $url" }
           Write-Host ("  OK: " + (Get-Item $zip).Length + " bytes")
 
+          Remove-Item npcap-sdk -Recurse -Force -ErrorAction SilentlyContinue
           Expand-Archive $zip -DestinationPath npcap-sdk -Force
 
+          # Kiem tra CA header lan lib (day la cho truoc kia bi thieu)
+          if (-not (Test-Path "npcap-sdk\Include\pcap.h")) {
+            throw "Giai nen Npcap SDK that bai (thieu Include\pcap.h)"
+          }
           if (-not (Test-Path "npcap-sdk\Lib\x64\wpcap.lib")) {
             throw "Giai nen Npcap SDK that bai (thieu wpcap.lib)"
           }
@@ -1737,13 +1742,15 @@ jobs:
           $vcvars = Join-Path $vsPath 'VC\Auxiliary\Build\vcvars64.bat'
 
           $srcs = (Get-ChildItem src\*.cpp | ForEach-Object { $_.FullName }) -join ' '
+          $inc  = (Resolve-Path "npcap-sdk\Include").Path
+          $lib  = (Resolve-Path "npcap-sdk\Lib\x64").Path
 
           $bat = @"
           @echo off
           call "$vcvars" >nul
-          cl /nologo /std:c++17 /EHsc /O2 /MT /W3 /utf-8 /D_CRT_SECURE_NO_WARNINGS $srcs /Fo:obj\ /Fe:dist\ArpCutter.exe /link /LIBPATH:npcap-sdk\Lib\x64 wpcap.lib Packet.lib ws2_32.lib iphlpapi.lib winhttp.lib
+          cl /nologo /std:c++17 /EHsc /O2 /MT /W3 /utf-8 /D_CRT_SECURE_NO_WARNINGS /I "$inc" $srcs /Fo:obj\ /Fe:dist\ArpCutter.exe /link /LIBPATH:"$lib" wpcap.lib Packet.lib ws2_32.lib iphlpapi.lib winhttp.lib
           "@
-          Set-Content -Encoding ascii build.bat $bat
+          Set-Content -Encoding ascii build.bat ($bat -replace "`r?`n", "`r`n")
 
           Write-Host "== Build =="
           & cmd.exe /c build.bat
