@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
   schedule:
-    - cron: '0 18 * * *'      # 01:00 sang gio Viet Nam
+    - cron: '0 18 * * *'      # 01:00 sang gio Viet Nam, build lai moi ngay
   workflow_dispatch:
 
 permissions:
@@ -23,14 +23,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: version.h + common.hpp + util.cpp
+      - name: Dong bo gio he thong
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          try { Start-Service w32time -ErrorAction Stop } catch { Write-Host $_.Exception.Message }
+          w32tm /resync /force
+          Get-Date
+
+      - name: Sinh version.h + common.hpp + util.cpp
+        id: build
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
+          $ProgressPreference    = 'SilentlyContinue'
+
           $ver  = "1.0.${{ github.run_number }}"
           $date = (Get-Date).ToUniversalTime().AddHours(7).ToString('yyyy-MM-dd')
           "VER=$ver"   >> $env:GITHUB_OUTPUT
           "DATE=$date" >> $env:GITHUB_OUTPUT
+
           New-Item -ItemType Directory -Force -Path src | Out-Null
 
           @(
@@ -297,7 +309,7 @@ jobs:
           }
           '@ | Set-Content -Encoding utf8 src/util.cpp
 
-      - name: net.hpp + net.cpp
+      - name: Sinh net.hpp + net.cpp
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -474,7 +486,7 @@ jobs:
           }
           '@ | Set-Content -Encoding utf8 src/net.cpp
 
-      - name: arp.hpp + arp.cpp
+      - name: Sinh arp.hpp + arp.cpp
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -718,7 +730,7 @@ jobs:
           }
           '@ | Set-Content -Encoding utf8 src/arp.cpp
 
-      - name: db.hpp + db.cpp
+      - name: Sinh db.hpp + db.cpp
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -879,7 +891,7 @@ jobs:
           }
           '@ | Set-Content -Encoding utf8 src/db.cpp
 
-      - name: protect.hpp + protect.cpp
+      - name: Sinh protect.hpp + protect.cpp
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -1056,7 +1068,7 @@ jobs:
           }
           '@ | Set-Content -Encoding utf8 src/protect.cpp
 
-      - name: updater.hpp + updater.cpp
+      - name: Sinh updater.hpp + updater.cpp
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -1272,7 +1284,7 @@ jobs:
           }
           '@ | Set-Content -Encoding utf8 src/updater.cpp
 
-      - name: main.cpp (phan 1)
+      - name: Sinh main.cpp (phan 1)
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -1446,7 +1458,7 @@ jobs:
           }
           '@ | Set-Content -Encoding utf8 src/main.cpp
 
-      - name: main.cpp (phan 2)
+      - name: Sinh main.cpp (phan 2)
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -1674,11 +1686,48 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
+          $ProgressPreference    = 'SilentlyContinue'
           New-Item -ItemType Directory -Force -Path obj, dist | Out-Null
 
+          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+          $url = "https://npcap.com/dist/npcap-sdk-1.13.zip"
+          $zip = "npcap-sdk.zip"
+          Remove-Item $zip -ErrorAction SilentlyContinue
+
+          function Test-Zip($p) {
+            if (-not (Test-Path $p)) { return $false }
+            return ((Get-Item $p).Length -gt 100000)
+          }
+
           Write-Host "== Tai Npcap SDK =="
-          Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-sdk-1.13.zip" -OutFile npcap-sdk.zip
-          Expand-Archive npcap-sdk.zip -DestinationPath npcap-sdk -Force
+
+          $ok = $false
+          for ($i = 1; $i -le 3 -and -not $ok; $i++) {
+            try {
+              Invoke-WebRequest -Uri $url -OutFile $zip -SkipCertificateCheck -MaximumRedirection 5
+              $ok = Test-Zip $zip
+            } catch {
+              Write-Host "  lan $i loi: $($_.Exception.Message)"
+              Start-Sleep -Seconds 3
+            }
+          }
+
+          if (-not $ok) {
+            Write-Host "  Thu lai bang curl.exe -k ..."
+            Remove-Item $zip -ErrorAction SilentlyContinue
+            & curl.exe -L -k --retry 3 --retry-delay 2 -o $zip $url
+            $ok = Test-Zip $zip
+          }
+
+          if (-not $ok) { throw "Khong tai duoc Npcap SDK tu $url" }
+          Write-Host ("  OK: " + (Get-Item $zip).Length + " bytes")
+
+          Expand-Archive $zip -DestinationPath npcap-sdk -Force
+
+          if (-not (Test-Path "npcap-sdk\Lib\x64\wpcap.lib")) {
+            throw "Giai nen Npcap SDK that bai (thieu wpcap.lib)"
+          }
 
           $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
           $vsPath  = & $vswhere -latest -products * `
