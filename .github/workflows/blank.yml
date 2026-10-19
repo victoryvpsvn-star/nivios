@@ -220,6 +220,7 @@ jobs:
           lunch "$TARGET"
           # Log day du -> /build/make_full.log ; man hinh chi in moi 300 dong + dong loi
           set +e
+          T0=$(date +%s)
           nice -n 10 make -j"$JOBS" systemimage 2>&1 | tee /build/make_full.log | awk 'NR%300==0 || /FAILED|error:|Error [0-9]|No space/ {print; fflush()}'
           set -e
           ccache -s | head -8 || true
@@ -230,6 +231,17 @@ jobs:
             grep -n -m1 -B1 -A40 'FAILED:' /build/make_full.log 2>/dev/null | cut -c1-600 || true
             echo "================ HET LOI DAU TIEN ================"
             echo "[tien do cuoi] $(grep -o '\[ *[0-9]*% [0-9]*/[0-9]*\]' /build/make_full.log 2>/dev/null | tail -1)"
+            echo "[thoi gian chay] $(( ($(date +%s) - T0) / 60 )) phut (gioi han 330)"
+            df -h /build | tail -1
+            echo "---- 30 dong cuoi make_full.log ----"
+            tail -n 30 /build/make_full.log 2>/dev/null | cut -c1-400
+            echo "---- tim killed/OOM/timeout/signal ----"
+            grep -n -i -m10 'killed\|out of memory\|oom\|signal\|cancel\|terminated\|panic\|fatal' /build/make_full.log 2>/dev/null | cut -c1-400
+            echo "---- soong log ----"
+            tail -n 20 out/soong.log 2>/dev/null | cut -c1-400
+            tail -n 20 out/verbose.log.gz 2>/dev/null | head -0
+            echo "---- error.log ----"
+            tail -n 40 out/error.log 2>/dev/null | cut -c1-400
           fi
 
           IMG="out/target/product/$PRODUCT_DIR/system.img"
