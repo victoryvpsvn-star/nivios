@@ -1695,44 +1695,34 @@ jobs:
           $zip = "npcap-sdk.zip"
           Remove-Item $zip -ErrorAction SilentlyContinue
 
-          function Test-Zip($p) {
-            if (-not (Test-Path $p)) { return $false }
-            return ((Get-Item $p).Length -gt 100000)
-          }
-
           Write-Host "== Tai Npcap SDK =="
-
           $ok = $false
           for ($i = 1; $i -le 3 -and -not $ok; $i++) {
             try {
               Invoke-WebRequest -Uri $url -OutFile $zip -SkipCertificateCheck -MaximumRedirection 5
-              $ok = Test-Zip $zip
+              $ok = (Test-Path $zip) -and ((Get-Item $zip).Length -gt 100000)
             } catch {
               Write-Host "  lan $i loi: $($_.Exception.Message)"
               Start-Sleep -Seconds 3
             }
           }
-
           if (-not $ok) {
-            Write-Host "  Thu lai bang curl.exe -k ..."
-            Remove-Item $zip -ErrorAction SilentlyContinue
             & curl.exe -L -k --retry 3 --retry-delay 2 -o $zip $url
-            $ok = Test-Zip $zip
+            $ok = (Test-Path $zip) -and ((Get-Item $zip).Length -gt 100000)
           }
-
           if (-not $ok) { throw "Khong tai duoc Npcap SDK tu $url" }
           Write-Host ("  OK: " + (Get-Item $zip).Length + " bytes")
 
           Remove-Item npcap-sdk -Recurse -Force -ErrorAction SilentlyContinue
           Expand-Archive $zip -DestinationPath npcap-sdk -Force
 
-          # Kiem tra CA header lan lib (day la cho truoc kia bi thieu)
-          if (-not (Test-Path "npcap-sdk\Include\pcap.h")) {
-            throw "Giai nen Npcap SDK that bai (thieu Include\pcap.h)"
-          }
-          if (-not (Test-Path "npcap-sdk\Lib\x64\wpcap.lib")) {
-            throw "Giai nen Npcap SDK that bai (thieu wpcap.lib)"
-          }
+          Write-Host "== Cay thu muc SDK =="
+          Get-ChildItem npcap-sdk | Select-Object -ExpandProperty Name
+          Get-ChildItem npcap-sdk\Include -ErrorAction SilentlyContinue |
+            Select-Object -First 20 -ExpandProperty Name
+
+          if (-not (Test-Path "npcap-sdk\Include\pcap.h"))    { throw "Thieu npcap-sdk\Include\pcap.h" }
+          if (-not (Test-Path "npcap-sdk\Lib\x64\wpcap.lib")) { throw "Thieu npcap-sdk\Lib\x64\wpcap.lib" }
 
           $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
           $vsPath  = & $vswhere -latest -products * `
@@ -1745,12 +1735,19 @@ jobs:
           $inc  = (Resolve-Path "npcap-sdk\Include").Path
           $lib  = (Resolve-Path "npcap-sdk\Lib\x64").Path
 
-          $bat = @"
-          @echo off
-          call "$vcvars" >nul
-          cl /nologo /std:c++17 /EHsc /O2 /MT /W3 /utf-8 /D_CRT_SECURE_NO_WARNINGS /I "$inc" $srcs /Fo:obj\ /Fe:dist\ArpCutter.exe /link /LIBPATH:"$lib" wpcap.lib Packet.lib ws2_32.lib iphlpapi.lib winhttp.lib
-          "@
-          Set-Content -Encoding ascii build.bat ($bat -replace "`r?`n", "`r`n")
+          Write-Host "INCLUDE = $inc"
+          Write-Host "LIB     = $lib"
+          Write-Host "SRCS    = $srcs"
+
+          $cmdline = 'cl /nologo /std:c++17 /EHsc /O2 /MT /W3 /utf-8 /D_CRT_SECURE_NO_WARNINGS /I "' +
+                     $inc + '" ' + $srcs + ' /Fo:obj\ /Fe:dist\ArpCutter.exe /link /LIBPATH:"' +
+                     $lib + '" wpcap.lib Packet.lib ws2_32.lib iphlpapi.lib winhttp.lib'
+
+          $bat = "@echo off`r`ncall `"$vcvars`" >nul`r`n$cmdline`r`n"
+          Set-Content -Encoding ascii build.bat $bat
+
+          Write-Host "== build.bat =="
+          Get-Content build.bat
 
           Write-Host "== Build =="
           & cmd.exe /c build.bat
