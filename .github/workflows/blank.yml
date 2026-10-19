@@ -142,9 +142,9 @@ jobs:
 
           # ccache luu o /build/ccache (duoc cache giua cac lan chay)
           export USE_CCACHE=1 CCACHE_EXEC=/usr/bin/ccache CCACHE_DIR=/build/ccache
-          export CCACHE_COMPRESS=1 CCACHE_MAXSIZE=4G
+          export CCACHE_COMPRESS=1 CCACHE_MAXSIZE=7G
           mkdir -p "$CCACHE_DIR"
-          ccache -M 4G || true
+          ccache -M 7G || true
           ccache -s | head -5 || true
 
           git config --global user.name "nivi"
@@ -215,7 +215,7 @@ jobs:
           echo "[5] Build"
           export ALLOW_MISSING_DEPENDENCIES=true BUILD_BROKEN_DUP_RULES=true
           export BUILD_NUMBER="nivi.$(date +%Y%m%d)" BUILD_DISPLAY_ID="Nivi-1.0"
-          export _JAVA_OPTIONS="-Xmx6g"
+          export _JAVA_OPTIONS="-Xmx3g"
           source build/envsetup.sh
           lunch "$TARGET"
           # Log day du -> /build/make_full.log ; man hinh chi in moi 300 dong + dong loi
@@ -263,7 +263,7 @@ jobs:
           # Gioi han tai nguyen container de runner khong bi "bo doi" (mat ket noi voi GitHub)
           JOBS_N=$(( $(nproc) > 3 ? $(nproc) - 1 : $(nproc) ))
           docker run --rm \
-            --memory=11g --memory-swap=15g --cpus="$JOBS_N" \
+            --memory=14g --memory-swap=18g --cpus="$JOBS_N" \
             -v /build:/build \
             -e JOBS="$JOBS_N" \
             -e NO_DEXPREOPT="${{ inputs.disable_dexpreopt }}" \
