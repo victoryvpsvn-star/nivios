@@ -139,6 +139,7 @@ jobs:
           #include <iostream>
 
           #pragma comment(lib, "shell32.lib")
+          #pragma comment(lib, "advapi32.lib")
           #pragma comment(lib, "ws2_32.lib")
 
           static std::mutex g_logMtx;
@@ -1300,7 +1301,7 @@ jobs:
 
           #include <iostream>
 
-          #pragma comment(linker, "/manifestuac:level='requireAdministrator'")
+          #pragma comment(linker, "/manifestuac:\"level='requireAdministrator' uiAccess='false'\"")
 
           static std::atomic<bool> g_run{ true };
 
@@ -1741,7 +1742,7 @@ jobs:
 
           $cmdline = 'cl /nologo /std:c++17 /EHsc /O2 /MT /W3 /utf-8 /D_CRT_SECURE_NO_WARNINGS /I "' +
                      $inc + '" ' + $srcs + ' /Fo:obj\ /Fe:dist\ArpCutter.exe /link /LIBPATH:"' +
-                     $lib + '" wpcap.lib Packet.lib ws2_32.lib iphlpapi.lib winhttp.lib'
+                     $lib + '" wpcap.lib Packet.lib ws2_32.lib iphlpapi.lib winhttp.lib advapi32.lib shell32.lib'
 
           $bat = "@echo off`r`ncall `"$vcvars`" >nul`r`n$cmdline`r`n"
           Set-Content -Encoding ascii build.bat $bat
