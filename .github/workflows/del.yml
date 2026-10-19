@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
   schedule:
-    - cron: '0 18 * * *'      # 01:00 sang gio Viet Nam, build lai moi ngay
+    - cron: '0 18 * * *'      # 01:00 sang gio Viet Nam
   workflow_dispatch:
 
 permissions:
@@ -23,20 +23,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # ================= TAT CA O DAY =================
-      - name: Build all
-        id: build
+      - name: version.h + common.hpp + util.cpp
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-
-          # ---- version ----
           $ver  = "1.0.${{ github.run_number }}"
           $date = (Get-Date).ToUniversalTime().AddHours(7).ToString('yyyy-MM-dd')
           "VER=$ver"   >> $env:GITHUB_OUTPUT
           "DATE=$date" >> $env:GITHUB_OUTPUT
-
-          New-Item -ItemType Directory -Force -Path src, obj, dist | Out-Null
+          New-Item -ItemType Directory -Force -Path src | Out-Null
 
           @(
             "#pragma once",
@@ -302,6 +297,11 @@ jobs:
           }
           '@ | Set-Content -Encoding utf8 src/util.cpp
 
+      - name: net.hpp + net.cpp
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+
           @'
           // net.hpp
           #pragma once
@@ -473,6 +473,11 @@ jobs:
               std::cout << "\n";
           }
           '@ | Set-Content -Encoding utf8 src/net.cpp
+
+      - name: arp.hpp + arp.cpp
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
 
           @'
           // arp.hpp
@@ -713,6 +718,11 @@ jobs:
           }
           '@ | Set-Content -Encoding utf8 src/arp.cpp
 
+      - name: db.hpp + db.cpp
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+
           @'
           // db.hpp
           #pragma once
@@ -868,6 +878,11 @@ jobs:
               return newCount;
           }
           '@ | Set-Content -Encoding utf8 src/db.cpp
+
+      - name: protect.hpp + protect.cpp
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
 
           @'
           // protect.hpp
@@ -1040,6 +1055,11 @@ jobs:
               runLoop(p, run, true);
           }
           '@ | Set-Content -Encoding utf8 src/protect.cpp
+
+      - name: updater.hpp + updater.cpp
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
 
           @'
           // updater.hpp
@@ -1252,6 +1272,11 @@ jobs:
           }
           '@ | Set-Content -Encoding utf8 src/updater.cpp
 
+      - name: main.cpp (phan 1)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+
           @'
           // main.cpp
           #include "common.hpp"
@@ -1419,7 +1444,14 @@ jobs:
               printf("\nTong: %d\n\n", c);
               return 0;
           }
+          '@ | Set-Content -Encoding utf8 src/main.cpp
 
+      - name: main.cpp (phan 2)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          @'
           static int cmdCut(Adapter& a, Db& db, const Opts& o) {
               pcap_t* h = openAdapter(a);
               if (!h) return 1;
@@ -1636,14 +1668,18 @@ jobs:
               usage();
               return 1;
           }
-          '@ | Set-Content -Encoding utf8 src/main.cpp
+          '@ | Add-Content -Encoding utf8 src/main.cpp
 
-          # ---- Npcap SDK ----
+      - name: Npcap SDK + Build
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Force -Path obj, dist | Out-Null
+
           Write-Host "== Tai Npcap SDK =="
           Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-sdk-1.13.zip" -OutFile npcap-sdk.zip
           Expand-Archive npcap-sdk.zip -DestinationPath npcap-sdk -Force
 
-          # ---- Tim MSVC ----
           $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
           $vsPath  = & $vswhere -latest -products * `
                        -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
@@ -1651,7 +1687,6 @@ jobs:
           if (-not $vsPath) { throw "Khong tim thay Visual Studio" }
           $vcvars = Join-Path $vsPath 'VC\Auxiliary\Build\vcvars64.bat'
 
-          # ---- build.bat ----
           $srcs = (Get-ChildItem src\*.cpp | ForEach-Object { $_.FullName }) -join ' '
 
           $bat = @"
