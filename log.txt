@@ -1,10 +1,7 @@
-cap nhat : 2026-10-20 03:23:38 UTC
+cap nhat : 2026-10-20 03:24:09 UTC
 tien do  : chua bat dau make
 dia      : 32G dung / 67G trong
 -------------------------------------------
-Adding debian:Security_Communication_RootCA3.pem
-Adding debian:NetLock_Arany_=Class_Gold=_Főtanúsítvány.pem
-Adding debian:ePKI_Root_Certification_Authority.pem
 Adding debian:Izenpe.com.pem
 Adding debian:GTS_Root_R3.pem
 Adding debian:GLOBALTRUST_2020.pem
@@ -252,3 +249,6 @@ HOST_BUILD_TYPE=release
 BUILD_ID=PI
 OUT_DIR=out
 ============================================
+[142/933] including external/dagger2/Android.mk ...
+[442/933] including packages/apps/SoundRecorder/Android.mk ...
+[741/933] including test/vts-testcase/hal/nfc/V1_0/target_replay/Android.mk ...
