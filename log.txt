@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 03:55:59 UTC
-tien do  : [ 17% 17591/101844]
+cap nhat : 2026-10-20 03:56:31 UTC
+tien do  : [ 17% 18065/101844]
 dia      : 40G dung / 59G trong
 -------------------------------------------
-Adding debian:TunTrust_Root_CA.pem
 Adding debian:Certainly_Root_R1.pem
 Adding debian:Certainly_Root_E1.pem
 Adding debian:GlobalSign_Root_CA_-_R3.pem
@@ -252,3 +251,4 @@ OUT_DIR=out
 [ 16% 16942/101844] //external/dng_sdk:libdng_sdk clang++ source/dng_jpeg_image.cpp [arm]
 [ 16% 17217/101844] //external/e2fsprogs/lib/blkid:libext2_blkid clang tag.c [linux_glibc]
 [ 17% 17492/101844] //external/e2fsprogs/lib/ext2fs:libext2fs clang link.c [linux_glibc]
+[ 17% 17792/101844] //external/fdlibm:libfdlibm clang k_cos.c [linux_glibc x86]
