@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 07:56:58 UTC
-tien do  : [ 75% 76710/101844]
+cap nhat : 2026-10-20 07:57:30 UTC
+tien do  : [ 75% 77088/101844]
 dia      : 85G dung / 14G trong
 -------------------------------------------
-[  5% 5300/101844] Check module type: out/target/product/generic_arm64_ab/obj_arm/SHARED_LIBRARIES/libresourcemanagerservice_intermediates/link_type
 [  5% 5599/101844] target  C: tc <= external/iproute2/tc/tc_filter.c
 [  5% 5899/101844] Install: out/target/product/generic_arm64_ab/system/etc/security/cacerts/5a250ea7.0
 [  6% 6199/101844] Install: out/target/product/generic_arm64_ab/system/fonts/NotoSansChakma-Regular.ttf
@@ -252,3 +251,4 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 74% 76028/101844] //system/core/libdiskconfig:libdiskconfig header-abi-dumper config_mbr.c [arm]
 [ 74% 76328/101844] //frameworks/native/libs/gui:libgui clang++ BufferItemConsumer.cpp
 [ 75% 76628/101844] //system/libhidl/libhidlmemory:libhidlmemory clang++ mapping.cpp [arm]
+[ 75% 76928/101844] //external/libjpeg-turbo:libjpeg clang jdmarker.c [arm]
