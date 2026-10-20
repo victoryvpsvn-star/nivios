@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 03:30:24 UTC
-tien do  : [  3% 4007/101844]
+cap nhat : 2026-10-20 03:30:56 UTC
+tien do  : [  3% 4037/101844]
 dia      : 34G dung / 65G trong
 -------------------------------------------
 Adding debian:Trustwave_Global_ECC_P384_Certification_Authority.pem
