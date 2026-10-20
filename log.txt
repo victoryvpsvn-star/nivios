@@ -1,10 +1,7 @@
-cap nhat : 2026-10-20 08:35:52 UTC
-tien do  : [ 82% 84025/101844]
-dia      : 90G dung / 8.3G trong
+cap nhat : 2026-10-20 08:36:23 UTC
+tien do  : [ 82% 84035/101844]
+dia      : 90G dung / 8.2G trong
 -------------------------------------------
-[ 23% 23492/101844] //frameworks/av/media/libnblog:libnblog clang++ ReportPerformance.cpp [arm]
-[ 23% 23792/101844] //libcore:libopenjdk clang EPollPort.c [linux_glibc x86]
-[ 23% 24092/101844] //external/libopus:libopus clang celt/mathops.c [arm]
 [ 23% 24392/101844] //external/pdfium:libpdfium clang++ fpdfsdk/fpdf_transformpage.cpp
 [ 24% 24692/101844] //external/pdfium:libpdfiumfpdfapi clang++ core/fpdfapi/cmaps/Japan1/90msp-RKSJ-H_2.cpp [arm]
 [ 24% 24992/101844] //external/pdfium:libpdfiumfxcodec clang++ core/fxcodec/codec/ccodec_scanlinedecoder.cpp [arm]
@@ -252,3 +249,6 @@ Note: duplicate definition of library class [java.net.URLClassLoader]
 Note: duplicate definition of library class [java.lang.SafeVarargs]
 Note: duplicate definition of library class [java.io.WriteAbortedException]
       Maybe this is library method 'android.icu.util.CopticCalendar { java.lang.String getType(); }'
+Preparing output jar [/build/src/out/target/common/obj/APPS/SimAppDialog_intermediates/classes-proguard.jar]
+  Type `android.animation.AnimatorListenerAdapter` was not found, it is required for default or static interface methods desugaring of `void com.android.contacts.dialog.CallSubjectDialog$7$2.onAnimationEnd(android.animation.Animator)`
+  Interface `android.view.MenuItem$OnMenuItemClickListener` not found. It's needed to make sure desugaring of `android.support.v7.view.SupportMenuInflater$InflatedOnMenuItemClickListener` is correct. Desugaring will assume that this interface has no default method.
