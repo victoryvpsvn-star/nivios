@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 04:09:34 UTC
-tien do  : [ 23% 24429/101844]
+cap nhat : 2026-10-20 04:10:05 UTC
+tien do  : [ 24% 24533/101844]
 dia      : 48G dung / 51G trong
 -------------------------------------------
-Adding debian:D-TRUST_Root_Class_3_CA_2_2009.pem
 Adding debian:Hellenic_Academic_and_Research_Institutions_ECC_RootCA_2015.pem
 Adding debian:QuoVadis_Root_CA_1_G3.pem
 Adding debian:Trustwave_Global_Certification_Authority.pem
@@ -252,3 +251,4 @@ OUT_DIR=out
 [ 23% 23492/101844] //frameworks/av/media/libnblog:libnblog clang++ ReportPerformance.cpp [arm]
 [ 23% 23792/101844] //libcore:libopenjdk clang EPollPort.c [linux_glibc x86]
 [ 23% 24092/101844] //external/libopus:libopus clang celt/mathops.c [arm]
+[ 23% 24392/101844] //external/pdfium:libpdfium clang++ fpdfsdk/fpdf_transformpage.cpp
