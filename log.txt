@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 05:43:46 UTC
-tien do  : [ 60% 62022/101844]
+cap nhat : 2026-10-20 05:44:17 UTC
+tien do  : [ 60% 62088/101844]
 dia      : 62G dung / 37G trong
 -------------------------------------------
-including sdk/bash_completion/adb.bash
 
 ============================================
 PLATFORM_VERSION_CODENAME=REL
@@ -252,3 +251,4 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 60% 61136/101844] //frameworks/av/drm/libmediadrm:libmediadrm clang++ SharedLibrary.cpp [arm]
 [ 60% 61436/101844] //art/openjdkjvmti:libopenjdkjvmti clang++ ti_ddms.cc
 [ 60% 61736/101844] //frameworks/native/services/sensorservice:libsensorservice clang++ SensorServiceUtils.cpp [arm]
+[ 60% 62036/101844] //frameworks/av/media/libmediaplayerservice/nuplayer:libstagefright_nuplayer clang++ HTTPLiveSource.cpp [arm]
