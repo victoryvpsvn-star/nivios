@@ -1,9 +1,7 @@
-cap nhat : 2026-10-20 04:35:40 UTC
-tien do  : [ 30% 30560/101844]
-dia      : 51G dung / 48G trong
+cap nhat : 2026-10-20 04:36:12 UTC
+tien do  : [ 30% 30934/101844]
+dia      : 52G dung / 47G trong
 -------------------------------------------
-Adding debian:Autoridad_de_Certificacion_Firmaprofesional_CIF_A62634068.pem
-Adding debian:GTS_Root_R4.pem
 Adding debian:CFCA_EV_ROOT.pem
 Adding debian:Microsoft_ECC_Root_Certificate_Authority_2017.pem
 Adding debian:Amazon_Root_CA_3.pem
@@ -252,3 +250,5 @@ OUT_DIR=out
 [ 29% 29678/101844] //external/vixl:libvixl-arm clang++ src/aarch32/assembler-aarch32.cc [linux_glibc x86]
 [ 29% 29978/101844] //external/libvpx:libvpx clang libvpx/vp8/common/blockd.c
 [ 29% 30278/101844] //external/libvpx:libvpx clang libvpx/vp9/decoder/vp9_detokenize.c
+[ 30% 30578/101844] //external/libxml2:libxml2 clang xmlreader.c [linux_glibc]
+[ 30% 30878/101844] Copy: out/host/linux-x86/obj/lib/libz.so
