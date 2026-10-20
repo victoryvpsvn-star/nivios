@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 05:41:40 UTC
-tien do  : [ 60% 61738/101844]
+cap nhat : 2026-10-20 05:42:11 UTC
+tien do  : [ 60% 61819/101844]
 dia      : 62G dung / 37G trong
 -------------------------------------------
-including device/linaro/hikey/vendorsetup.sh
 including sdk/bash_completion/adb.bash
 
 ============================================
@@ -252,3 +251,4 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 59% 60836/101844] //frameworks/base/libs/input:libinputservice clang++ SpriteController.cpp [arm]
 [ 60% 61136/101844] //frameworks/av/drm/libmediadrm:libmediadrm clang++ SharedLibrary.cpp [arm]
 [ 60% 61436/101844] //art/openjdkjvmti:libopenjdkjvmti clang++ ti_ddms.cc
+[ 60% 61736/101844] //frameworks/native/services/sensorservice:libsensorservice clang++ SensorServiceUtils.cpp [arm]
