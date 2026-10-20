@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 04:29:24 UTC
-tien do  : [ 28% 29027/101844]
+cap nhat : 2026-10-20 04:29:56 UTC
+tien do  : [ 28% 29338/101844]
 dia      : 50G dung / 49G trong
 -------------------------------------------
-Adding debian:TeliaSonera_Root_CA_v1.pem
 Adding debian:Microsoft_RSA_Root_Certificate_Authority_2017.pem
 Adding debian:ISRG_Root_X2.pem
 Adding debian:D-TRUST_BR_Root_CA_1_2020.pem
@@ -252,3 +251,4 @@ OUT_DIR=out
 [ 27% 28191/101844] //frameworks/av/media/libstagefright/codecs/amrnb/common:libstagefright_amrnb_common clang++ src/gains_tbl.cpp [arm]
 [ 27% 28491/101844] //frameworks/av/media/libstagefright/codecs/amrwbenc:libstagefright_amrwbenc clang src/log2.c [arm]
 [ 28% 28791/101844] //bionic/libc/system_properties:libsystemproperties clang++ prop_area.cpp
+[ 28% 29091/101844] //external/libunwind:libunwind clang src/dwarf/global.c [linux_glibc]
