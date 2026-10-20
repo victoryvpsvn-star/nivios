@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 04:51:22 UTC
-tien do  : [ 53% 54932/101844]
+cap nhat : 2026-10-20 04:51:53 UTC
+tien do  : [ 54% 55013/101844]
 dia      : 56G dung / 43G trong
 -------------------------------------------
-[3] repo sync
 [3b] Don dep: xoa thu muc chi dung cho macOS / khong can cho GSI (tiet kiem dia)
 [3b] giai phong khoang 5800 MB
 /dev/mapper/buildvg-buildlv   98G   46G   53G  47% /build
@@ -252,3 +251,4 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 53% 54022/101844] //prebuilts/sdk/current/androidx:androidx.arch.core_core-runtime-nodeps overlay resource file list [common]
 [ 53% 54292/101844] LLVM TableGen external/llvm/lib/Target/AArch64/AArch64.td => out/soong/.intermediates/external/llvm/lib/Target/AArch64/llvm-gen-aarch64/gen/AArch64GenMCPseudoLowering.inc
 [ 53% 54592/101844] //external/llvm/lib/Analysis:libLLVMAnalysis clang++ LazyValueInfo.cpp
+[ 53% 54892/101844] //external/llvm/lib/IR:libLLVMCore clang++ DiagnosticPrinter.cpp [arm]
