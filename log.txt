@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 08:13:47 UTC
-tien do  : [ 81% 82907/101844]
+cap nhat : 2026-10-20 08:14:18 UTC
+tien do  : [ 81% 82922/101844]
 dia      : 87G dung / 12G trong
 -------------------------------------------
-[ 11% 11542/101844] //external/llvm/lib/Support:libLLVMSupport clang++ BlockFrequency.cpp [arm]
 [ 11% 11842/101844] //frameworks/rs:libRSDriver clang++ driver/rsdShaderCache.cpp
 [ 11% 12142/101844] //external/libavc:libavcdec clang common/ih264_mem_fns.c [arm]
 [ 12% 12442/101844] //external/cblas:libblas clang src/cblas_dsymm.c
@@ -252,3 +251,4 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 80% 82201/101844] //external/bouncycastle:bouncycastle jarjar [common]
 [ 80% 82470/101844] //prebuilts/sdk/current/support:android-support-cursoradapter for turbine [common]
 [ 81% 82677/101844] //prebuilts/sdk/current/support:android-support-v7-appcompat javac [common]
+Picked up _JAVA_OPTIONS: -Xmx3g
