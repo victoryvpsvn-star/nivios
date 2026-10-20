@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 07:00:18 UTC
-tien do  : [ 66% 68038/101844]
+cap nhat : 2026-10-20 07:00:50 UTC
+tien do  : [ 66% 68055/101844]
 dia      : 71G dung / 28G trong
 -------------------------------------------
 HOST_BUILD_TYPE=release
