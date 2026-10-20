@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 08:06:25 UTC
-tien do  : [ 79% 81167/101844]
-dia      : 85G dung / 14G trong
+cap nhat : 2026-10-20 08:06:57 UTC
+tien do  : [ 79% 81389/101844]
+dia      : 85G dung / 13G trong
 -------------------------------------------
-[  9% 9744/101844] Check module type: out/target/product/generic_arm64_ab/obj/SHARED_LIBRARIES/liblog.ndk.current_intermediates/link_type
 [  9% 10044/101844] //prebuilts/sdk/current/support:android-support-cursoradapter-nodeps unzip AAR [common]
 [ 10% 10344/101844] //hardware/interfaces/wifi/1.0:android.hardware.wifi@1.0 gunzipandroid.hardware.wifi@1.0.so_ref.lsdump [arm]
 [ 10% 10642/101844] //external/e2fsprogs/e2fsck:e2fsck clang problem.c
@@ -252,3 +251,4 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 78% 80444/101844] //external/libunwind:libunwind clang src/mi/init.c [arm]
 [ 79% 80744/101844] //system/core/libutils:libutilscallstack clang++ CallStack.cpp [arm]
 [ 79% 81044/101844] //external/libvpx:libvpx clang libvpx/vp9/encoder/vp9_aq_360.c [arm]
+[ 79% 81344/101844] //external/webrtc/webrtc/modules/audio_processing:libwebrtc_apm clang++ echo_cancellation_impl.cc [arm]
