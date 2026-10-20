@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 04:06:57 UTC
-tien do  : [ 22% 23068/101844]
+cap nhat : 2026-10-20 04:07:29 UTC
+tien do  : [ 22% 23239/101844]
 dia      : 48G dung / 51G trong
 -------------------------------------------
 Adding debian:GlobalSign_Root_E46.pem
