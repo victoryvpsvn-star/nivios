@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 03:46:35 UTC
-tien do  : [ 10% 10453/101844]
+cap nhat : 2026-10-20 03:47:06 UTC
+tien do  : [ 10% 10520/101844]
 dia      : 38G dung / 61G trong
 -------------------------------------------
 Adding debian:E-Tugra_Global_Root_CA_RSA_v3.pem
