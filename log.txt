@@ -1,23 +1,7 @@
-cap nhat : 2026-10-20 08:31:08 UTC
-tien do  : [ 82% 83897/101844]
-dia      : 89G dung / 9.1G trong
+cap nhat : 2026-10-20 08:31:40 UTC
+tien do  : [ 82% 83918/101844]
+dia      : 89G dung / 9.0G trong
 -------------------------------------------
-[ 13% 13942/101844] //bionic/libc:libc_nopthread clang stdio/parsefloat.c [arm]
-[ 13% 14242/101844] //bionic/libc:libc_openbsd_ndk header-abi-dumper upstream-openbsd/lib/libc/locale/wcstoul.c [arm]
-[ 14% 14542/101844] //bionic/libc:libc_syscalls clang arch-arm64/syscalls/__waitid.S
-[ 14% 14842/101844] //bionic/libc:libc_syscalls clang arch-arm/syscalls/readv.S [arm]
-[ 14% 15142/101844] //bionic/libc:libc_uapi install i8k.h
-[ 15% 15442/101844] //bionic/libc:libc_uapi install uvcvideo.h
-[ 15% 15742/101844] //bionic/libc:libc_uapi install uvesafb.h
-[ 15% 16042/101844] //external/compiler-rt:libcompiler_rt clang lib/builtins/truncsfhf2.c [linux_glibc x86]
-[ 16% 16342/101844] //external/boringssl:libcrypto clang src/crypto/x509v3/pcy_lib.c [linux_glibc]
-[ 16% 16642/101844] //system/core/libcutils:libcutils clang++ threads.cpp
-[ 16% 16942/101844] //external/dng_sdk:libdng_sdk clang++ source/dng_jpeg_image.cpp [arm]
-[ 16% 17217/101844] //external/e2fsprogs/lib/blkid:libext2_blkid clang tag.c [linux_glibc]
-[ 17% 17492/101844] //external/e2fsprogs/lib/ext2fs:libext2fs clang link.c [linux_glibc]
-[ 17% 17792/101844] //external/fdlibm:libfdlibm clang k_cos.c [linux_glibc x86]
-[ 17% 18092/101844] //system/tools/aidl:aidl link aidl [linux_glibc]
-[ 18% 18392/101844] //system/libhwbinder:libhwbinder gunziplibhwbinder.so_ref.lsdump
 [ 18% 18692/101844] //external/icu/icu4c/source/i18n:libicui18n clang++ datefmt.cpp [arm]
 [ 18% 18992/101844] //external/icu/icu4c/source/i18n:libicui18n clang++ reldatefmt.cpp [linux_glibc]
 [ 18% 19292/101844] //external/icu/icu4c/source/common:libicuuc clang++ chariter.cpp
@@ -252,3 +236,19 @@ Warning in out/target/common/obj/APPS/QuickSearchBox_intermediates/dex/d8_input.
   Copying resources from program jar [/build/src/out/target/common/obj/APPS/ExternalStorageProvider_intermediates/classes.jar]
 Reading program jar [/build/src/out/target/common/obj/APPS/StorageManager_intermediates/classes.jar]
 [ 82% 83838/101844] Compiling SDK Stubs: out/target/common/obj/JAVA_LIBRARIES/android_stubs_current_intermediates/classes.jar
+Note: duplicate definition of library class [javax.security.cert.CertificateExpiredException]
+Note: duplicate definition of library class [android.app.job.JobServiceEngine]
+Note: duplicate definition of library class [android.animation.Animator$AnimatorListener]
+Note: duplicate definition of library class [android.telephony.TelephonyManager$UssdResponseCallback]
+Note: duplicate definition of library class [android.security.keystore.KeyExpiredException]
+Note: duplicate definition of library class [android.bluetooth.BluetoothA2dp]
+Note: duplicate definition of library class [android.inputmethodservice.AbstractInputMethodService$AbstractInputMethodSessionImpl]
+Note: duplicate definition of library class [android.service.carrier.CarrierIdentifier]
+Note: duplicate definition of library class [android.telecom.VideoProfile]
+Note: duplicate definition of library class [android.provider.ContactsContract$Settings]
+Note: duplicate definition of library class [android.renderscript.ScriptGroup$Builder2]
+Note: duplicate definition of library class [java.util.LinkedList]
+Note: duplicate definition of library class [java.security.spec.RSAMultiPrimePrivateCrtKeySpec]
+Note: duplicate definition of library class [java.lang.ref.PhantomReference]
+Note: duplicate definition of library class [java.sql.SQLXML]
+      Maybe this is library method 'android.app.Person { java.lang.String getUri(); }'
