@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 04:05:55 UTC
-tien do  : [ 21% 22034/101844]
-dia      : 44G dung / 55G trong
+cap nhat : 2026-10-20 04:06:26 UTC
+tien do  : [ 21% 22160/101844]
+dia      : 47G dung / 52G trong
 -------------------------------------------
-Adding debian:TUBITAK_Kamu_SM_SSL_Kok_Sertifikasi_-_Surum_1.pem
 Adding debian:Security_Communication_RootCA2.pem
 Adding debian:Telia_Root_CA_v2.pem
 Adding debian:SZAFIR_ROOT_CA2.pem
@@ -252,3 +251,4 @@ OUT_DIR=out
 [ 20% 21092/101844] //frameworks/base:framework aidl core/java/android/hardware/radio/ICloseHandle.aidl [common]
 [ 21% 21392/101844] //frameworks/base:framework aidl telecomm/java/com/android/internal/telecom/IVideoCallback.aidl [common]
 [ 21% 21692/101844] //frameworks/native/libs/binder:libbinder clang++ IServiceManager.cpp
+[ 21% 21992/101844] //system/media/audio_utils:libaudioutils link libaudioutils.so [linux_glibc x86]
