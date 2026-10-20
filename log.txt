@@ -1,10 +1,7 @@
-cap nhat : 2026-10-20 04:03:18 UTC
-tien do  : [ 20% 20727/101844]
-dia      : 40G dung / 59G trong
+cap nhat : 2026-10-20 04:03:49 UTC
+tien do  : [ 21% 21598/101844]
+dia      : 41G dung / 58G trong
 -------------------------------------------
-Adding debian:DigiCert_High_Assurance_EV_Root_CA.pem
-Adding debian:Security_Communication_ECC_RootCA1.pem
-Adding debian:Hongkong_Post_Root_CA_1.pem
 Adding debian:GTS_Root_R2.pem
 Adding debian:TUBITAK_Kamu_SM_SSL_Kok_Sertifikasi_-_Surum_1.pem
 Adding debian:Security_Communication_RootCA2.pem
@@ -252,3 +249,6 @@ OUT_DIR=out
 [ 19% 19892/101844] //external/icu/icu4c/source/common:libicuuc clang++ rbbinode.cpp [linux_glibc x86]
 [ 19% 20192/101844] //libcore:libjavacore clang++ ZipUtilities.cpp [linux_glibc x86]
 [ 20% 20492/101844] //external/libjpeg-turbo:libjpeg clang jfdctfst.c [linux_glibc]
+[ 20% 20792/101844] //system/core/liblog:liblog clang fake_writer.c [linux_glibc]
+[ 20% 21092/101844] //frameworks/base:framework aidl core/java/android/hardware/radio/ICloseHandle.aidl [common]
+[ 21% 21392/101844] //frameworks/base:framework aidl telecomm/java/com/android/internal/telecom/IVideoCallback.aidl [common]
