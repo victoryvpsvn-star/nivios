@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 03:31:58 UTC
-tien do  : [  4% 4094/101844]
+cap nhat : 2026-10-20 03:32:29 UTC
+tien do  : [  4% 4117/101844]
 dia      : 34G dung / 65G trong
 -------------------------------------------
-Adding debian:Trustwave_Global_ECC_P384_Certification_Authority.pem
 Adding debian:SwissSign_Silver_CA_-_G2.pem
 Adding debian:SecureTrust_CA.pem
 Adding debian:Hellenic_Academic_and_Research_Institutions_RootCA_2015.pem
@@ -252,3 +251,4 @@ OUT_DIR=out
 [  3% 3201/101844] Export includes file:  -- out/target/product/generic_arm64_ab/obj/STATIC_LIBRARIES/libhidl-gen-utils_intermediates/export_includes
 [  3% 3500/101844] Export includes file:  -- out/target/product/generic_arm64_ab/obj/SHARED_LIBRARIES/libldacBT_abr_intermediates/export_includes
 [  3% 3800/101844] target  C++: libv8src <= external/v8/src/ast/ast-numbering.cc
+[  4% 4100/101844] target  C++: libv8src <= external/v8/src/machine-type.cc
