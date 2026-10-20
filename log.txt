@@ -1,13 +1,7 @@
-cap nhat : 2026-10-20 03:45:32 UTC
-tien do  : [  8% 8160/101844]
+cap nhat : 2026-10-20 03:46:03 UTC
+tien do  : [  9% 10058/101844]
 dia      : 38G dung / 61G trong
 -------------------------------------------
-Adding debian:GlobalSign_Root_CA.pem
-Adding debian:SSL.com_EV_Root_Certification_Authority_RSA_R2.pem
-Adding debian:ANF_Secure_Server_Root_CA.pem
-Adding debian:AffirmTrust_Premium_ECC.pem
-Adding debian:DigiCert_Assured_ID_Root_CA.pem
-Adding debian:QuoVadis_Root_CA_3_G3.pem
 Adding debian:SecureSign_RootCA11.pem
 Adding debian:Starfield_Class_2_CA.pem
 Adding debian:E-Tugra_Global_Root_CA_RSA_v3.pem
@@ -252,3 +246,9 @@ OUT_DIR=out
 [  7% 7399/101844] target thumb C++: libv8src_32 <= external/v8/src/fast-accessor-assembler.cc
 [  7% 7699/101844] Export includes file:  -- out/target/product/generic_arm64_ab/obj_arm/SHARED_LIBRARIES/libstagefright_soft_avcdec_intermediates/export_includes
 [  7% 7999/101844] target Prebuilt: dialer-grpc-context-target (out/target/common/obj/JAVA_LIBRARIES/dialer-grpc-context-target_intermediates/classes.jar)
+[  8% 8264/101844] Install: out/target/product/generic_arm64_ab/system/usr/hyphen-data/hyph-ta.lic.txt
+[  8% 8544/101844] target  C: tcpdump <= external/tcpdump/print-m3ua.c
+[  8% 8844/101844] Copy: out/target/product/generic_arm64_ab/system/media/audio/notifications/Canopus.ogg
+[  8% 9144/101844] Check module type: out/target/product/generic_arm64_ab/obj_arm/SHARED_LIBRARIES/libEGL.ndk.28_intermediates/link_type
+[  9% 9444/101844] Check module type: out/target/product/generic_arm64_ab/obj/SHARED_LIBRARIES/libandroid.ndk.27_intermediates/link_type
+[  9% 9744/101844] Check module type: out/target/product/generic_arm64_ab/obj/SHARED_LIBRARIES/liblog.ndk.current_intermediates/link_type
