@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 07:47:01 UTC
-tien do  : [ 70% 72308/101844]
+cap nhat : 2026-10-20 07:47:32 UTC
+tien do  : [ 71% 72400/101844]
 dia      : 83G dung / 16G trong
 -------------------------------------------
 [  0% 801/101844] Check module type: out/target/product/generic_arm64_ab/obj_arm/SHARED_LIBRARIES/libadbconnectiond_intermediates/link_type
