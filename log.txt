@@ -1,6 +1,6 @@
-cap nhat : 2026-10-20 04:46:08 UTC
-tien do  : [ 53% 54616/101844]
-dia      : 54G dung / 45G trong
+cap nhat : 2026-10-20 04:46:39 UTC
+tien do  : [ 53% 54648/101844]
+dia      : 54G dung / 44G trong
 -------------------------------------------
 [3] repo sync
 [3b] Don dep: xoa thu muc chi dung cho macOS / khong can cho GSI (tiet kiem dia)
