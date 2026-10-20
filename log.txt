@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 04:57:08 UTC
-tien do  : [ 54% 55439/101844]
+cap nhat : 2026-10-20 04:57:39 UTC
+tien do  : [ 54% 55470/101844]
 dia      : 57G dung / 42G trong
 -------------------------------------------
 [3b] giai phong khoang 5800 MB
