@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 05:25:25 UTC
-tien do  : [ 59% 60158/101844]
+cap nhat : 2026-10-20 05:25:57 UTC
+tien do  : [ 59% 60263/101844]
 dia      : 60G dung / 39G trong
 -------------------------------------------
-including device/generic/uml/vendorsetup.sh
 including device/google/cuttlefish/vendorsetup.sh
 including device/google/marlin/vendorsetup.sh
 including device/google/muskie/vendorsetup.sh
@@ -252,3 +251,4 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 58% 59336/101844] //system/bt/bta:libbt-bta clang++ gatt/bta_gattc_queue.cc
 [ 58% 59636/101844] //system/bt/btif:libbtif clang++ src/btif_hearing_aid.cc [arm]
 [ 58% 59936/101844] //external/libchrome:libchrome clang++ base/metrics/field_trial.cc [arm]
+[ 59% 60236/101844] //external/libchrome:libchrome clang++ base/threading/worker_pool_posix.cc [linux_glibc]
