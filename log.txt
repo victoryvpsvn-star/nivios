@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 08:11:40 UTC
-tien do  : [ 81% 82677/101844]
-dia      : 86G dung / 13G trong
+cap nhat : 2026-10-20 08:12:12 UTC
+tien do  : [ 81% 82721/101844]
+dia      : 87G dung / 12G trong
 -------------------------------------------
-[ 11% 11242/101844] //external/aac:libFraunhoferAAC clang++ libAACdec/src/channelinfo.cpp [arm]
 [ 11% 11542/101844] //external/llvm/lib/Support:libLLVMSupport clang++ BlockFrequency.cpp [arm]
 [ 11% 11842/101844] //frameworks/rs:libRSDriver clang++ driver/rsdShaderCache.cpp
 [ 11% 12142/101844] //external/libavc:libavcdec clang common/ih264_mem_fns.c [arm]
@@ -252,3 +251,4 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 80% 81944/101844] //external/libyuv/files:libyuv clang++ source/row_any.cc [arm]
 [ 80% 82201/101844] //external/bouncycastle:bouncycastle jarjar [common]
 [ 80% 82470/101844] //prebuilts/sdk/current/support:android-support-cursoradapter for turbine [common]
+[ 81% 82677/101844] //prebuilts/sdk/current/support:android-support-v7-appcompat javac [common]
