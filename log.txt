@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 04:59:45 UTC
-tien do  : [ 54% 55872/101844]
+cap nhat : 2026-10-20 05:00:17 UTC
+tien do  : [ 54% 55949/101844]
 dia      : 57G dung / 42G trong
 -------------------------------------------
 [3c] Xoa .repo (lich su git) de tiet kiem dia. Kich thuoc truoc khi xoa:
