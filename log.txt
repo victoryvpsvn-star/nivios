@@ -1,6 +1,6 @@
-cap nhat : 2026-10-20 05:40:05 UTC
-tien do  : [ 60% 61609/101844]
-dia      : 61G dung / 37G trong
+cap nhat : 2026-10-20 05:40:37 UTC
+tien do  : [ 60% 61629/101844]
+dia      : 62G dung / 37G trong
 -------------------------------------------
 including device/linaro/hikey/vendorsetup.sh
 including sdk/bash_completion/adb.bash
