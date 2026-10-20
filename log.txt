@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 07:36:31 UTC
-tien do  : [ 70% 71310/101844]
+cap nhat : 2026-10-20 07:37:03 UTC
+tien do  : [ 70% 71327/101844]
 dia      : 81G dung / 18G trong
 -------------------------------------------
 [ 94% 1308/1379] glob system/media/private/camera/include
