@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 05:04:29 UTC
-tien do  : [ 56% 57356/101844]
+cap nhat : 2026-10-20 05:05:00 UTC
+tien do  : [ 56% 57370/101844]
 dia      : 58G dung / 41G trong
 -------------------------------------------
 [4] Che do nhe: chi dexpreopt boot image + system_server (van bat dexpreopt, userdebug yeu cau)
