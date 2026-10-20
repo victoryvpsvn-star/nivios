@@ -1,9 +1,7 @@
-cap nhat : 2026-10-20 03:46:03 UTC
-tien do  : [  9% 10058/101844]
+cap nhat : 2026-10-20 03:46:35 UTC
+tien do  : [ 10% 10453/101844]
 dia      : 38G dung / 61G trong
 -------------------------------------------
-Adding debian:SecureSign_RootCA11.pem
-Adding debian:Starfield_Class_2_CA.pem
 Adding debian:E-Tugra_Global_Root_CA_RSA_v3.pem
 Adding debian:T-TeleSec_GlobalRoot_Class_3.pem
 Adding debian:emSign_Root_CA_-_G1.pem
@@ -252,3 +250,5 @@ OUT_DIR=out
 [  8% 9144/101844] Check module type: out/target/product/generic_arm64_ab/obj_arm/SHARED_LIBRARIES/libEGL.ndk.28_intermediates/link_type
 [  9% 9444/101844] Check module type: out/target/product/generic_arm64_ab/obj/SHARED_LIBRARIES/libandroid.ndk.27_intermediates/link_type
 [  9% 9744/101844] Check module type: out/target/product/generic_arm64_ab/obj/SHARED_LIBRARIES/liblog.ndk.current_intermediates/link_type
+[  9% 10044/101844] //prebuilts/sdk/current/support:android-support-cursoradapter-nodeps unzip AAR [common]
+[ 10% 10344/101844] //hardware/interfaces/wifi/1.0:android.hardware.wifi@1.0 gunzipandroid.hardware.wifi@1.0.so_ref.lsdump [arm]
