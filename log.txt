@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 04:09:03 UTC
-tien do  : [ 23% 24343/101844]
+cap nhat : 2026-10-20 04:09:34 UTC
+tien do  : [ 23% 24429/101844]
 dia      : 48G dung / 51G trong
 -------------------------------------------
 Adding debian:D-TRUST_Root_Class_3_CA_2_2009.pem
