@@ -1,6 +1,6 @@
-cap nhat : 2026-10-20 07:43:52 UTC
-tien do  : [ 70% 72048/101844]
-dia      : 82G dung / 17G trong
+cap nhat : 2026-10-20 07:44:24 UTC
+tien do  : [ 70% 72078/101844]
+dia      : 83G dung / 16G trong
 -------------------------------------------
   @libcore.util.NonNull (nl=false) @ {GENERIC_ARRAY_LOCATION=GenericArrayLocationCriterion at outermost type, RETURN_TYPE=ReturnTypeCriterion for method: append(C)Ljava/io/Writer;, IN_METHOD=in method 'append(C)Ljava/io/Writer;', IN_CLASS=In class 'java.io.PrintWriter' (exactly)}
 [  0% 801/101844] Check module type: out/target/product/generic_arm64_ab/obj_arm/SHARED_LIBRARIES/libadbconnectiond_intermediates/link_type
