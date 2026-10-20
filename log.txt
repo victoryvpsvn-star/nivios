@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 03:59:39 UTC
-tien do  : [ 18% 19082/101844]
+cap nhat : 2026-10-20 04:00:10 UTC
+tien do  : [ 18% 19236/101844]
 dia      : 40G dung / 59G trong
 -------------------------------------------
 Adding debian:HARICA_TLS_RSA_Root_CA_2021.pem
