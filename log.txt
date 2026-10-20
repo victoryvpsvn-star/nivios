@@ -1,12 +1,7 @@
-cap nhat : 2026-10-20 03:53:54 UTC
-tien do  : [ 14% 14678/101844]
-dia      : 39G dung / 60G trong
+cap nhat : 2026-10-20 03:54:25 UTC
+tien do  : [ 16% 16347/101844]
+dia      : 39G dung / 59G trong
 -------------------------------------------
-Adding debian:SSL.com_EV_Root_Certification_Authority_ECC.pem
-Adding debian:AffirmTrust_Commercial.pem
-Adding debian:e-Szigno_Root_CA_2017.pem
-Adding debian:AffirmTrust_Premium.pem
-Adding debian:GlobalSign_ECC_Root_CA_-_R4.pem
 Adding debian:Entrust_Root_Certification_Authority.pem
 Adding debian:Go_Daddy_Class_2_CA.pem
 Adding debian:Amazon_Root_CA_1.pem
@@ -252,3 +247,8 @@ OUT_DIR=out
 [ 13% 13942/101844] //bionic/libc:libc_nopthread clang stdio/parsefloat.c [arm]
 [ 13% 14242/101844] //bionic/libc:libc_openbsd_ndk header-abi-dumper upstream-openbsd/lib/libc/locale/wcstoul.c [arm]
 [ 14% 14542/101844] //bionic/libc:libc_syscalls clang arch-arm64/syscalls/__waitid.S
+[ 14% 14842/101844] //bionic/libc:libc_syscalls clang arch-arm/syscalls/readv.S [arm]
+[ 14% 15142/101844] //bionic/libc:libc_uapi install i8k.h
+[ 15% 15442/101844] //bionic/libc:libc_uapi install uvcvideo.h
+[ 15% 15742/101844] //bionic/libc:libc_uapi install uvesafb.h
+[ 15% 16042/101844] //external/compiler-rt:libcompiler_rt clang lib/builtins/truncsfhf2.c [linux_glibc x86]
