@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 06:31:29 UTC
-tien do  : [ 65% 66788/101844]
+cap nhat : 2026-10-20 06:32:00 UTC
+tien do  : [ 65% 66820/101844]
 dia      : 69G dung / 30G trong
 -------------------------------------------
-HOST_OS=linux
 HOST_OS_EXTRA=Linux-6.8.0-1064-azure-x86_64-Ubuntu-18.04.6-LTS
 HOST_CROSS_OS=windows
 HOST_CROSS_ARCH=x86
@@ -252,3 +251,4 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 64% 65863/101844] //art/runtime:libart clang++ scoped_thread_state_change.cc [linux_glibc x86]
 [ 64% 66163/101844] //art/compiler:libart-compiler clang++ optimizing/builder.cc [linux_glibc]
 [ 65% 66463/101844] //art/libartbase:libartbase clang++ base/safe_copy.cc [arm]
+[ 65% 66763/101844] //art/runtime:libartd clang++ ti/agent.cc
