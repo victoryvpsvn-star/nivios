@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 05:53:12 UTC
-tien do  : [ 63% 64749/101844]
-dia      : 64G dung / 35G trong
+cap nhat : 2026-10-20 05:53:43 UTC
+tien do  : [ 63% 64877/101844]
+dia      : 65G dung / 34G trong
 -------------------------------------------
-TARGET_ARCH_VARIANT=armv8-a
 TARGET_CPU_VARIANT=generic
 TARGET_2ND_ARCH=arm
 TARGET_2ND_ARCH_VARIANT=armv8-a
@@ -252,3 +251,4 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 62% 63831/101844] //external/perfetto:perfetto_src_tracing_ipc clang++ external/perfetto/protos/perfetto/trace/ftrace/mm_compaction_end.pbzero.cc
 [ 62% 64117/101844] //system/core/libsparse:simg2img install simg2img [linux_glibc]
 [ 63% 64409/101844] //prebuilts/sdk/current/extras/material-design:android-support-design-expandable overlay resource file list [common]
+[ 63% 64703/101844] target R.java/Manifest.java: BookmarkProvider (out/target/common/obj/APPS/BookmarkProvider_intermediates/src/R.stamp)
