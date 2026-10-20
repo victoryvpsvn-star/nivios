@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 03:50:14 UTC
-tien do  : [ 11% 11706/101844]
+cap nhat : 2026-10-20 03:50:46 UTC
+tien do  : [ 11% 11865/101844]
 dia      : 39G dung / 60G trong
 -------------------------------------------
 Adding debian:Certum_EC-384_CA.pem
