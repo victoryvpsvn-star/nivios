@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 06:07:20 UTC
-tien do  : [ 64% 65575/101844]
+cap nhat : 2026-10-20 06:07:52 UTC
+tien do  : [ 64% 65598/101844]
 dia      : 67G dung / 32G trong
 -------------------------------------------
-TARGET_2ND_ARCH_VARIANT=armv8-a
 TARGET_2ND_CPU_VARIANT=generic
 HOST_ARCH=x86_64
 HOST_2ND_ARCH=x86
@@ -252,3 +251,4 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 63% 64703/101844] target R.java/Manifest.java: BookmarkProvider (out/target/common/obj/APPS/BookmarkProvider_intermediates/src/R.stamp)
 [ 63% 64963/101844] //art/runtime:libart clang++ gc/space/dlmalloc_space.cc
 [ 64% 65263/101844] //art/runtime:libart clang++ jdwp/jdwp_socket.cc [arm]
+[ 64% 65563/101844] //art/runtime:libart clang++ native/java_lang_Class.cc [linux_glibc]
