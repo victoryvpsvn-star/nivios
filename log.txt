@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 03:58:05 UTC
-tien do  : [ 18% 18594/101844]
+cap nhat : 2026-10-20 03:58:36 UTC
+tien do  : [ 18% 18763/101844]
 dia      : 40G dung / 59G trong
 -------------------------------------------
-Adding debian:GlobalSign_Root_CA_-_R3.pem
 Adding debian:Certigna_Root_CA.pem
 Adding debian:HARICA_TLS_RSA_Root_CA_2021.pem
 Adding debian:OISTE_WISeKey_Global_Root_GB_CA.pem
@@ -252,3 +251,4 @@ OUT_DIR=out
 [ 17% 17792/101844] //external/fdlibm:libfdlibm clang k_cos.c [linux_glibc x86]
 [ 17% 18092/101844] //system/tools/aidl:aidl link aidl [linux_glibc]
 [ 18% 18392/101844] //system/libhwbinder:libhwbinder gunziplibhwbinder.so_ref.lsdump
+[ 18% 18692/101844] //external/icu/icu4c/source/i18n:libicui18n clang++ datefmt.cpp [arm]
