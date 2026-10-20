@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 04:10:05 UTC
-tien do  : [ 24% 24533/101844]
+cap nhat : 2026-10-20 04:10:37 UTC
+tien do  : [ 24% 24616/101844]
 dia      : 48G dung / 51G trong
 -------------------------------------------
 Adding debian:Hellenic_Academic_and_Research_Institutions_ECC_RootCA_2015.pem
