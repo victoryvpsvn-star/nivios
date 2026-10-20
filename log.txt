@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 06:45:37 UTC
-tien do  : [ 66% 67439/101844]
+cap nhat : 2026-10-20 06:46:09 UTC
+tien do  : [ 66% 67459/101844]
 dia      : 70G dung / 29G trong
 -------------------------------------------
-HOST_CROSS_OS=windows
 HOST_CROSS_ARCH=x86
 HOST_CROSS_2ND_ARCH=x86_64
 HOST_BUILD_TYPE=release
@@ -252,3 +251,4 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 65% 66463/101844] //art/libartbase:libartbase clang++ base/safe_copy.cc [arm]
 [ 65% 66763/101844] //art/runtime:libartd clang++ ti/agent.cc
 [ 65% 67063/101844] //art/runtime:libartd clang++ entrypoints/quick/quick_math_entrypoints.cc [arm]
+[ 66% 67363/101844] //art/runtime:libartd clang++ compiler_filter.cc [linux_glibc x86]
