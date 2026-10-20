@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 03:50:46 UTC
-tien do  : [ 11% 11865/101844]
+cap nhat : 2026-10-20 03:51:17 UTC
+tien do  : [ 11% 11993/101844]
 dia      : 39G dung / 60G trong
 -------------------------------------------
-Adding debian:Certum_EC-384_CA.pem
 Adding debian:GDCA_TrustAUTH_R5_ROOT.pem
 Adding debian:Starfield_Services_Root_Certificate_Authority_-_G2.pem
 Adding debian:UCA_Global_G2_Root.pem
@@ -252,3 +251,4 @@ OUT_DIR=out
 [ 10% 10942/101844] //external/neven:libFFTEm clang Embedded/common/src/b_BasicEm/Memory.c [arm]
 [ 11% 11242/101844] //external/aac:libFraunhoferAAC clang++ libAACdec/src/channelinfo.cpp [arm]
 [ 11% 11542/101844] //external/llvm/lib/Support:libLLVMSupport clang++ BlockFrequency.cpp [arm]
+[ 11% 11842/101844] //frameworks/rs:libRSDriver clang++ driver/rsdShaderCache.cpp
