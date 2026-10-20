@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 04:28:22 UTC
-tien do  : [ 28% 28889/101844]
+cap nhat : 2026-10-20 04:28:53 UTC
+tien do  : [ 28% 28932/101844]
 dia      : 50G dung / 49G trong
 -------------------------------------------
 Adding debian:TeliaSonera_Root_CA_v1.pem
