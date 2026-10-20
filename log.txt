@@ -1,11 +1,7 @@
-cap nhat : 2026-10-20 03:35:37 UTC
-tien do  : [  5% 5402/101844]
-dia      : 35G dung / 63G trong
+cap nhat : 2026-10-20 03:36:08 UTC
+tien do  : [  6% 6830/101844]
+dia      : 36G dung / 63G trong
 -------------------------------------------
-Adding debian:Go_Daddy_Root_Certificate_Authority_-_G2.pem
-Adding debian:emSign_ECC_Root_CA_-_G3.pem
-Adding debian:emSign_ECC_Root_CA_-_C3.pem
-Adding debian:Certum_Trusted_Network_CA_2.pem
 Adding debian:COMODO_RSA_Certification_Authority.pem
 Adding debian:SwissSign_Gold_CA_-_G2.pem
 Adding debian:Starfield_Root_Certificate_Authority_-_G2.pem
@@ -252,3 +248,7 @@ OUT_DIR=out
 [  4% 4700/101844] target  C: ip <= external/iproute2/ip/ip.c
 [  4% 5000/101844] target  C: libext <= out/target/product/generic_arm64_ab/obj/STATIC_LIBRARIES/libext_intermediates/libxt_cluster.c
 [  5% 5300/101844] Check module type: out/target/product/generic_arm64_ab/obj_arm/SHARED_LIBRARIES/libresourcemanagerservice_intermediates/link_type
+[  5% 5599/101844] target  C: tc <= external/iproute2/tc/tc_filter.c
+[  5% 5899/101844] Install: out/target/product/generic_arm64_ab/system/etc/security/cacerts/5a250ea7.0
+[  6% 6199/101844] Install: out/target/product/generic_arm64_ab/system/fonts/NotoSansChakma-Regular.ttf
+[  6% 6499/101844] target Prebuilt: NotoSansSharada-Regular.otf (out/target/product/generic_arm64_ab/obj/ETC/NotoSansSharada-Regular.otf_intermediates/NotoSansSharada-Regular.otf)
