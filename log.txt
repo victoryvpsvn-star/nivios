@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 08:07:28 UTC
-tien do  : [ 80% 81681/101844]
+cap nhat : 2026-10-20 08:08:00 UTC
+tien do  : [ 80% 82027/101844]
 dia      : 86G dung / 13G trong
 -------------------------------------------
-[  9% 10044/101844] //prebuilts/sdk/current/support:android-support-cursoradapter-nodeps unzip AAR [common]
 [ 10% 10344/101844] //hardware/interfaces/wifi/1.0:android.hardware.wifi@1.0 gunzipandroid.hardware.wifi@1.0.so_ref.lsdump [arm]
 [ 10% 10642/101844] //external/e2fsprogs/e2fsck:e2fsck clang problem.c
 [ 10% 10942/101844] //external/neven:libFFTEm clang Embedded/common/src/b_BasicEm/Memory.c [arm]
@@ -252,3 +251,4 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 79% 80744/101844] //system/core/libutils:libutilscallstack clang++ CallStack.cpp [arm]
 [ 79% 81044/101844] //external/libvpx:libvpx clang libvpx/vp9/encoder/vp9_aq_360.c [arm]
 [ 79% 81344/101844] //external/webrtc/webrtc/modules/audio_processing:libwebrtc_apm clang++ echo_cancellation_impl.cc [arm]
+[ 80% 81644/101844] //external/webrtc/webrtc/common_audio/vad:libwebrtc_vad static link libwebrtc_vad.a
