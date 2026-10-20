@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 03:40:50 UTC
-tien do  : [  7% 7376/101844]
+cap nhat : 2026-10-20 03:41:22 UTC
+tien do  : [  7% 7407/101844]
 dia      : 36G dung / 63G trong
 -------------------------------------------
-Adding debian:Starfield_Root_Certificate_Authority_-_G2.pem
 Adding debian:certSIGN_ROOT_CA.pem
 Adding debian:DigiCert_Trusted_Root_G4.pem
 Adding debian:GlobalSign_Root_CA.pem
@@ -252,3 +251,4 @@ OUT_DIR=out
 [  6% 6499/101844] target Prebuilt: NotoSansSharada-Regular.otf (out/target/product/generic_arm64_ab/obj/ETC/NotoSansSharada-Regular.otf_intermediates/NotoSansSharada-Regular.otf)
 [  6% 6799/101844] Notice file: frameworks/base/cmds/appwidget/NOTICE -- out/target/product/generic_arm64_ab/obj/NOTICE_FILES/src/system/framework/appwidget.jar.txt
 [  6% 7099/101844] Check module type: out/target/product/generic_arm64_ab/obj_arm/SHARED_LIBRARIES/libopus_intermediates/link_type
+[  7% 7399/101844] target thumb C++: libv8src_32 <= external/v8/src/fast-accessor-assembler.cc
