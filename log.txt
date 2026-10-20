@@ -1,9 +1,7 @@
-cap nhat : 2026-10-20 05:52:09 UTC
-tien do  : [ 62% 64058/101844]
-dia      : 62G dung / 36G trong
+cap nhat : 2026-10-20 05:52:40 UTC
+tien do  : [ 63% 64524/101844]
+dia      : 63G dung / 36G trong
 -------------------------------------------
-TARGET_BUILD_TYPE=release
-TARGET_ARCH=arm64
 TARGET_ARCH_VARIANT=armv8-a
 TARGET_CPU_VARIANT=generic
 TARGET_2ND_ARCH=arm
@@ -252,3 +250,5 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 62% 63231/101844] //external/perfetto:libtraced_shared clang++ src/protozero/scattered_stream_writer.cc
 [ 62% 63531/101844] //external/perfetto:perfetto clang++ external/perfetto/protos/perfetto/trace/ftrace/sched_cpu_hotplug.pbzero.cc
 [ 62% 63831/101844] //external/perfetto:perfetto_src_tracing_ipc clang++ external/perfetto/protos/perfetto/trace/ftrace/mm_compaction_end.pbzero.cc
+[ 62% 64117/101844] //system/core/libsparse:simg2img install simg2img [linux_glibc]
+[ 63% 64409/101844] //prebuilts/sdk/current/extras/material-design:android-support-design-expandable overlay resource file list [common]
