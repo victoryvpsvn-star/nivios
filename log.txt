@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 04:52:25 UTC
-tien do  : [ 54% 55065/101844]
+cap nhat : 2026-10-20 04:52:56 UTC
+tien do  : [ 54% 55103/101844]
 dia      : 56G dung / 43G trong
 -------------------------------------------
 [3b] Don dep: xoa thu muc chi dung cho macOS / khong can cho GSI (tiet kiem dia)
