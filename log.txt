@@ -1,6 +1,6 @@
-cap nhat : 2026-10-20 07:01:53 UTC
-tien do  : [ 66% 68101/101844]
-dia      : 71G dung / 27G trong
+cap nhat : 2026-10-20 07:02:24 UTC
+tien do  : [ 66% 68189/101844]
+dia      : 72G dung / 27G trong
 -------------------------------------------
 HOST_BUILD_TYPE=release
 BUILD_ID=PI
