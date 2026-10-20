@@ -1,9 +1,7 @@
-cap nhat : 2026-10-20 07:54:53 UTC
-tien do  : [ 74% 75713/101844]
-dia      : 84G dung / 15G trong
+cap nhat : 2026-10-20 07:55:24 UTC
+tien do  : [ 74% 76260/101844]
+dia      : 84G dung / 14G trong
 -------------------------------------------
-[  4% 4100/101844] target  C++: libv8src <= external/v8/src/machine-type.cc
-[  4% 4400/101844] Notice file: frameworks/base/cmds/appwidget/NOTICE -- out/target/product/generic_arm64_ab/obj/NOTICE_FILES/src/system/bin/appwidget.txt
 [  4% 4700/101844] target  C: ip <= external/iproute2/ip/ip.c
 [  4% 5000/101844] target  C: libext <= out/target/product/generic_arm64_ab/obj/STATIC_LIBRARIES/libext_intermediates/libxt_cluster.c
 [  5% 5300/101844] Check module type: out/target/product/generic_arm64_ab/obj_arm/SHARED_LIBRARIES/libresourcemanagerservice_intermediates/link_type
@@ -252,3 +250,5 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 73% 74828/101844] //external/boringssl:libcrypto clang src/crypto/x509/x_req.c
 [ 73% 75128/101844] //external/boringssl:libcrypto header-abi-dumper src/crypto/pem/pem_oth.c [arm]
 [ 74% 75428/101844] //external/curl:libcurl clang lib/getinfo.c
+[ 74% 75728/101844] //external/curl:libcurl clang lib/strtoofft.c [arm]
+[ 74% 76028/101844] //system/core/libdiskconfig:libdiskconfig header-abi-dumper config_mbr.c [arm]
