@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 04:41:57 UTC
-tien do  : [ 53% 54245/101844]
-dia      : 53G dung / 45G trong
+cap nhat : 2026-10-20 04:42:28 UTC
+tien do  : [ 53% 54328/101844]
+dia      : 54G dung / 45G trong
 -------------------------------------------
-cache hit (preprocessed)               0
 [2] repo init android-9.0.0_r61
 [3] repo sync
 [3b] Don dep: xoa thu muc chi dung cho macOS / khong can cho GSI (tiet kiem dia)
@@ -252,3 +251,4 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 52% 53496/101844] AAPT2 compile out/target/common/obj/APPS/TeleService_intermediates/flat-res/packages/services/Telephony/res/values-en-rCA_config.arsc.flat <- packages/services/Telephony/res/values-en-rCA/config.xml
 [ 52% 53723/101844] AAPT2 compile out/target/common/obj/APPS/TeleService_intermediates/flat-res/packages/services/Telephony/res/xml_call_feature_setting.xml.flat <- packages/services/Telephony/res/xml/call_feature_setting.xml
 [ 53% 54022/101844] //prebuilts/sdk/current/androidx:androidx.arch.core_core-runtime-nodeps overlay resource file list [common]
+[ 53% 54292/101844] LLVM TableGen external/llvm/lib/Target/AArch64/AArch64.td => out/soong/.intermediates/external/llvm/lib/Target/AArch64/llvm-gen-aarch64/gen/AArch64GenMCPseudoLowering.inc
