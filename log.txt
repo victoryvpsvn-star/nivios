@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 08:20:05 UTC
-tien do  : [ 81% 83413/101844]
+cap nhat : 2026-10-20 08:20:36 UTC
+tien do  : [ 81% 83456/101844]
 dia      : 88G dung / 11G trong
 -------------------------------------------
 [ 12% 12742/101844] //external/bsdiff:libbspatch clang++ extents_file.cc
