@@ -1,6 +1,6 @@
-cap nhat : 2026-10-20 04:39:20 UTC
-tien do  : [ 30% 31506/101844]
-dia      : 52G dung / 46G trong
+cap nhat : 2026-10-20 04:39:51 UTC
+tien do  : [ 31% 31600/101844]
+dia      : 53G dung / 46G trong
 -------------------------------------------
 Adding debian:Amazon_Root_CA_3.pem
 Adding debian:HiPKI_Root_CA_-_G1.pem
