@@ -1,9 +1,7 @@
-cap nhat : 2026-10-20 07:53:18 UTC
-tien do  : [ 72% 74069/101844]
+cap nhat : 2026-10-20 07:53:50 UTC
+tien do  : [ 73% 74754/101844]
 dia      : 84G dung / 15G trong
 -------------------------------------------
-[  2% 2601/101844] Notice file: frameworks/av/media/libstagefright/codecs/m4v_h263/enc/NOTICE -- out/target/product/generic_arm64_ab/obj/NOTICE_FILES/src/system/lib/vndk-28/libstagefright_soft_mpeg4enc.so.txt
-[  2% 2901/101844] Check module type: out/target/product/generic_arm64_ab/obj_arm/SHARED_LIBRARIES/android.hardware.soundtrigger@2.0.vndk.27.arm64.vendor_intermediates/link_type
 [  3% 3201/101844] Export includes file:  -- out/target/product/generic_arm64_ab/obj/STATIC_LIBRARIES/libhidl-gen-utils_intermediates/export_includes
 [  3% 3500/101844] Export includes file:  -- out/target/product/generic_arm64_ab/obj/SHARED_LIBRARIES/libldacBT_abr_intermediates/export_includes
 [  3% 3800/101844] target  C++: libv8src <= external/v8/src/ast/ast-numbering.cc
@@ -252,3 +250,5 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 72% 73337/101844] //external/libavc:libavcenc clang encoder/irc_picture_type.c [arm]
 [ 72% 73637/101844] //external/cblas:libblas clang src/cblas_ssyr2k.c
 [ 72% 73937/101844] //external/libcxx:libc++_static clang++ src/regex.cpp [arm]
+[ 72% 74237/101844] //external/compiler-rt:libcompiler_rt clang lib/builtins/powixf2.c
+[ 73% 74528/101844] //external/boringssl:libcrypto header-abi-dumper src/crypto/asn1/tasn_typ.c
