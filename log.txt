@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 04:27:50 UTC
-tien do  : [ 28% 28717/101844]
+cap nhat : 2026-10-20 04:28:22 UTC
+tien do  : [ 28% 28889/101844]
 dia      : 50G dung / 49G trong
 -------------------------------------------
-Adding debian:E-Tugra_Global_Root_CA_ECC_v3.pem
 Adding debian:TeliaSonera_Root_CA_v1.pem
 Adding debian:Microsoft_RSA_Root_Certificate_Authority_2017.pem
 Adding debian:ISRG_Root_X2.pem
@@ -252,3 +251,4 @@ OUT_DIR=out
 [ 27% 27891/101844] //external/sonivox/arm-wt-22k:libsonivox clang lib_src/eas_voicemgt.c [arm]
 [ 27% 28191/101844] //frameworks/av/media/libstagefright/codecs/amrnb/common:libstagefright_amrnb_common clang++ src/gains_tbl.cpp [arm]
 [ 27% 28491/101844] //frameworks/av/media/libstagefright/codecs/amrwbenc:libstagefright_amrwbenc clang src/log2.c [arm]
+[ 28% 28791/101844] //bionic/libc/system_properties:libsystemproperties clang++ prop_area.cpp
