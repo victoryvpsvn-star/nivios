@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 04:57:39 UTC
-tien do  : [ 54% 55470/101844]
+cap nhat : 2026-10-20 04:58:11 UTC
+tien do  : [ 54% 55525/101844]
 dia      : 57G dung / 42G trong
 -------------------------------------------
-[3b] giai phong khoang 5800 MB
 /dev/mapper/buildvg-buildlv   98G   46G   53G  47% /build
 [3c] Xoa .repo (lich su git) de tiet kiem dia. Kich thuoc truoc khi xoa:
 15G	.repo
@@ -252,3 +251,4 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 53% 54592/101844] //external/llvm/lib/Analysis:libLLVMAnalysis clang++ LazyValueInfo.cpp
 [ 53% 54892/101844] //external/llvm/lib/IR:libLLVMCore clang++ DiagnosticPrinter.cpp [arm]
 [ 54% 55192/101844] //external/llvm/lib/MC:libLLVMMC clang++ WinCOFFObjectWriter.cpp [arm]
+[ 54% 55473/101844] //external/llvm/lib/Transforms/IPO:libLLVMipo clang++ SampleProfile.cpp
