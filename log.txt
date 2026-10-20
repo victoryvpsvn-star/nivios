@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 05:24:22 UTC
-tien do  : [ 58% 59988/101844]
+cap nhat : 2026-10-20 05:24:54 UTC
+tien do  : [ 58% 60067/101844]
 dia      : 60G dung / 39G trong
 -------------------------------------------
-including device/generic/mini-emulator-x86/vendorsetup.sh
 including device/generic/uml/vendorsetup.sh
 including device/google/cuttlefish/vendorsetup.sh
 including device/google/marlin/vendorsetup.sh
@@ -252,3 +251,4 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 57% 59036/101844] //frameworks/av/camera:libcamera_client clang++ CameraParameters2.cpp
 [ 58% 59336/101844] //system/bt/bta:libbt-bta clang++ gatt/bta_gattc_queue.cc
 [ 58% 59636/101844] //system/bt/btif:libbtif clang++ src/btif_hearing_aid.cc [arm]
+[ 58% 59936/101844] //external/libchrome:libchrome clang++ base/metrics/field_trial.cc [arm]
