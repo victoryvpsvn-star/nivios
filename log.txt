@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 04:23:08 UTC
-tien do  : [ 26% 27315/101844]
+cap nhat : 2026-10-20 04:23:40 UTC
+tien do  : [ 26% 27391/101844]
 dia      : 49G dung / 50G trong
 -------------------------------------------
-Adding debian:QuoVadis_Root_CA_2_G3.pem
 Adding debian:TWCA_Global_Root_CA.pem
 Adding debian:USERTrust_RSA_Certification_Authority.pem
 Adding debian:GlobalSign_ECC_Root_CA_-_R5.pem
@@ -252,3 +251,4 @@ OUT_DIR=out
 [ 25% 26391/101844] //external/skia:libskia clang++ src/core/SkBBHFactory.cpp
 [ 26% 26691/101844] //external/skia:libskia clang++ src/gpu/GrSKSLPrettyPrint.cpp
 [ 26% 26991/101844] //external/skia:libskia clang++ src/shaders/gradients/SkTwoPointConicalGradient_gpu.cpp
+[ 26% 27291/101844] //external/skia:libskia clang++ src/core/SkXfermodeInterpretation.cpp [arm]
