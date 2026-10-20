@@ -1,11 +1,7 @@
-cap nhat : 2026-10-20 03:35:06 UTC
-tien do  : [  4% 4352/101844]
-dia      : 35G dung / 64G trong
+cap nhat : 2026-10-20 03:35:37 UTC
+tien do  : [  5% 5402/101844]
+dia      : 35G dung / 63G trong
 -------------------------------------------
-Adding debian:SwissSign_Silver_CA_-_G2.pem
-Adding debian:SecureTrust_CA.pem
-Adding debian:Hellenic_Academic_and_Research_Institutions_RootCA_2015.pem
-Adding debian:T-TeleSec_GlobalRoot_Class_2.pem
 Adding debian:Go_Daddy_Root_Certificate_Authority_-_G2.pem
 Adding debian:emSign_ECC_Root_CA_-_G3.pem
 Adding debian:emSign_ECC_Root_CA_-_C3.pem
@@ -252,3 +248,7 @@ OUT_DIR=out
 [  3% 3500/101844] Export includes file:  -- out/target/product/generic_arm64_ab/obj/SHARED_LIBRARIES/libldacBT_abr_intermediates/export_includes
 [  3% 3800/101844] target  C++: libv8src <= external/v8/src/ast/ast-numbering.cc
 [  4% 4100/101844] target  C++: libv8src <= external/v8/src/machine-type.cc
+[  4% 4400/101844] Notice file: frameworks/base/cmds/appwidget/NOTICE -- out/target/product/generic_arm64_ab/obj/NOTICE_FILES/src/system/bin/appwidget.txt
+[  4% 4700/101844] target  C: ip <= external/iproute2/ip/ip.c
+[  4% 5000/101844] target  C: libext <= out/target/product/generic_arm64_ab/obj/STATIC_LIBRARIES/libext_intermediates/libxt_cluster.c
+[  5% 5300/101844] Check module type: out/target/product/generic_arm64_ab/obj_arm/SHARED_LIBRARIES/libresourcemanagerservice_intermediates/link_type
