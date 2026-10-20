@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 04:23:40 UTC
-tien do  : [ 26% 27391/101844]
+cap nhat : 2026-10-20 04:24:11 UTC
+tien do  : [ 26% 27466/101844]
 dia      : 49G dung / 50G trong
 -------------------------------------------
 Adding debian:TWCA_Global_Root_CA.pem
