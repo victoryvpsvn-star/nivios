@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 07:55:24 UTC
-tien do  : [ 74% 76260/101844]
+cap nhat : 2026-10-20 07:55:55 UTC
+tien do  : [ 74% 76381/101844]
 dia      : 84G dung / 14G trong
 -------------------------------------------
-[  4% 4700/101844] target  C: ip <= external/iproute2/ip/ip.c
 [  4% 5000/101844] target  C: libext <= out/target/product/generic_arm64_ab/obj/STATIC_LIBRARIES/libext_intermediates/libxt_cluster.c
 [  5% 5300/101844] Check module type: out/target/product/generic_arm64_ab/obj_arm/SHARED_LIBRARIES/libresourcemanagerservice_intermediates/link_type
 [  5% 5599/101844] target  C: tc <= external/iproute2/tc/tc_filter.c
@@ -252,3 +251,4 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 74% 75428/101844] //external/curl:libcurl clang lib/getinfo.c
 [ 74% 75728/101844] //external/curl:libcurl clang lib/strtoofft.c [arm]
 [ 74% 76028/101844] //system/core/libdiskconfig:libdiskconfig header-abi-dumper config_mbr.c [arm]
+[ 74% 76328/101844] //frameworks/native/libs/gui:libgui clang++ BufferItemConsumer.cpp
