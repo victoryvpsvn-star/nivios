@@ -1,6 +1,6 @@
-cap nhat : 2026-10-20 04:24:43 UTC
-tien do  : [ 27% 27530/101844]
-dia      : 49G dung / 50G trong
+cap nhat : 2026-10-20 04:25:14 UTC
+tien do  : [ 27% 27587/101844]
+dia      : 49G dung / 49G trong
 -------------------------------------------
 Adding debian:TWCA_Global_Root_CA.pem
 Adding debian:USERTrust_RSA_Certification_Authority.pem
