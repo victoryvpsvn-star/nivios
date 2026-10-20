@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 05:46:23 UTC
-tien do  : [ 61% 62338/101844]
+cap nhat : 2026-10-20 05:46:54 UTC
+tien do  : [ 61% 62388/101844]
 dia      : 62G dung / 37G trong
 -------------------------------------------
-
 ============================================
 PLATFORM_VERSION_CODENAME=REL
 PLATFORM_VERSION=9
@@ -252,3 +251,4 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 60% 61436/101844] //art/openjdkjvmti:libopenjdkjvmti clang++ ti_ddms.cc
 [ 60% 61736/101844] //frameworks/native/services/sensorservice:libsensorservice clang++ SensorServiceUtils.cpp [arm]
 [ 60% 62036/101844] //frameworks/av/media/libmediaplayerservice/nuplayer:libstagefright_nuplayer clang++ HTTPLiveSource.cpp [arm]
+[ 61% 62336/101844] //system/vold:libvold clang++ Ext4Crypt.cpp
