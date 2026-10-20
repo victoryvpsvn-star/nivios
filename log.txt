@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 03:43:58 UTC
-tien do  : [  7% 7545/101844]
+cap nhat : 2026-10-20 03:44:29 UTC
+tien do  : [  7% 7581/101844]
 dia      : 37G dung / 62G trong
 -------------------------------------------
 Adding debian:certSIGN_ROOT_CA.pem
