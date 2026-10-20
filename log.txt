@@ -1,6 +1,6 @@
-cap nhat : 2026-10-20 03:16:16 UTC
+cap nhat : 2026-10-20 03:16:47 UTC
 tien do  : chua bat dau make
-dia      : 17G dung / 82G trong
+dia      : 18G dung / 81G trong
 -------------------------------------------
 Setting up libglx-mesa0:amd64 (20.0.8-0ubuntu1~18.04.1) ...
 Setting up libxi6:amd64 (2:1.7.9-1) ...
