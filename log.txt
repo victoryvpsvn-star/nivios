@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 03:26:46 UTC
-tien do  : [  3% 3812/101844]
+cap nhat : 2026-10-20 03:27:17 UTC
+tien do  : [  3% 3839/101844]
 dia      : 33G dung / 66G trong
 -------------------------------------------
-Adding debian:ISRG_Root_X1.pem
 Adding debian:Trustwave_Global_ECC_P384_Certification_Authority.pem
 Adding debian:SwissSign_Silver_CA_-_G2.pem
 Adding debian:SecureTrust_CA.pem
@@ -252,3 +251,4 @@ OUT_DIR=out
 [  2% 2901/101844] Check module type: out/target/product/generic_arm64_ab/obj_arm/SHARED_LIBRARIES/android.hardware.soundtrigger@2.0.vndk.27.arm64.vendor_intermediates/link_type
 [  3% 3201/101844] Export includes file:  -- out/target/product/generic_arm64_ab/obj/STATIC_LIBRARIES/libhidl-gen-utils_intermediates/export_includes
 [  3% 3500/101844] Export includes file:  -- out/target/product/generic_arm64_ab/obj/SHARED_LIBRARIES/libldacBT_abr_intermediates/export_includes
+[  3% 3800/101844] target  C++: libv8src <= external/v8/src/ast/ast-numbering.cc
