@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 04:29:56 UTC
-tien do  : [ 28% 29338/101844]
-dia      : 50G dung / 49G trong
+cap nhat : 2026-10-20 04:30:27 UTC
+tien do  : [ 29% 29559/101844]
+dia      : 50G dung / 48G trong
 -------------------------------------------
-Adding debian:Microsoft_RSA_Root_Certificate_Authority_2017.pem
 Adding debian:ISRG_Root_X2.pem
 Adding debian:D-TRUST_BR_Root_CA_1_2020.pem
 Adding debian:SSL.com_Root_Certification_Authority_ECC.pem
@@ -252,3 +251,4 @@ OUT_DIR=out
 [ 27% 28491/101844] //frameworks/av/media/libstagefright/codecs/amrwbenc:libstagefright_amrwbenc clang src/log2.c [arm]
 [ 28% 28791/101844] //bionic/libc/system_properties:libsystemproperties clang++ prop_area.cpp
 [ 28% 29091/101844] //external/libunwind:libunwind clang src/dwarf/global.c [linux_glibc]
+[ 28% 29391/101844] //system/core/libunwindstack:libunwindstack_dex static link libunwindstack_dex.a [arm]
