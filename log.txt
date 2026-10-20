@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 04:26:48 UTC
-tien do  : [ 27% 27931/101844]
+cap nhat : 2026-10-20 04:27:19 UTC
+tien do  : [ 27% 28052/101844]
 dia      : 50G dung / 49G trong
 -------------------------------------------
 Adding debian:GlobalSign_ECC_Root_CA_-_R5.pem
