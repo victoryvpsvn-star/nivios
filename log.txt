@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 04:37:14 UTC
-tien do  : [ 30% 31071/101844]
+cap nhat : 2026-10-20 04:37:46 UTC
+tien do  : [ 30% 31260/101844]
 dia      : 52G dung / 47G trong
 -------------------------------------------
-Adding debian:CFCA_EV_ROOT.pem
 Adding debian:Microsoft_ECC_Root_Certificate_Authority_2017.pem
 Adding debian:Amazon_Root_CA_3.pem
 Adding debian:HiPKI_Root_CA_-_G1.pem
@@ -252,3 +251,4 @@ OUT_DIR=out
 [ 29% 30278/101844] //external/libvpx:libvpx clang libvpx/vp9/decoder/vp9_detokenize.c
 [ 30% 30578/101844] //external/libxml2:libxml2 clang xmlreader.c [linux_glibc]
 [ 30% 30878/101844] Copy: out/host/linux-x86/obj/lib/libz.so
+[ 30% 31172/101844] //frameworks/base:libplatformprotos protoc core/proto/android/net/network.proto
