@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 07:07:40 UTC
-tien do  : [ 67% 69136/101844]
+cap nhat : 2026-10-20 07:08:12 UTC
+tien do  : [ 67% 69206/101844]
 dia      : 79G dung / 20G trong
 -------------------------------------------
-============================================
 [142/933] including external/dagger2/Android.mk ...
 [442/933] including packages/apps/SoundRecorder/Android.mk ...
 [741/933] including test/vts-testcase/hal/nfc/V1_0/target_replay/Android.mk ...
@@ -252,3 +251,4 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 67% 68263/101844] //art/libdexfile:libdexfiled clang++ art/libdexfile/dex/dex_instruction.operator_out.cc [linux_glibc]
 [ 67% 68563/101844] target  C++: statsd <= frameworks/base/cmds/statsd/src/external/SubsystemSleepStatePuller.cpp
 [ 67% 68863/101844] //frameworks/base/core/jni:libandroid_runtime clang++ android/graphics/GraphicBuffer.cpp [arm]
+[ 67% 69163/101844] //system/bt/stack:libbt-stack clang++ l2cap/l2c_fcr.cc [arm]
