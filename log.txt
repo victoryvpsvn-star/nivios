@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 07:49:06 UTC
-tien do  : [ 71% 72705/101844]
+cap nhat : 2026-10-20 07:49:38 UTC
+tien do  : [ 71% 72795/101844]
 dia      : 84G dung / 15G trong
 -------------------------------------------
 [  1% 1101/101844] target  C: toybox <= external/toybox/toys/pending/dd.c
