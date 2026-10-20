@@ -1,23 +1,7 @@
-cap nhat : 2026-10-20 08:33:14 UTC
-tien do  : [ 82% 83957/101844]
-dia      : 90G dung / 8.8G trong
+cap nhat : 2026-10-20 08:33:46 UTC
+tien do  : [ 82% 83976/101844]
+dia      : 90G dung / 8.7G trong
 -------------------------------------------
-[ 18% 18692/101844] //external/icu/icu4c/source/i18n:libicui18n clang++ datefmt.cpp [arm]
-[ 18% 18992/101844] //external/icu/icu4c/source/i18n:libicui18n clang++ reldatefmt.cpp [linux_glibc]
-[ 18% 19292/101844] //external/icu/icu4c/source/common:libicuuc clang++ chariter.cpp
-[ 19% 19592/101844] //external/icu/icu4c/source/common:libicuuc clang++ uinit.cpp [arm]
-[ 19% 19892/101844] //external/icu/icu4c/source/common:libicuuc clang++ rbbinode.cpp [linux_glibc x86]
-[ 19% 20192/101844] //libcore:libjavacore clang++ ZipUtilities.cpp [linux_glibc x86]
-[ 20% 20492/101844] //external/libjpeg-turbo:libjpeg clang jfdctfst.c [linux_glibc]
-[ 20% 20792/101844] //system/core/liblog:liblog clang fake_writer.c [linux_glibc]
-[ 20% 21092/101844] //frameworks/base:framework aidl core/java/android/hardware/radio/ICloseHandle.aidl [common]
-[ 21% 21392/101844] //frameworks/base:framework aidl telecomm/java/com/android/internal/telecom/IVideoCallback.aidl [common]
-[ 21% 21692/101844] //frameworks/native/libs/binder:libbinder clang++ IServiceManager.cpp
-[ 21% 21992/101844] //system/media/audio_utils:libaudioutils link libaudioutils.so [linux_glibc x86]
-[ 21% 22292/101844] //bionic/libm:libm header-abi-dumper upstream-freebsd/lib/msun/src/k_tanf.c
-[ 22% 22592/101844] //bionic/libm:libm header-abi-dumper upstream-freebsd/lib/msun/src/e_sinhl.c
-[ 22% 22892/101844] //bionic/libm:libm header-abi-dumper upstream-freebsd/lib/msun/src/s_nan.c [arm]
-[ 22% 23192/101844] //external/minijail:libminijail clang syscall_wrapper.c [linux_glibc]
 [ 23% 23492/101844] //frameworks/av/media/libnblog:libnblog clang++ ReportPerformance.cpp [arm]
 [ 23% 23792/101844] //libcore:libopenjdk clang EPollPort.c [linux_glibc x86]
 [ 23% 24092/101844] //external/libopus:libopus clang celt/mathops.c [arm]
@@ -252,3 +236,19 @@ Note: duplicate definition of library class [java.security.spec.RSAMultiPrimePri
 Note: duplicate definition of library class [java.lang.ref.PhantomReference]
 Note: duplicate definition of library class [java.sql.SQLXML]
       Maybe this is library method 'android.app.Person { java.lang.String getUri(); }'
+ProGuard, version 5.1
+Note: duplicate definition of library class [org.xml.sax.HandlerBase]
+Note: duplicate definition of library class [android.graphics.drawable.ShapeDrawable$ShaderFactory]
+Note: duplicate definition of library class [android.util.Pair]
+Note: duplicate definition of library class [android.se.omapi.Reader]
+Note: duplicate definition of library class [android.media.CameraProfile]
+Note: duplicate definition of library class [android.content.SyncRequest]
+Note: duplicate definition of library class [android.icu.text.NumberingSystem]
+Note: duplicate definition of library class [android.widget.Chronometer$OnChronometerTickListener]
+Note: duplicate definition of library class [android.view.textservice.SpellCheckerSession$SpellCheckerSessionListener]
+Note: duplicate definition of library class [android.provider.CalendarContract$Instances]
+Note: duplicate definition of library class [java.util.concurrent.ConcurrentHashMap$KeySetView]
+Note: duplicate definition of library class [java.net.URLClassLoader]
+Note: duplicate definition of library class [java.lang.SafeVarargs]
+Note: duplicate definition of library class [java.io.WriteAbortedException]
+      Maybe this is library method 'android.icu.util.CopticCalendar { java.lang.String getType(); }'
