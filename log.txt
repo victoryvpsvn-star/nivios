@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 07:11:52 UTC
-tien do  : [ 68% 69475/101844]
+cap nhat : 2026-10-20 07:12:23 UTC
+tien do  : [ 68% 69742/101844]
 dia      : 79G dung / 20G trong
 -------------------------------------------
-[142/933] including external/dagger2/Android.mk ...
 [442/933] including packages/apps/SoundRecorder/Android.mk ...
 [741/933] including test/vts-testcase/hal/nfc/V1_0/target_replay/Android.mk ...
 [  7% 108/1379] glob external/llvm/lib/TableGen/*.cpp
@@ -252,3 +251,4 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 67% 68563/101844] target  C++: statsd <= frameworks/base/cmds/statsd/src/external/SubsystemSleepStatePuller.cpp
 [ 67% 68863/101844] //frameworks/base/core/jni:libandroid_runtime clang++ android/graphics/GraphicBuffer.cpp [arm]
 [ 67% 69163/101844] //system/bt/stack:libbt-stack clang++ l2cap/l2c_fcr.cc [arm]
+[ 68% 69463/101844] //frameworks/opt/net/voip:voip-common aidl src/java/android/net/sip/ISipSession.aidl [common]
