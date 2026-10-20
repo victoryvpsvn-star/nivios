@@ -1,6 +1,6 @@
-cap nhat : 2026-10-20 08:14:18 UTC
-tien do  : [ 81% 82922/101844]
-dia      : 87G dung / 12G trong
+cap nhat : 2026-10-20 08:14:50 UTC
+tien do  : [ 81% 82986/101844]
+dia      : 87G dung / 11G trong
 -------------------------------------------
 [ 11% 11842/101844] //frameworks/rs:libRSDriver clang++ driver/rsdShaderCache.cpp
 [ 11% 12142/101844] //external/libavc:libavcdec clang common/ih264_mem_fns.c [arm]
