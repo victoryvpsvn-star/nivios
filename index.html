@@ -1,0 +1,16 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nivi build log</title>
+<body style="font:13px/1.4 monospace;background:#111;color:#ddd;margin:0;padding:12px">
+<b>Nivi build</b> &middot; <span id="st">dang tai...</span> &middot; <a href="#" id="rl" style="color:#8cf">tai lai ngay</a>
+<pre id="log" style="white-space:pre-wrap;word-break:break-all;margin-top:10px"></pre>
+<script>
+var REPO='victoryvpsvn-star/nivios';
+function tick(){
+  fetch('https://api.github.com/repos/'+REPO+'/contents/log.txt?ref=logs',{headers:{'Accept':'application/vnd.github.raw+json'},cache:'no-store'})
+    .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); })
+    .then(function(t){ document.getElementById('log').textContent=t; document.getElementById('st').textContent='da tai luc '+new Date().toLocaleTimeString()+' (tu dong moi 60s)'; })
+    .catch(function(e){ document.getElementById('st').textContent='loi: '+e.message+' - se thu lai'; });
+}
+document.getElementById('rl').onclick=function(e){ e.preventDefault(); tick(); };
+tick(); setInterval(tick,60000);
+</script>
