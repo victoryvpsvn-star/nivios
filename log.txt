@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 05:51:06 UTC
-tien do  : [ 62% 63621/101844]
+cap nhat : 2026-10-20 05:51:37 UTC
+tien do  : [ 62% 63948/101844]
 dia      : 62G dung / 37G trong
 -------------------------------------------
-TARGET_BUILD_VARIANT=userdebug
 TARGET_BUILD_TYPE=release
 TARGET_ARCH=arm64
 TARGET_ARCH_VARIANT=armv8-a
@@ -252,3 +251,4 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 61% 62931/101844] //external/perfetto:libtraced_shared clang++ external/perfetto/protos/perfetto/trace/ftrace/block_getrq.pbzero.cc
 [ 62% 63231/101844] //external/perfetto:libtraced_shared clang++ src/protozero/scattered_stream_writer.cc
 [ 62% 63531/101844] //external/perfetto:perfetto clang++ external/perfetto/protos/perfetto/trace/ftrace/sched_cpu_hotplug.pbzero.cc
+[ 62% 63831/101844] //external/perfetto:perfetto_src_tracing_ipc clang++ external/perfetto/protos/perfetto/trace/ftrace/mm_compaction_end.pbzero.cc
