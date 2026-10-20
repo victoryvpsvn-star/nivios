@@ -1,9 +1,7 @@
-cap nhat : 2026-10-20 05:00:48 UTC
-tien do  : [ 55% 56258/101844]
+cap nhat : 2026-10-20 05:01:20 UTC
+tien do  : [ 55% 56934/101844]
 dia      : 58G dung / 41G trong
 -------------------------------------------
-15G	.repo
-[3c] giai phong khoang 14925 MB
 /dev/mapper/buildvg-buildlv   98G   31G   68G  32% /build
 [4] Prop Nivi
 [4] Che do nhe: chi dexpreopt boot image + system_server (van bat dexpreopt, userdebug yeu cau)
@@ -252,3 +250,5 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 54% 55473/101844] //external/llvm/lib/Transforms/IPO:libLLVMipo clang++ SampleProfile.cpp
 [ 54% 55773/101844] //frameworks/compile/mclinker/lib/Object:libmcldObject clang++ ObjectLinker.cpp [linux_glibc]
 [ 55% 56073/101844] //frameworks/base/tools/streaming_proto:protoc-gen-javastream link protoc-gen-javastream [linux_glibc]
+[ 55% 56356/101844] //frameworks/rs:rsg-generator clang lex/frameworks/rs/spec.c [linux_glibc]
+[ 55% 56636/101844] Export includes file: out/soong/.intermediates/system/libhidl/transport/manager/1.0/android.hidl.manager@1.0_genc++_headers/gen/android/hidl/manager/1.0/IServiceManager.h -- out/target/product/generic_arm64_ab/obj/SHARED_LIBRARIES/android.hardware.biometrics.fingerprint@2.1.vendor_intermediates/export_includes
