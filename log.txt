@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 06:59:15 UTC
-tien do  : [ 66% 68005/101844]
+cap nhat : 2026-10-20 06:59:47 UTC
+tien do  : [ 66% 68021/101844]
 dia      : 71G dung / 28G trong
 -------------------------------------------
-HOST_CROSS_2ND_ARCH=x86_64
 HOST_BUILD_TYPE=release
 BUILD_ID=PI
 OUT_DIR=out
@@ -252,3 +251,4 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 65% 67063/101844] //art/runtime:libartd clang++ entrypoints/quick/quick_math_entrypoints.cc [arm]
 [ 66% 67363/101844] //art/runtime:libartd clang++ compiler_filter.cc [linux_glibc x86]
 [ 66% 67663/101844] //art/compiler:libartd-compiler clang++ optimizing/prepare_for_register_allocation.cc
+[ 66% 67963/101844] //art/compiler:libartd-compiler clang++ driver/compiler_driver.cc [linux_glibc x86]
