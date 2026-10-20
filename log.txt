@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 05:50:03 UTC
-tien do  : [ 61% 63141/101844]
+cap nhat : 2026-10-20 05:50:34 UTC
+tien do  : [ 62% 63289/101844]
 dia      : 62G dung / 37G trong
 -------------------------------------------
-PLATFORM_VERSION=9
 TARGET_PRODUCT=aosp_arm64_ab
 TARGET_BUILD_VARIANT=userdebug
 TARGET_BUILD_TYPE=release
@@ -252,3 +251,4 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 61% 62336/101844] //system/vold:libvold clang++ Ext4Crypt.cpp
     VrComposerClient& mVrClient;
 [ 61% 62931/101844] //external/perfetto:libtraced_shared clang++ external/perfetto/protos/perfetto/trace/ftrace/block_getrq.pbzero.cc
+[ 62% 63231/101844] //external/perfetto:libtraced_shared clang++ src/protozero/scattered_stream_writer.cc
