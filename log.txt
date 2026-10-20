@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 04:10:37 UTC
-tien do  : [ 24% 24616/101844]
+cap nhat : 2026-10-20 04:11:08 UTC
+tien do  : [ 24% 24724/101844]
 dia      : 48G dung / 51G trong
 -------------------------------------------
-Adding debian:Hellenic_Academic_and_Research_Institutions_ECC_RootCA_2015.pem
 Adding debian:QuoVadis_Root_CA_1_G3.pem
 Adding debian:Trustwave_Global_Certification_Authority.pem
 Adding debian:DigiCert_TLS_RSA4096_Root_G5.pem
@@ -252,3 +251,4 @@ OUT_DIR=out
 [ 23% 23792/101844] //libcore:libopenjdk clang EPollPort.c [linux_glibc x86]
 [ 23% 24092/101844] //external/libopus:libopus clang celt/mathops.c [arm]
 [ 23% 24392/101844] //external/pdfium:libpdfium clang++ fpdfsdk/fpdf_transformpage.cpp
+[ 24% 24692/101844] //external/pdfium:libpdfiumfpdfapi clang++ core/fpdfapi/cmaps/Japan1/90msp-RKSJ-H_2.cpp [arm]
