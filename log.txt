@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 05:31:11 UTC
-tien do  : [ 59% 60885/101844]
+cap nhat : 2026-10-20 05:31:42 UTC
+tien do  : [ 59% 60964/101844]
 dia      : 61G dung / 38G trong
 -------------------------------------------
-including device/google/marlin/vendorsetup.sh
 including device/google/muskie/vendorsetup.sh
 including device/google/taimen/vendorsetup.sh
 including device/linaro/hikey/vendorsetup.sh
@@ -252,3 +251,4 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 58% 59936/101844] //external/libchrome:libchrome clang++ base/metrics/field_trial.cc [arm]
 [ 59% 60236/101844] //external/libchrome:libchrome clang++ base/threading/worker_pool_posix.cc [linux_glibc]
 [ 59% 60536/101844] //frameworks/native/libs/gui:libgui clang++ bufferqueue/1.0/H2BGraphicBufferProducer.cpp [arm]
+[ 59% 60836/101844] //frameworks/base/libs/input:libinputservice clang++ SpriteController.cpp [arm]
