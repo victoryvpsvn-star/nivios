@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 06:14:10 UTC
-tien do  : [ 64% 65904/101844]
+cap nhat : 2026-10-20 06:14:41 UTC
+tien do  : [ 64% 65958/101844]
 dia      : 68G dung / 31G trong
 -------------------------------------------
-TARGET_2ND_CPU_VARIANT=generic
 HOST_ARCH=x86_64
 HOST_2ND_ARCH=x86
 HOST_OS=linux
@@ -252,3 +251,4 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 63% 64963/101844] //art/runtime:libart clang++ gc/space/dlmalloc_space.cc
 [ 64% 65263/101844] //art/runtime:libart clang++ jdwp/jdwp_socket.cc [arm]
 [ 64% 65563/101844] //art/runtime:libart clang++ native/java_lang_Class.cc [linux_glibc]
+[ 64% 65863/101844] //art/runtime:libart clang++ scoped_thread_state_change.cc [linux_glibc x86]
