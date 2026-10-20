@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 04:21:34 UTC
-tien do  : [ 26% 26994/101844]
+cap nhat : 2026-10-20 04:22:06 UTC
+tien do  : [ 26% 27093/101844]
 dia      : 49G dung / 50G trong
 -------------------------------------------
-Adding debian:AC_RAIZ_FNMT-RCM_SERVIDORES_SEGUROS.pem
 Adding debian:QuoVadis_Root_CA_2_G3.pem
 Adding debian:TWCA_Global_Root_CA.pem
 Adding debian:USERTrust_RSA_Certification_Authority.pem
@@ -252,3 +251,4 @@ OUT_DIR=out
 [ 25% 26171/101844] //external/selinux/libsepol:libsepol clang cil/src/cil_list.c [linux_glibc]
 [ 25% 26391/101844] //external/skia:libskia clang++ src/core/SkBBHFactory.cpp
 [ 26% 26691/101844] //external/skia:libskia clang++ src/gpu/GrSKSLPrettyPrint.cpp
+[ 26% 26991/101844] //external/skia:libskia clang++ src/shaders/gradients/SkTwoPointConicalGradient_gpu.cpp
