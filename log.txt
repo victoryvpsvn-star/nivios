@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 05:30:39 UTC
-tien do  : [ 59% 60814/101844]
+cap nhat : 2026-10-20 05:31:11 UTC
+tien do  : [ 59% 60885/101844]
 dia      : 61G dung / 38G trong
 -------------------------------------------
 including device/google/marlin/vendorsetup.sh
