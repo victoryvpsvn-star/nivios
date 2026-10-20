@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 04:26:17 UTC
-tien do  : [ 27% 27872/101844]
+cap nhat : 2026-10-20 04:26:48 UTC
+tien do  : [ 27% 27931/101844]
 dia      : 50G dung / 49G trong
 -------------------------------------------
-Adding debian:USERTrust_RSA_Certification_Authority.pem
 Adding debian:GlobalSign_ECC_Root_CA_-_R5.pem
 Adding debian:Entrust_Root_Certification_Authority_-_EC1.pem
 Adding debian:E-Tugra_Global_Root_CA_ECC_v3.pem
@@ -252,3 +251,4 @@ OUT_DIR=out
 [ 26% 26991/101844] //external/skia:libskia clang++ src/shaders/gradients/SkTwoPointConicalGradient_gpu.cpp
 [ 26% 27291/101844] //external/skia:libskia clang++ src/core/SkXfermodeInterpretation.cpp [arm]
 [ 27% 27591/101844] //external/skia:libskia clang++ src/image/SkSurface_Raster.cpp [arm]
+[ 27% 27891/101844] //external/sonivox/arm-wt-22k:libsonivox clang lib_src/eas_voicemgt.c [arm]
