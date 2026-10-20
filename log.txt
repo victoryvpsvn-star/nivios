@@ -1,6 +1,6 @@
-cap nhat : 2026-10-20 03:47:38 UTC
-tien do  : [ 10% 10783/101844]
-dia      : 38G dung / 61G trong
+cap nhat : 2026-10-20 03:48:09 UTC
+tien do  : [ 10% 10833/101844]
+dia      : 39G dung / 60G trong
 -------------------------------------------
 Adding debian:T-TeleSec_GlobalRoot_Class_3.pem
 Adding debian:emSign_Root_CA_-_G1.pem
