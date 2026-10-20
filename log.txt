@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 03:57:33 UTC
-tien do  : [ 18% 18432/101844]
+cap nhat : 2026-10-20 03:58:05 UTC
+tien do  : [ 18% 18594/101844]
 dia      : 40G dung / 59G trong
 -------------------------------------------
 Adding debian:GlobalSign_Root_CA_-_R3.pem
