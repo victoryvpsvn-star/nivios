@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 08:30:05 UTC
-tien do  : [ 82% 83850/101844]
-dia      : 89G dung / 9.5G trong
+cap nhat : 2026-10-20 08:30:36 UTC
+tien do  : [ 82% 83875/101844]
+dia      : 89G dung / 9.3G trong
 -------------------------------------------
-[ 13% 13642/101844] //bionic/libc:libc_gdtoa header-abi-dumper upstream-openbsd/lib/libc/gdtoa/smisc.c
 [ 13% 13942/101844] //bionic/libc:libc_nopthread clang stdio/parsefloat.c [arm]
 [ 13% 14242/101844] //bionic/libc:libc_openbsd_ndk header-abi-dumper upstream-openbsd/lib/libc/locale/wcstoul.c [arm]
 [ 14% 14542/101844] //bionic/libc:libc_syscalls clang arch-arm64/syscalls/__waitid.S
@@ -252,3 +251,4 @@ Warning in out/target/common/obj/APPS/QuickSearchBox_intermediates/dex/d8_input.
 [ 81% 83477/101844] Copying: out/target/common/obj/JAVA_LIBRARIES/com.android.media.remotedisplay_intermediates/classes.dex
   Copying resources from program jar [/build/src/out/target/common/obj/APPS/ExternalStorageProvider_intermediates/classes.jar]
 Reading program jar [/build/src/out/target/common/obj/APPS/StorageManager_intermediates/classes.jar]
+[ 82% 83838/101844] Compiling SDK Stubs: out/target/common/obj/JAVA_LIBRARIES/android_stubs_current_intermediates/classes.jar
