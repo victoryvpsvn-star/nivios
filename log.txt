@@ -1,6 +1,6 @@
-cap nhat : 2026-10-20 04:13:45 UTC
-tien do  : [ 24% 25189/101844]
-dia      : 48G dung / 50G trong
+cap nhat : 2026-10-20 04:14:16 UTC
+tien do  : [ 24% 25310/101844]
+dia      : 49G dung / 50G trong
 -------------------------------------------
 Adding debian:Trustwave_Global_Certification_Authority.pem
 Adding debian:DigiCert_TLS_RSA4096_Root_G5.pem
