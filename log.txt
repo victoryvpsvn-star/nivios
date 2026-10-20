@@ -1,9 +1,7 @@
-cap nhat : 2026-10-20 05:18:06 UTC
-tien do  : [ 57% 58336/101844]
+cap nhat : 2026-10-20 05:18:37 UTC
+tien do  : [ 57% 59041/101844]
 dia      : 60G dung / 39G trong
 -------------------------------------------
-including device/generic/mini-emulator-arm64/vendorsetup.sh
-including device/generic/mini-emulator-armv7-a-neon/vendorsetup.sh
 including device/generic/mini-emulator-mips64/vendorsetup.sh
 including device/generic/mini-emulator-mips/vendorsetup.sh
 including device/generic/mini-emulator-x86_64/vendorsetup.sh
@@ -252,3 +250,5 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 56% 57536/101844] //hardware/interfaces/drm/1.0:android.hardware.drm@1.0 clang++ android/hardware/drm/1.0/DrmFactoryAll.cpp
 [ 56% 57836/101844] //system/libhidl/transport/memory/1.0/default:android.hidl.memory@1.0-impl clang++ AshmemMapper.cpp
 [ 57% 58136/101844] //frameworks/base/native/android:libandroid clang++ input.cpp [arm]
+[ 57% 58436/101844] //bionic/libc:libc_bionic_ndk header-abi-dumper bionic/error.cpp
+[ 57% 58736/101844] //bionic/libc:libc_bionic_ndk clang++ bionic/clock.cpp [arm]
