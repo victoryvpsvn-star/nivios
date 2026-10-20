@@ -143,6 +143,9 @@ jobs:
           # ccache luu o /build/ccache (duoc cache giua cac lan chay)
           export USE_CCACHE=1 CCACHE_EXEC=/usr/bin/ccache CCACHE_DIR=/build/ccache
           export CCACHE_COMPRESS=1 CCACHE_MAXSIZE=7G
+          # repo sync dat lai mtime cua compiler va file nguon moi lan chay -> ccache mac dinh miss 100%. Hash theo noi dung:
+          export CCACHE_COMPILERCHECK=content CCACHE_BASEDIR=/build/src
+          export CCACHE_SLOPPINESS=include_file_mtime,include_file_ctime,time_macros,file_macro,pch_defines
           mkdir -p "$CCACHE_DIR"
           ccache -M 7G || true
           ccache -s | head -5 || true
@@ -229,6 +232,8 @@ jobs:
           if [ ! -f "out/target/product/$PRODUCT_DIR/system.img" ]; then
             echo "================ LOI DAU TIEN (FAILED) ================"
             grep -n -m1 -B1 -A40 'FAILED:' /build/make_full.log 2>/dev/null | cut -c1-600 || true
+            echo "---- KHOI FAILED cua Dialer (day du, khong cat) ----"
+            awk '/FAILED: .*Dialer_intermediates/{f=1} f{print} /^\[ *[0-9]+%/{if(f&&++n>1)exit}' /build/make_full.log 2>/dev/null | cut -c1-12000 | head -c 20000
             echo "================ HET LOI DAU TIEN ================"
             echo "[tien do cuoi] $(grep -o '\[ *[0-9]*% [0-9]*/[0-9]*\]' /build/make_full.log 2>/dev/null | tail -1)"
             echo "[thoi gian chay] $(( ($(date +%s) - T0) / 60 )) phut (gioi han 330)"
@@ -262,15 +267,19 @@ jobs:
           # Het gio thi tu dung truoc khi GitHub cat (de con thoi gian luu cache + upload)
           # Gioi han tai nguyen container de runner khong bi "bo doi" (mat ket noi voi GitHub)
           JOBS_N=$(( $(nproc) > 3 ? $(nproc) - 1 : $(nproc) ))
-          docker run --rm \
+            # patchoat/dex2oat (ART cua Android 9) can dia chi mmap co dinh -> tat ASLR (host dung chung kernel voi container)
+          sudo sysctl -w kernel.randomize_va_space=0 || true
+          docker run --rm --security-opt seccomp=unconfined \
             --memory=14g --memory-swap=18g --cpus="$JOBS_N" \
             -v /build:/build \
             -e JOBS="$JOBS_N" \
             -e NO_DEXPREOPT="${{ inputs.disable_dexpreopt }}" \
             -e FREE_REPO="${{ inputs.free_repo_dir }}" \
             ubuntu:18.04 \
-            bash -lc "timeout 330m bash /build/build.sh" 2>&1 | tee /build/ci_last.log || true
+            bash -lc "timeout 330m setarch x86_64 -R bash /build/build.sh" 2>&1 | tee /build/ci_last.log || true
           kill "$HB" 2>/dev/null || true
+          echo "---- host dmesg: OOM kill (neu co) ----"
+          sudo dmesg 2>/dev/null | grep -i -E 'out of memory|killed process|oom-kill' | tail -n 15 | tee -a /build/ci_last.log || true
 
       - name: Ket qua
         if: always()
