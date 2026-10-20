@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 04:22:37 UTC
-tien do  : [ 26% 27208/101844]
+cap nhat : 2026-10-20 04:23:08 UTC
+tien do  : [ 26% 27315/101844]
 dia      : 49G dung / 50G trong
 -------------------------------------------
 Adding debian:QuoVadis_Root_CA_2_G3.pem
