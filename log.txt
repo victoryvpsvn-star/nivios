@@ -1,6 +1,6 @@
-cap nhat : 2026-10-20 05:16:32 UTC
-tien do  : [ 57% 58223/101844]
-dia      : 59G dung / 39G trong
+cap nhat : 2026-10-20 05:17:03 UTC
+tien do  : [ 57% 58249/101844]
+dia      : 60G dung / 39G trong
 -------------------------------------------
 including device/generic/mini-emulator-arm64/vendorsetup.sh
 including device/generic/mini-emulator-armv7-a-neon/vendorsetup.sh
