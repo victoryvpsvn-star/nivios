@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 04:38:49 UTC
-tien do  : [ 30% 31467/101844]
-dia      : 52G dung / 47G trong
+cap nhat : 2026-10-20 04:39:20 UTC
+tien do  : [ 30% 31506/101844]
+dia      : 52G dung / 46G trong
 -------------------------------------------
-Adding debian:Microsoft_ECC_Root_Certificate_Authority_2017.pem
 Adding debian:Amazon_Root_CA_3.pem
 Adding debian:HiPKI_Root_CA_-_G1.pem
 Adding debian:NAVER_Global_Root_Certification_Authority.pem
@@ -252,3 +251,4 @@ OUT_DIR=out
 [ 30% 30578/101844] //external/libxml2:libxml2 clang xmlreader.c [linux_glibc]
 [ 30% 30878/101844] Copy: out/host/linux-x86/obj/lib/libz.so
 [ 30% 31172/101844] //frameworks/base:libplatformprotos protoc core/proto/android/net/network.proto
+[ 30% 31470/101844] //frameworks/base:libplatformprotos clang++ proto/frameworks/base/core/proto/android/content/package_item_info.pb.cc [linux_glibc]
