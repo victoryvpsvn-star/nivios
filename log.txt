@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 04:16:21 UTC
-tien do  : [ 25% 25765/101844]
+cap nhat : 2026-10-20 04:16:53 UTC
+tien do  : [ 25% 26061/101844]
 dia      : 49G dung / 50G trong
 -------------------------------------------
-Adding debian:AC_RAIZ_FNMT-RCM.pem
 Adding debian:E-Tugra_Certification_Authority.pem
 Adding debian:DigiCert_Assured_ID_Root_G3.pem
 Adding debian:DigiCert_Global_Root_CA.pem
@@ -252,3 +251,4 @@ OUT_DIR=out
 [ 24% 24992/101844] //external/pdfium:libpdfiumfxcodec clang++ core/fxcodec/codec/ccodec_scanlinedecoder.cpp [arm]
 [ 24% 25292/101844] //external/pdfium:libpdfiumpwl clang++ fpdfsdk/pwl/cpwl_special_button.cpp [arm]
 [ 25% 25585/101844] //external/protobuf:libprotobuf-cpp-full clang++ src/google/protobuf/timestamp.pb.cc [linux_glibc]
+[ 25% 25871/101844] //bionic/libc/seccomp:libseccomp_policy clang++ x86_64_global_policy.cpp [arm]
