@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 04:14:47 UTC
-tien do  : [ 25% 25492/101844]
+cap nhat : 2026-10-20 04:15:19 UTC
+tien do  : [ 25% 25570/101844]
 dia      : 49G dung / 50G trong
 -------------------------------------------
 Adding debian:DigiCert_TLS_RSA4096_Root_G5.pem
