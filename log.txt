@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 03:54:56 UTC
-tien do  : [ 16% 16839/101844]
+cap nhat : 2026-10-20 03:55:28 UTC
+tien do  : [ 16% 17022/101844]
 dia      : 40G dung / 59G trong
 -------------------------------------------
-Adding debian:Amazon_Root_CA_1.pem
 Adding debian:IdenTrust_Public_Sector_Root_CA_1.pem
 Adding debian:Trustwave_Global_ECC_P256_Certification_Authority.pem
 Adding debian:TunTrust_Root_CA.pem
@@ -252,3 +251,4 @@ OUT_DIR=out
 [ 15% 16042/101844] //external/compiler-rt:libcompiler_rt clang lib/builtins/truncsfhf2.c [linux_glibc x86]
 [ 16% 16342/101844] //external/boringssl:libcrypto clang src/crypto/x509v3/pcy_lib.c [linux_glibc]
 [ 16% 16642/101844] //system/core/libcutils:libcutils clang++ threads.cpp
+[ 16% 16942/101844] //external/dng_sdk:libdng_sdk clang++ source/dng_jpeg_image.cpp [arm]
