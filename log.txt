@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 05:17:34 UTC
-tien do  : [ 57% 58273/101844]
+cap nhat : 2026-10-20 05:18:06 UTC
+tien do  : [ 57% 58336/101844]
 dia      : 60G dung / 39G trong
 -------------------------------------------
 including device/generic/mini-emulator-arm64/vendorsetup.sh
