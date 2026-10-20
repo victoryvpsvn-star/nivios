@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 04:18:27 UTC
-tien do  : [ 26% 26556/101844]
+cap nhat : 2026-10-20 04:18:58 UTC
+tien do  : [ 26% 26647/101844]
 dia      : 49G dung / 50G trong
 -------------------------------------------
 Adding debian:DigiCert_Global_Root_CA.pem
