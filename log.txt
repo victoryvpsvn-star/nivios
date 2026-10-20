@@ -1,15 +1,7 @@
-cap nhat : 2026-10-20 03:25:12 UTC
-tien do  : [  0% 920/101844]
+cap nhat : 2026-10-20 03:25:43 UTC
+tien do  : [  3% 3251/101844]
 dia      : 33G dung / 66G trong
 -------------------------------------------
-Adding debian:GTS_Root_R1.pem
-Adding debian:emSign_Root_CA_-_C1.pem
-Adding debian:vTrus_ECC_Root_CA.pem
-Adding debian:Entrust_Root_Certification_Authority_-_G2.pem
-Adding debian:OISTE_WISeKey_Global_Root_GC_CA.pem
-Adding debian:Comodo_AAA_Services_root.pem
-Adding debian:ACCVRAIZ1.pem
-Adding debian:Certigna.pem
 Adding debian:Buypass_Class_3_Root_CA.pem
 Adding debian:ISRG_Root_X1.pem
 Adding debian:Trustwave_Global_ECC_P384_Certification_Authority.pem
@@ -252,3 +244,11 @@ OUT_DIR=out
 [  0% 230/101844] Export includes file:  -- out/host/linux-x86/obj/EXECUTABLES/fastboot_intermediates/export_includes
   @libcore.util.NonNull (nl=false) @ {GENERIC_ARRAY_LOCATION=GenericArrayLocationCriterion at outermost type, RETURN_TYPE=ReturnTypeCriterion for method: append(C)Ljava/io/Writer;, IN_METHOD=in method 'append(C)Ljava/io/Writer;', IN_CLASS=In class 'java.io.PrintWriter' (exactly)}
 [  0% 801/101844] Check module type: out/target/product/generic_arm64_ab/obj_arm/SHARED_LIBRARIES/libadbconnectiond_intermediates/link_type
+[  1% 1101/101844] target  C: toybox <= external/toybox/toys/pending/dd.c
+[  1% 1401/101844] Check module type: out/target/product/generic_arm64_ab/obj/SHARED_LIBRARIES/libdumpstateutil.vendor_intermediates/link_type
+[  1% 1701/101844] Check module type: out/target/product/generic_arm64_ab/obj/SHARED_LIBRARIES/libstagefright_foundation_intermediates/link_type
+[  1% 2001/101844] Check module type: out/target/product/generic_arm64_ab/obj_arm/SHARED_LIBRARIES/android.hardware.thermal@1.0.vendor_intermediates/link_type
+[  2% 2301/101844] Export includes file:  -- out/target/product/generic_arm64_ab/obj_arm/SHARED_LIBRARIES/libharfbuzz_ng_intermediates/export_includes
+[  2% 2601/101844] Notice file: frameworks/av/media/libstagefright/codecs/m4v_h263/enc/NOTICE -- out/target/product/generic_arm64_ab/obj/NOTICE_FILES/src/system/lib/vndk-28/libstagefright_soft_mpeg4enc.so.txt
+[  2% 2901/101844] Check module type: out/target/product/generic_arm64_ab/obj_arm/SHARED_LIBRARIES/android.hardware.soundtrigger@2.0.vndk.27.arm64.vendor_intermediates/link_type
+[  3% 3201/101844] Export includes file:  -- out/target/product/generic_arm64_ab/obj/STATIC_LIBRARIES/libhidl-gen-utils_intermediates/export_includes
