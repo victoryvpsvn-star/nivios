@@ -1,6 +1,6 @@
-cap nhat : 2026-10-20 07:37:03 UTC
-tien do  : [ 70% 71327/101844]
-dia      : 81G dung / 18G trong
+cap nhat : 2026-10-20 07:37:34 UTC
+tien do  : [ 70% 71342/101844]
+dia      : 81G dung / 17G trong
 -------------------------------------------
 [ 94% 1308/1379] glob system/media/private/camera/include
 [  0% 230/101844] Export includes file:  -- out/host/linux-x86/obj/EXECUTABLES/fastboot_intermediates/export_includes
