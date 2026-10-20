@@ -1,6 +1,6 @@
-cap nhat : 2026-10-20 03:34:35 UTC
-tien do  : [  4% 4240/101844]
-dia      : 34G dung / 65G trong
+cap nhat : 2026-10-20 03:35:06 UTC
+tien do  : [  4% 4352/101844]
+dia      : 35G dung / 64G trong
 -------------------------------------------
 Adding debian:SwissSign_Silver_CA_-_G2.pem
 Adding debian:SecureTrust_CA.pem
