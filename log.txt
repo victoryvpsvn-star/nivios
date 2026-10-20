@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 05:20:11 UTC
-tien do  : [ 58% 59292/101844]
+cap nhat : 2026-10-20 05:20:43 UTC
+tien do  : [ 58% 59364/101844]
 dia      : 60G dung / 39G trong
 -------------------------------------------
 including device/generic/mini-emulator-mips/vendorsetup.sh
