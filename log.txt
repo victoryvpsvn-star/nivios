@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 05:55:49 UTC
-tien do  : [ 63% 64985/101844]
+cap nhat : 2026-10-20 05:56:20 UTC
+tien do  : [ 63% 65009/101844]
 dia      : 66G dung / 33G trong
 -------------------------------------------
-TARGET_CPU_VARIANT=generic
 TARGET_2ND_ARCH=arm
 TARGET_2ND_ARCH_VARIANT=armv8-a
 TARGET_2ND_CPU_VARIANT=generic
@@ -252,3 +251,4 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 62% 64117/101844] //system/core/libsparse:simg2img install simg2img [linux_glibc]
 [ 63% 64409/101844] //prebuilts/sdk/current/extras/material-design:android-support-design-expandable overlay resource file list [common]
 [ 63% 64703/101844] target R.java/Manifest.java: BookmarkProvider (out/target/common/obj/APPS/BookmarkProvider_intermediates/src/R.stamp)
+[ 63% 64963/101844] //art/runtime:libart clang++ gc/space/dlmalloc_space.cc
