@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 07:29:10 UTC
-tien do  : [ 69% 71030/101844]
+cap nhat : 2026-10-20 07:29:42 UTC
+tien do  : [ 69% 71046/101844]
 dia      : 81G dung / 18G trong
 -------------------------------------------
 [ 73% 1008/1379] glob prebuilts/abi-dumps/vndk/28/64/arm_armv8-a/source-based/android.hardware.graphics.bufferqueue@1.0.so.lsdump.gz
