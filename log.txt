@@ -1,6 +1,6 @@
-cap nhat : 2026-10-20 07:55:55 UTC
-tien do  : [ 74% 76381/101844]
-dia      : 84G dung / 14G trong
+cap nhat : 2026-10-20 07:56:27 UTC
+tien do  : [ 75% 76641/101844]
+dia      : 85G dung / 14G trong
 -------------------------------------------
 [  4% 5000/101844] target  C: libext <= out/target/product/generic_arm64_ab/obj/STATIC_LIBRARIES/libext_intermediates/libxt_cluster.c
 [  5% 5300/101844] Check module type: out/target/product/generic_arm64_ab/obj_arm/SHARED_LIBRARIES/libresourcemanagerservice_intermediates/link_type
