@@ -1,6 +1,6 @@
-cap nhat : 2026-10-20 04:30:27 UTC
-tien do  : [ 29% 29559/101844]
-dia      : 50G dung / 48G trong
+cap nhat : 2026-10-20 04:30:59 UTC
+tien do  : [ 29% 29611/101844]
+dia      : 51G dung / 48G trong
 -------------------------------------------
 Adding debian:ISRG_Root_X2.pem
 Adding debian:D-TRUST_BR_Root_CA_1_2020.pem
