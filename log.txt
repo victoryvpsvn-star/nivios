@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 03:48:09 UTC
-tien do  : [ 10% 10833/101844]
+cap nhat : 2026-10-20 03:48:41 UTC
+tien do  : [ 10% 11199/101844]
 dia      : 39G dung / 60G trong
 -------------------------------------------
-Adding debian:T-TeleSec_GlobalRoot_Class_3.pem
 Adding debian:emSign_Root_CA_-_G1.pem
 Adding debian:Hongkong_Post_Root_CA_3.pem
 Adding debian:Certum_EC-384_CA.pem
@@ -252,3 +251,4 @@ OUT_DIR=out
 [  9% 10044/101844] //prebuilts/sdk/current/support:android-support-cursoradapter-nodeps unzip AAR [common]
 [ 10% 10344/101844] //hardware/interfaces/wifi/1.0:android.hardware.wifi@1.0 gunzipandroid.hardware.wifi@1.0.so_ref.lsdump [arm]
 [ 10% 10642/101844] //external/e2fsprogs/e2fsck:e2fsck clang problem.c
+[ 10% 10942/101844] //external/neven:libFFTEm clang Embedded/common/src/b_BasicEm/Memory.c [arm]
