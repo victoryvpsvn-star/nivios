@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 04:36:43 UTC
-tien do  : [ 30% 31010/101844]
+cap nhat : 2026-10-20 04:37:14 UTC
+tien do  : [ 30% 31071/101844]
 dia      : 52G dung / 47G trong
 -------------------------------------------
 Adding debian:CFCA_EV_ROOT.pem
