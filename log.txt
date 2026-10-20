@@ -1,28 +1,7 @@
-cap nhat : 2026-10-20 04:39:51 UTC
-tien do  : [ 31% 31600/101844]
+cap nhat : 2026-10-20 04:40:22 UTC
+tien do  : [ 36% 37305/101844]
 dia      : 53G dung / 46G trong
 -------------------------------------------
-Adding debian:Amazon_Root_CA_3.pem
-Adding debian:HiPKI_Root_CA_-_G1.pem
-Adding debian:NAVER_Global_Root_Certification_Authority.pem
-Adding debian:DigiCert_TLS_ECC_P384_Root_G5.pem
-Adding debian:GlobalSign_Root_R46.pem
-Adding debian:Certum_Trusted_Root_CA.pem
-Adding debian:Secure_Global_CA.pem
-Adding debian:Autoridad_de_Certificacion_Firmaprofesional_CIF_A62634068_2.pem
-Adding debian:Certum_Trusted_Network_CA.pem
-Adding debian:QuoVadis_Root_CA_2.pem
-Adding debian:Baltimore_CyberTrust_Root.pem
-done.
-Setting up libgail18:amd64 (2.24.32-1ubuntu1) ...
-Setting up libgail-common:amd64 (2.24.32-1ubuntu1) ...
-Setting up humanity-icon-theme (0.6.15) ...
-Setting up libgtk2.0-bin (2.24.32-1ubuntu1) ...
-Setting up ubuntu-mono (16.10+18.04.20181005-0ubuntu1) ...
-Processing triggers for libc-bin (2.27-3ubuntu1.6) ...
-Processing triggers for ca-certificates (20230311ubuntu0.18.04.1) ...
-Updating certificates in /etc/ssl/certs...
-0 added, 0 removed; done.
 Running hooks in /etc/ca-certificates/update.d...
 
 done.
@@ -252,3 +231,24 @@ OUT_DIR=out
 [ 30% 30878/101844] Copy: out/host/linux-x86/obj/lib/libz.so
 [ 30% 31172/101844] //frameworks/base:libplatformprotos protoc core/proto/android/net/network.proto
 [ 30% 31470/101844] //frameworks/base:libplatformprotos clang++ proto/frameworks/base/core/proto/android/content/package_item_info.pb.cc [linux_glibc]
+[ 31% 31770/101844] AAPT2 compile out/target/common/obj/APPS/LatinIME_intermediates/flat-res/packages/inputmethods/LatinIME/java/res/drawable-mdpi_sym_keyboard_voice_lxx_light.png.flat <- packages/inputmethods/LatinIME/java/res/drawable-mdpi/sym_keyboard_voice_lxx_light.png
+[ 31% 32070/101844] AAPT2 compile out/target/common/obj/APPS/Bluetooth_intermediates/flat-res/packages/apps/Bluetooth/res/values-ka_strings_pbap.arsc.flat <- packages/apps/Bluetooth/res/values-ka/strings_pbap.xml
+[ 31% 32370/101844] AAPT2 compile out/target/common/obj/APPS/messaging_intermediates/flat-res/packages/apps/Messaging/res/drawable-xhdpi_ic_ime_light.png.flat <- packages/apps/Messaging/res/drawable-xhdpi/ic_ime_light.png
+[ 32% 32670/101844] AAPT2 compile out/target/common/obj/JAVA_LIBRARIES/libchips_intermediates/flat-res/res/frameworks/opt/chips/res/values-es_strings.arsc.flat <- frameworks/opt/chips/res/values-es/strings.xml
+[ 32% 32970/101844] AAPT2 compile out/target/common/obj/APPS/Camera2_intermediates/flat-res/packages/apps/Camera2/res/drawable-hdpi_ic_camera_blanket.png.flat <- packages/apps/Camera2/res/drawable-hdpi/ic_camera_blanket.png
+[ 32% 33270/101844] AAPT2 compile out/target/common/obj/APPS/Camera2_intermediates/flat-res/packages/apps/Camera2/res/drawable-land-hdpi_switcher_bg.9.png.flat <- packages/apps/Camera2/res/drawable-land-hdpi/switcher_bg.9.png
+[ 32% 33570/101844] AAPT2 compile out/target/common/obj/APPS/Camera2_intermediates/flat-res/packages/apps/Camera2/res/drawable-sw600dp-mdpi_btn_shutter_video_default.png.flat <- packages/apps/Camera2/res/drawable-sw600dp-mdpi/btn_shutter_video_default.png
+[ 33% 33870/101844] AAPT2 compile out/target/common/obj/APPS/Camera2_intermediates/flat-res/packages/apps/Camera2/res/drawable-xxhdpi_aspect_ratio_16x9_selected.jpg.flat <- packages/apps/Camera2/res/drawable-xxhdpi/aspect_ratio_16x9_selected.jpg
+[ 33% 34170/101844] AAPT2 compile out/target/common/obj/APPS/Camera2_intermediates/flat-res/packages/apps/Camera2/res/drawable_pano_direction_right_indicator.xml.flat <- packages/apps/Camera2/res/drawable/pano_direction_right_indicator.xml
+[ 33% 34470/101844] AAPT2 compile out/target/common/obj/APPS/DeskClock_intermediates/flat-res/packages/apps/DeskClock/res/drawable-mdpi_stat_notify_stopwatch.png.flat <- packages/apps/DeskClock/res/drawable-mdpi/stat_notify_stopwatch.png
+packages/apps/DeskClock/res/values-en-rGB/strings.xml:242: warn: multiple substitutions specified in non-positional format; did you mean to add the formatted="false" attribute?.
+[ 34% 34848/101844] AAPT2 compile out/target/common/obj/APPS/DeskClock_intermediates/flat-res/packages/apps/DeskClock/res/values-tr_strings.arsc.flat <- packages/apps/DeskClock/res/values-tr/strings.xml
+[ 34% 35118/101844] AAPT2 compile out/target/common/obj/APPS/Email_intermediates/flat-res/packages/apps/UnifiedEmail/res/drawable-ldrtl-xxxhdpi_ic_vertical_shadow_start_4dp.9.png.flat <- packages/apps/UnifiedEmail/res/drawable-ldrtl-xxxhdpi/ic_vertical_shadow_start_4dp.9.png
+[ 34% 35418/101844] AAPT2 compile out/target/common/obj/APPS/Email_intermediates/flat-res/packages/apps/UnifiedEmail/res/drawable-xxhdpi_ic_drawer_trash_24dp.png.flat <- packages/apps/UnifiedEmail/res/drawable-xxhdpi/ic_drawer_trash_24dp.png
+[ 35% 35698/101844] AAPT2 compile out/target/common/obj/APPS/Email_intermediates/flat-res/packages/apps/UnifiedEmail/res/values-el_strings.arsc.flat <- packages/apps/UnifiedEmail/res/values-el/strings.xml
+[ 35% 35868/101844] AAPT2 compile out/target/common/obj/APPS/Email_intermediates/flat-res/packages/apps/UnifiedEmail/res/values_ids.arsc.flat <- packages/apps/UnifiedEmail/res/values/ids.xml
+frameworks/opt/photoviewer/res/values-in/strings.xml:24: warn: multiple substitutions specified in non-positional format; did you mean to add the formatted="false" attribute?.
+[ 35% 36294/101844] AAPT2 compile out/target/common/obj/APPS/ExactCalculator_intermediates/flat-res/packages/apps/ExactCalculator/res/values-w375dp-h275dp_dimens.arsc.flat <- packages/apps/ExactCalculator/res/values-w375dp-h275dp/dimens.xml
+[ 35% 36594/101844] AAPT2 compile out/target/common/obj/APPS/Gallery2_intermediates/flat-res/packages/apps/Gallery2/res/drawable-mdpi_ic_exposure_0.png.flat <- packages/apps/Gallery2/res/drawable-mdpi/ic_exposure_0.png
+[ 36% 36894/101844] AAPT2 compile out/target/common/obj/APPS/Gallery2_intermediates/flat-res/packages/apps/Gallery2/res/drawable-xhdpi_ic_wb_fluorescent.png.flat <- packages/apps/Gallery2/res/drawable-xhdpi/ic_wb_fluorescent.png
+[ 36% 37194/101844] AAPT2 compile out/target/common/obj/APPS/Gallery2_intermediates/flat-res/packages/apps/Gallery2/res/values-fr-rCA_filtershow_strings.arsc.flat <- packages/apps/Gallery2/res/values-fr-rCA/filtershow_strings.xml
