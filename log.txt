@@ -1,6 +1,6 @@
-cap nhat : 2026-10-20 08:06:57 UTC
-tien do  : [ 79% 81389/101844]
-dia      : 85G dung / 13G trong
+cap nhat : 2026-10-20 08:07:28 UTC
+tien do  : [ 80% 81681/101844]
+dia      : 86G dung / 13G trong
 -------------------------------------------
 [  9% 10044/101844] //prebuilts/sdk/current/support:android-support-cursoradapter-nodeps unzip AAR [common]
 [ 10% 10344/101844] //hardware/interfaces/wifi/1.0:android.hardware.wifi@1.0 gunzipandroid.hardware.wifi@1.0.so_ref.lsdump [arm]
