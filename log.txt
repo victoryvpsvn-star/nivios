@@ -1,6 +1,6 @@
-cap nhat : 2026-10-20 03:42:24 UTC
-tien do  : [  7% 7464/101844]
-dia      : 36G dung / 62G trong
+cap nhat : 2026-10-20 03:42:55 UTC
+tien do  : [  7% 7488/101844]
+dia      : 37G dung / 62G trong
 -------------------------------------------
 Adding debian:certSIGN_ROOT_CA.pem
 Adding debian:DigiCert_Trusted_Root_G4.pem
