@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 03:57:02 UTC
-tien do  : [ 17% 18325/101844]
+cap nhat : 2026-10-20 03:57:33 UTC
+tien do  : [ 18% 18432/101844]
 dia      : 40G dung / 59G trong
 -------------------------------------------
-Adding debian:Certainly_Root_E1.pem
 Adding debian:GlobalSign_Root_CA_-_R3.pem
 Adding debian:Certigna_Root_CA.pem
 Adding debian:HARICA_TLS_RSA_Root_CA_2021.pem
@@ -252,3 +251,4 @@ OUT_DIR=out
 [ 17% 17492/101844] //external/e2fsprogs/lib/ext2fs:libext2fs clang link.c [linux_glibc]
 [ 17% 17792/101844] //external/fdlibm:libfdlibm clang k_cos.c [linux_glibc x86]
 [ 17% 18092/101844] //system/tools/aidl:aidl link aidl [linux_glibc]
+[ 18% 18392/101844] //system/libhwbinder:libhwbinder gunziplibhwbinder.so_ref.lsdump
