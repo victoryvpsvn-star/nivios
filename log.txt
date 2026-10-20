@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 05:14:26 UTC
-tien do  : [ 56% 57942/101844]
+cap nhat : 2026-10-20 05:14:57 UTC
+tien do  : [ 56% 58008/101844]
 dia      : 59G dung / 40G trong
 -------------------------------------------
 including device/generic/car/vendorsetup.sh
