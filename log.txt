@@ -1,10 +1,7 @@
-cap nhat : 2026-10-20 03:24:41 UTC
-tien do  : [  0% 141/101844]
-dia      : 32G dung / 66G trong
+cap nhat : 2026-10-20 03:25:12 UTC
+tien do  : [  0% 920/101844]
+dia      : 33G dung / 66G trong
 -------------------------------------------
-Adding debian:USERTrust_ECC_Certification_Authority.pem
-Adding debian:COMODO_ECC_Certification_Authority.pem
-Adding debian:D-TRUST_Root_Class_3_CA_2_EV_2009.pem
 Adding debian:GTS_Root_R1.pem
 Adding debian:emSign_Root_CA_-_C1.pem
 Adding debian:vTrus_ECC_Root_CA.pem
@@ -252,3 +249,6 @@ OUT_DIR=out
 [ 51% 708/1379] glob hardware/interfaces/usb/1.0/src
 [ 73% 1008/1379] glob prebuilts/abi-dumps/vndk/28/64/arm_armv8-a/source-based/android.hardware.graphics.bufferqueue@1.0.so.lsdump.gz
 [ 94% 1308/1379] glob system/media/private/camera/include
+[  0% 230/101844] Export includes file:  -- out/host/linux-x86/obj/EXECUTABLES/fastboot_intermediates/export_includes
+  @libcore.util.NonNull (nl=false) @ {GENERIC_ARRAY_LOCATION=GenericArrayLocationCriterion at outermost type, RETURN_TYPE=ReturnTypeCriterion for method: append(C)Ljava/io/Writer;, IN_METHOD=in method 'append(C)Ljava/io/Writer;', IN_CLASS=In class 'java.io.PrintWriter' (exactly)}
+[  0% 801/101844] Check module type: out/target/product/generic_arm64_ab/obj_arm/SHARED_LIBRARIES/libadbconnectiond_intermediates/link_type
