@@ -1,6 +1,6 @@
-cap nhat : 2026-10-20 08:37:58 UTC
-tien do  : [ 82% 84067/101844]
-dia      : 91G dung / 7.8G trong
+cap nhat : 2026-10-20 08:38:30 UTC
+tien do  : [ 82% 84084/101844]
+dia      : 91G dung / 7.6G trong
 -------------------------------------------
 [ 23% 24392/101844] //external/pdfium:libpdfium clang++ fpdfsdk/fpdf_transformpage.cpp
 [ 24% 24692/101844] //external/pdfium:libpdfiumfpdfapi clang++ core/fpdfapi/cmaps/Japan1/90msp-RKSJ-H_2.cpp [arm]
