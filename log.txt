@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 07:46:29 UTC
-tien do  : [ 70% 72224/101844]
+cap nhat : 2026-10-20 07:47:01 UTC
+tien do  : [ 70% 72308/101844]
 dia      : 83G dung / 16G trong
 -------------------------------------------
-  @libcore.util.NonNull (nl=false) @ {GENERIC_ARRAY_LOCATION=GenericArrayLocationCriterion at outermost type, RETURN_TYPE=ReturnTypeCriterion for method: append(C)Ljava/io/Writer;, IN_METHOD=in method 'append(C)Ljava/io/Writer;', IN_CLASS=In class 'java.io.PrintWriter' (exactly)}
 [  0% 801/101844] Check module type: out/target/product/generic_arm64_ab/obj_arm/SHARED_LIBRARIES/libadbconnectiond_intermediates/link_type
 [  1% 1101/101844] target  C: toybox <= external/toybox/toys/pending/dd.c
 [  1% 1401/101844] Check module type: out/target/product/generic_arm64_ab/obj/SHARED_LIBRARIES/libdumpstateutil.vendor_intermediates/link_type
@@ -252,3 +251,4 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 69% 71252/101844] //hardware/interfaces/usb/1.1:android.hardware.usb@1.1 header-abi-dumper android/hardware/usb/1.1/UsbCallbackAll.cpp
 [ 70% 71552/101844] //bionic/libc:crtbegin_so link crtbegin_so.o
 [ 70% 71852/101844] //external/aac:libFraunhoferAAC header-abi-dumper libMpegTPDec/src/tpdec_drm.cpp [arm]
+[ 70% 72152/101844] //external/llvm/lib/IR:libLLVMCore clang++ Value.cpp
