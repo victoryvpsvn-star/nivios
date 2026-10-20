@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 03:26:14 UTC
-tien do  : [  3% 3784/101844]
+cap nhat : 2026-10-20 03:26:46 UTC
+tien do  : [  3% 3812/101844]
 dia      : 33G dung / 66G trong
 -------------------------------------------
 Adding debian:ISRG_Root_X1.pem
