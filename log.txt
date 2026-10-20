@@ -1,10 +1,7 @@
-cap nhat : 2026-10-20 03:53:23 UTC
-tien do  : [ 13% 13670/101844]
+cap nhat : 2026-10-20 03:53:54 UTC
+tien do  : [ 14% 14678/101844]
 dia      : 39G dung / 60G trong
 -------------------------------------------
-Adding debian:QuoVadis_Root_CA_3.pem
-Adding debian:COMODO_Certification_Authority.pem
-Adding debian:Amazon_Root_CA_2.pem
 Adding debian:SSL.com_EV_Root_Certification_Authority_ECC.pem
 Adding debian:AffirmTrust_Commercial.pem
 Adding debian:e-Szigno_Root_CA_2017.pem
@@ -252,3 +249,6 @@ OUT_DIR=out
 [ 12% 13042/101844] //bionic/libc:libc_asm_arm64 install perf_regs.h
 [ 13% 13342/101844] //bionic/libc:libc_dns clang dns/nameser/ns_netint.c
 [ 13% 13642/101844] //bionic/libc:libc_gdtoa header-abi-dumper upstream-openbsd/lib/libc/gdtoa/smisc.c
+[ 13% 13942/101844] //bionic/libc:libc_nopthread clang stdio/parsefloat.c [arm]
+[ 13% 14242/101844] //bionic/libc:libc_openbsd_ndk header-abi-dumper upstream-openbsd/lib/libc/locale/wcstoul.c [arm]
+[ 14% 14542/101844] //bionic/libc:libc_syscalls clang arch-arm64/syscalls/__waitid.S
