@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 05:33:48 UTC
-tien do  : [ 60% 61267/101844]
+cap nhat : 2026-10-20 05:34:19 UTC
+tien do  : [ 60% 61306/101844]
 dia      : 61G dung / 38G trong
 -------------------------------------------
 including device/google/taimen/vendorsetup.sh
