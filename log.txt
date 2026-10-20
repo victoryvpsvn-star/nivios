@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 04:03:49 UTC
-tien do  : [ 21% 21598/101844]
+cap nhat : 2026-10-20 04:04:21 UTC
+tien do  : [ 21% 21647/101844]
 dia      : 41G dung / 58G trong
 -------------------------------------------
 Adding debian:GTS_Root_R2.pem
