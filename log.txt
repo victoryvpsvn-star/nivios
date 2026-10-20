@@ -1,6 +1,6 @@
-cap nhat : 2026-10-20 05:51:37 UTC
-tien do  : [ 62% 63948/101844]
-dia      : 62G dung / 37G trong
+cap nhat : 2026-10-20 05:52:09 UTC
+tien do  : [ 62% 64058/101844]
+dia      : 62G dung / 36G trong
 -------------------------------------------
 TARGET_BUILD_TYPE=release
 TARGET_ARCH=arm64
