@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 03:38:45 UTC
-tien do  : [  7% 7265/101844]
+cap nhat : 2026-10-20 03:39:17 UTC
+tien do  : [  7% 7294/101844]
 dia      : 36G dung / 63G trong
 -------------------------------------------
 Adding debian:Starfield_Root_Certificate_Authority_-_G2.pem
