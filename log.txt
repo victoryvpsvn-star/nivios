@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 08:22:11 UTC
-tien do  : [ 82% 83594/101844]
+cap nhat : 2026-10-20 08:22:43 UTC
+tien do  : [ 82% 83623/101844]
 dia      : 88G dung / 11G trong
 -------------------------------------------
-[ 12% 13042/101844] //bionic/libc:libc_asm_arm64 install perf_regs.h
 [ 13% 13342/101844] //bionic/libc:libc_dns clang dns/nameser/ns_netint.c
 [ 13% 13642/101844] //bionic/libc:libc_gdtoa header-abi-dumper upstream-openbsd/lib/libc/gdtoa/smisc.c
 [ 13% 13942/101844] //bionic/libc:libc_nopthread clang stdio/parsefloat.c [arm]
@@ -252,3 +251,4 @@ Picked up _JAVA_OPTIONS: -Xmx3g
 DroidDoc took 4 sec. to write docs to out/target/common/docs/apache-http-stubs-gen
 Warning in out/target/common/obj/APPS/QuickSearchBox_intermediates/dex/d8_input.jar:com/google/common/util/concurrent/ThreadFactoryBuilder.class:
 [ 81% 83477/101844] Copying: out/target/common/obj/JAVA_LIBRARIES/com.android.media.remotedisplay_intermediates/classes.dex
+  Copying resources from program jar [/build/src/out/target/common/obj/APPS/ExternalStorageProvider_intermediates/classes.jar]
