@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 04:00:42 UTC
-tien do  : [ 19% 19441/101844]
+cap nhat : 2026-10-20 04:01:13 UTC
+tien do  : [ 19% 19662/101844]
 dia      : 40G dung / 59G trong
 -------------------------------------------
-Adding debian:OISTE_WISeKey_Global_Root_GB_CA.pem
 Adding debian:Atos_TrustedRoot_2011.pem
 Adding debian:Entrust.net_Premium_2048_Secure_Server_CA.pem
 Adding debian:vTrus_Root_CA.pem
@@ -252,3 +251,4 @@ OUT_DIR=out
 [ 18% 18692/101844] //external/icu/icu4c/source/i18n:libicui18n clang++ datefmt.cpp [arm]
 [ 18% 18992/101844] //external/icu/icu4c/source/i18n:libicui18n clang++ reldatefmt.cpp [linux_glibc]
 [ 18% 19292/101844] //external/icu/icu4c/source/common:libicuuc clang++ chariter.cpp
+[ 19% 19592/101844] //external/icu/icu4c/source/common:libicuuc clang++ uinit.cpp [arm]
