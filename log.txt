@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 08:01:10 UTC
-tien do  : [ 77% 78784/101844]
+cap nhat : 2026-10-20 08:01:42 UTC
+tien do  : [ 77% 79095/101844]
 dia      : 85G dung / 14G trong
 -------------------------------------------
-[  7% 7399/101844] target thumb C++: libv8src_32 <= external/v8/src/fast-accessor-assembler.cc
 [  7% 7699/101844] Export includes file:  -- out/target/product/generic_arm64_ab/obj_arm/SHARED_LIBRARIES/libstagefright_soft_avcdec_intermediates/export_includes
 [  7% 7999/101844] target Prebuilt: dialer-grpc-context-target (out/target/common/obj/JAVA_LIBRARIES/dialer-grpc-context-target_intermediates/classes.jar)
 [  8% 8264/101844] Install: out/target/product/generic_arm64_ab/system/usr/hyphen-data/hyph-ta.lic.txt
@@ -252,3 +251,4 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 76% 78123/101844] //external/libopus:libopus clang silk/fixed/residual_energy_FIX.c [arm]
 [ 77% 78423/101844] //external/protobuf:libprotobuf-cpp-full clang++ src/google/protobuf/stubs/time.cc
 [ 77% 78709/101844] //external/protobuf:libprotobuf-cpp-lite header-abi-dumper src/google/protobuf/stubs/atomicops_internals_x86_msvc.cc
+[ 77% 78989/101844] //external/selinux/libselinux:libselinux header-abi-dumper src/load_policy.c [arm]
