@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 07:03:28 UTC
-tien do  : [ 67% 68511/101844]
-dia      : 78G dung / 21G trong
+cap nhat : 2026-10-20 07:04:00 UTC
+tien do  : [ 67% 68588/101844]
+dia      : 79G dung / 20G trong
 -------------------------------------------
-BUILD_ID=PI
 OUT_DIR=out
 ============================================
 [142/933] including external/dagger2/Android.mk ...
@@ -252,3 +251,4 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 66% 67663/101844] //art/compiler:libartd-compiler clang++ optimizing/prepare_for_register_allocation.cc
 [ 66% 67963/101844] //art/compiler:libartd-compiler clang++ driver/compiler_driver.cc [linux_glibc x86]
 [ 67% 68263/101844] //art/libdexfile:libdexfiled clang++ art/libdexfile/dex/dex_instruction.operator_out.cc [linux_glibc]
+[ 67% 68563/101844] target  C++: statsd <= frameworks/base/cmds/statsd/src/external/SubsystemSleepStatePuller.cpp
