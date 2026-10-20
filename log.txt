@@ -1,10 +1,7 @@
-cap nhat : 2026-10-20 04:06:26 UTC
-tien do  : [ 21% 22160/101844]
-dia      : 47G dung / 52G trong
+cap nhat : 2026-10-20 04:06:57 UTC
+tien do  : [ 22% 23068/101844]
+dia      : 48G dung / 51G trong
 -------------------------------------------
-Adding debian:Security_Communication_RootCA2.pem
-Adding debian:Telia_Root_CA_v2.pem
-Adding debian:SZAFIR_ROOT_CA2.pem
 Adding debian:GlobalSign_Root_E46.pem
 Adding debian:Buypass_Class_2_Root_CA.pem
 Adding debian:DigiCert_Global_Root_G3.pem
@@ -252,3 +249,6 @@ OUT_DIR=out
 [ 21% 21392/101844] //frameworks/base:framework aidl telecomm/java/com/android/internal/telecom/IVideoCallback.aidl [common]
 [ 21% 21692/101844] //frameworks/native/libs/binder:libbinder clang++ IServiceManager.cpp
 [ 21% 21992/101844] //system/media/audio_utils:libaudioutils link libaudioutils.so [linux_glibc x86]
+[ 21% 22292/101844] //bionic/libm:libm header-abi-dumper upstream-freebsd/lib/msun/src/k_tanf.c
+[ 22% 22592/101844] //bionic/libm:libm header-abi-dumper upstream-freebsd/lib/msun/src/e_sinhl.c
+[ 22% 22892/101844] //bionic/libm:libm header-abi-dumper upstream-freebsd/lib/msun/src/s_nan.c [arm]
