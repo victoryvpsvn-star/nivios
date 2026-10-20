@@ -1,6 +1,6 @@
-cap nhat : 2026-10-20 04:05:23 UTC
-tien do  : [ 21% 21834/101844]
-dia      : 41G dung / 58G trong
+cap nhat : 2026-10-20 04:05:55 UTC
+tien do  : [ 21% 22034/101844]
+dia      : 44G dung / 55G trong
 -------------------------------------------
 Adding debian:TUBITAK_Kamu_SM_SSL_Kok_Sertifikasi_-_Surum_1.pem
 Adding debian:Security_Communication_RootCA2.pem
