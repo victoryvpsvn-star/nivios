@@ -1,9 +1,7 @@
-cap nhat : 2026-10-20 07:51:12 UTC
-tien do  : [ 71% 73045/101844]
+cap nhat : 2026-10-20 07:51:44 UTC
+tien do  : [ 72% 73441/101844]
 dia      : 84G dung / 15G trong
 -------------------------------------------
-[  1% 1401/101844] Check module type: out/target/product/generic_arm64_ab/obj/SHARED_LIBRARIES/libdumpstateutil.vendor_intermediates/link_type
-[  1% 1701/101844] Check module type: out/target/product/generic_arm64_ab/obj/SHARED_LIBRARIES/libstagefright_foundation_intermediates/link_type
 [  1% 2001/101844] Check module type: out/target/product/generic_arm64_ab/obj_arm/SHARED_LIBRARIES/android.hardware.thermal@1.0.vendor_intermediates/link_type
 [  2% 2301/101844] Export includes file:  -- out/target/product/generic_arm64_ab/obj_arm/SHARED_LIBRARIES/libharfbuzz_ng_intermediates/export_includes
 [  2% 2601/101844] Notice file: frameworks/av/media/libstagefright/codecs/m4v_h263/enc/NOTICE -- out/target/product/generic_arm64_ab/obj/NOTICE_FILES/src/system/lib/vndk-28/libstagefright_soft_mpeg4enc.so.txt
@@ -252,3 +250,5 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 70% 72152/101844] //external/llvm/lib/IR:libLLVMCore clang++ Value.cpp
 [ 71% 72452/101844] //external/llvm/lib/Support:libLLVMSupport clang++ Valgrind.cpp
 [ 71% 72752/101844] //frameworks/rs/cpu_ref:libRSCpuRef clang++ rsCpuIntrinsicColorMatrix.cpp [arm]
+[ 71% 73052/101844] //frameworks/compile/slang/StripUnkAttr:libStripUnkAttr header-abi-dumper strip_unknown_attributes_pass.cpp [arm]
+[ 72% 73337/101844] //external/libavc:libavcenc clang encoder/irc_picture_type.c [arm]
