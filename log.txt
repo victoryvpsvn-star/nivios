@@ -1,25 +1,7 @@
-cap nhat : 2026-10-20 04:40:54 UTC
-tien do  : [ 48% 49531/101844]
+cap nhat : 2026-10-20 04:41:25 UTC
+tien do  : [ 53% 54191/101844]
 dia      : 53G dung / 46G trong
 -------------------------------------------
-update-alternatives: using /usr/lib/jvm/java-8-openjdk-amd64/bin/jarsigner to provide /usr/bin/jarsigner (jarsigner) in auto mode
-Setting up openjdk-8-jre:amd64 (8u372-ga~us1-0ubuntu1~18.04) ...
-update-alternatives: using /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/policytool to provide /usr/bin/policytool (policytool) in auto mode
-Setting up openjdk-8-jdk:amd64 (8u372-ga~us1-0ubuntu1~18.04) ...
-update-alternatives: using /usr/lib/jvm/java-8-openjdk-amd64/bin/appletviewer to provide /usr/bin/appletviewer (appletviewer) in auto mode
-update-alternatives: using /usr/lib/jvm/java-8-openjdk-amd64/bin/jconsole to provide /usr/bin/jconsole (jconsole) in auto mode
-Processing triggers for libgdk-pixbuf2.0-0:amd64 (2.36.11-2) ...
-Processing triggers for libc-bin (2.27-3ubuntu1.6) ...
-Generating locales (this might take a while)...
-  en_US.UTF-8... done
-Generation complete.
-Python 2.7.17
-openjdk version "1.8.0_362"
-Set cache size limit to 7.0 GB
-cache directory                     /build/ccache
-primary config                      /build/ccache/ccache.conf
-secondary config      (readonly)    /etc/ccache.conf
-cache hit (direct)                     0
 cache hit (preprocessed)               0
 [2] repo init android-9.0.0_r61
 [3] repo sync
@@ -252,3 +234,21 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 47% 48714/101844] AAPT2 compile out/target/common/obj/APPS/PackageInstaller_intermediates/flat-res/packages/apps/PackageInstaller/res/values-b+sr+Latn_strings.arsc.flat <- packages/apps/PackageInstaller/res/values-b+sr+Latn/strings.xml
 [ 48% 49014/101844] AAPT2 compile out/target/common/obj/JAVA_LIBRARIES/car-list_intermediates/flat-res/res/packages/apps/Car/libs/car-list/res/drawable_ic_check_box_unchecked.xml.flat <- packages/apps/Car/libs/car-list/res/drawable/ic_check_box_unchecked.xml
 [ 48% 49314/101844] AAPT2 compile out/target/common/obj/APPS/Settings_intermediates/flat-res/packages/apps/Settings/res/drawable-hdpi_msg_bubble_incoming.9.png.flat <- packages/apps/Settings/res/drawable-hdpi/msg_bubble_incoming.9.png
+[ 48% 49614/101844] AAPT2 compile out/target/common/obj/APPS/Settings_intermediates/flat-res/packages/apps/Settings/res/drawable-xhdpi_ic_wifi_signal_2_dark.png.flat <- packages/apps/Settings/res/drawable-xhdpi/ic_wifi_signal_2_dark.png
+[ 49% 49914/101844] AAPT2 compile out/target/common/obj/APPS/Settings_intermediates/flat-res/packages/apps/Settings/res/drawable_ic_search_24dp.xml.flat <- packages/apps/Settings/res/drawable/ic_search_24dp.xml
+[ 49% 50214/101844] AAPT2 compile out/target/common/obj/APPS/Settings_intermediates/flat-res/packages/apps/Settings/res/layout_preview_seek_bar_view_pager.xml.flat <- packages/apps/Settings/res/layout/preview_seek_bar_view_pager.xml
+[ 49% 50514/101844] AAPT2 compile out/target/common/obj/APPS/Settings_intermediates/flat-res/packages/apps/Settings/res/values-hi_config.arsc.flat <- packages/apps/Settings/res/values-hi/config.xml
+[ 49% 50814/101844] AAPT2 compile out/target/common/obj/APPS/Settings_intermediates/flat-res/packages/apps/Settings/res/values-uk_arrays.arsc.flat <- packages/apps/Settings/res/values-uk/arrays.xml
+[ 50% 51114/101844] AAPT2 compile out/target/common/obj/APPS/StorageManager_intermediates/flat-res/packages/apps/StorageManager/res/values-az_arrays.arsc.flat <- packages/apps/StorageManager/res/values-az/arrays.xml
+[ 50% 51414/101844] AAPT2 compile out/target/common/obj/APPS/SystemUI_intermediates/flat-res/frameworks/base/packages/SystemUI/res/drawable-hdpi_ic_cancel_white_24dp.png.flat <- frameworks/base/packages/SystemUI/res/drawable-hdpi/ic_cancel_white_24dp.png
+[ 50% 51714/101844] AAPT2 compile out/target/common/obj/APPS/SystemUI_intermediates/flat-res/frameworks/base/packages/SystemUI/res/drawable_ic_lock_open_24dp.xml.flat <- frameworks/base/packages/SystemUI/res/drawable/ic_lock_open_24dp.xml
+[ 51% 52014/101844] AAPT2 compile out/target/common/obj/APPS/SystemUI_intermediates/flat-res/frameworks/base/packages/SystemUI/res/interpolator_ic_signal_workmode_enable_animation_interpolator_0.xml.flat <- frameworks/base/packages/SystemUI/res/interpolator/ic_signal_workmode_enable_animation_interpolator_0.xml
+[ 51% 52265/101844] AAPT2 compile out/target/common/obj/APPS/SystemUI_intermediates/flat-res/frameworks/base/packages/SystemUI/res/values-bg_donottranslate.arsc.flat <- frameworks/base/packages/SystemUI/res/values-bg/donottranslate.xml
+[ 51% 52411/101844] AAPT2 compile out/target/common/obj/APPS/SystemUI_intermediates/flat-res/frameworks/base/packages/SystemUI/res/values-gu-land_strings.arsc.flat <- frameworks/base/packages/SystemUI/res/values-gu-land/strings.xml
+[ 51% 52571/101844] AAPT2 compile out/target/common/obj/APPS/SystemUI_intermediates/flat-res/frameworks/base/packages/SystemUI/res/values-ml_config.arsc.flat <- frameworks/base/packages/SystemUI/res/values-ml/config.xml
+[ 51% 52717/101844] AAPT2 compile out/target/common/obj/APPS/SystemUI_intermediates/flat-res/frameworks/base/packages/SystemUI/res/values-sw-land_strings.arsc.flat <- frameworks/base/packages/SystemUI/res/values-sw-land/strings.xml
+[ 51% 52912/101844] AAPT2 compile out/target/common/obj/APPS/SystemUI_intermediates/flat-res/frameworks/base/packages/SystemUI/res-keyguard/values-cs_strings.arsc.flat <- frameworks/base/packages/SystemUI/res-keyguard/values-cs/strings.xml
+[ 52% 53212/101844] AAPT2 compile out/target/common/obj/APPS/TeleService_intermediates/flat-res/packages/apps/PhoneCommon/res/values-my_strings.arsc.flat <- packages/apps/PhoneCommon/res/values-my/strings.xml
+[ 52% 53496/101844] AAPT2 compile out/target/common/obj/APPS/TeleService_intermediates/flat-res/packages/services/Telephony/res/values-en-rCA_config.arsc.flat <- packages/services/Telephony/res/values-en-rCA/config.xml
+[ 52% 53723/101844] AAPT2 compile out/target/common/obj/APPS/TeleService_intermediates/flat-res/packages/services/Telephony/res/xml_call_feature_setting.xml.flat <- packages/services/Telephony/res/xml/call_feature_setting.xml
+[ 53% 54022/101844] //prebuilts/sdk/current/androidx:androidx.arch.core_core-runtime-nodeps overlay resource file list [common]
