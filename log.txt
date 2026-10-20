@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 07:35:29 UTC
-tien do  : [ 69% 71222/101844]
+cap nhat : 2026-10-20 07:36:00 UTC
+tien do  : [ 69% 71264/101844]
 dia      : 81G dung / 18G trong
 -------------------------------------------
-[ 73% 1008/1379] glob prebuilts/abi-dumps/vndk/28/64/arm_armv8-a/source-based/android.hardware.graphics.bufferqueue@1.0.so.lsdump.gz
 [ 94% 1308/1379] glob system/media/private/camera/include
 [  0% 230/101844] Export includes file:  -- out/host/linux-x86/obj/EXECUTABLES/fastboot_intermediates/export_includes
   @libcore.util.NonNull (nl=false) @ {GENERIC_ARRAY_LOCATION=GenericArrayLocationCriterion at outermost type, RETURN_TYPE=ReturnTypeCriterion for method: append(C)Ljava/io/Writer;, IN_METHOD=in method 'append(C)Ljava/io/Writer;', IN_CLASS=In class 'java.io.PrintWriter' (exactly)}
@@ -252,3 +251,4 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 69% 70357/101844] //hardware/interfaces/bluetooth/a2dp/1.0:android.hardware.bluetooth.a2dp@1.0 clang++ android/hardware/bluetooth/a2dp/1.0/BluetoothAudioOffloadAll.cpp
 [ 69% 70652/101844] //hardware/interfaces/gatekeeper/1.0:android.hardware.gatekeeper@1.0 clang++ android/hardware/gatekeeper/1.0/types.cpp
 [ 69% 70952/101844] //hardware/interfaces/neuralnetworks/1.0:android.hardware.neuralnetworks@1.0 header-abi-dumper android/hardware/neuralnetworks/1.0/PreparedModelCallbackAll.cpp [arm]
+[ 69% 71252/101844] //hardware/interfaces/usb/1.1:android.hardware.usb@1.1 header-abi-dumper android/hardware/usb/1.1/UsbCallbackAll.cpp
