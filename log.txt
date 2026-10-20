@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 04:02:47 UTC
-tien do  : [ 19% 20329/101844]
+cap nhat : 2026-10-20 04:03:18 UTC
+tien do  : [ 20% 20727/101844]
 dia      : 40G dung / 59G trong
 -------------------------------------------
-Adding debian:vTrus_Root_CA.pem
 Adding debian:DigiCert_High_Assurance_EV_Root_CA.pem
 Adding debian:Security_Communication_ECC_RootCA1.pem
 Adding debian:Hongkong_Post_Root_CA_1.pem
@@ -252,3 +251,4 @@ OUT_DIR=out
 [ 19% 19592/101844] //external/icu/icu4c/source/common:libicuuc clang++ uinit.cpp [arm]
 [ 19% 19892/101844] //external/icu/icu4c/source/common:libicuuc clang++ rbbinode.cpp [linux_glibc x86]
 [ 19% 20192/101844] //libcore:libjavacore clang++ ZipUtilities.cpp [linux_glibc x86]
+[ 20% 20492/101844] //external/libjpeg-turbo:libjpeg clang jfdctfst.c [linux_glibc]
