@@ -1,6 +1,6 @@
-cap nhat : 2026-10-20 07:48:35 UTC
-tien do  : [ 71% 72602/101844]
-dia      : 83G dung / 15G trong
+cap nhat : 2026-10-20 07:49:06 UTC
+tien do  : [ 71% 72705/101844]
+dia      : 84G dung / 15G trong
 -------------------------------------------
 [  1% 1101/101844] target  C: toybox <= external/toybox/toys/pending/dd.c
 [  1% 1401/101844] Check module type: out/target/product/generic_arm64_ab/obj/SHARED_LIBRARIES/libdumpstateutil.vendor_intermediates/link_type
