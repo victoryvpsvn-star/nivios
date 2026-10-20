@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 04:34:06 UTC
-tien do  : [ 29% 29873/101844]
+cap nhat : 2026-10-20 04:34:38 UTC
+tien do  : [ 29% 30119/101844]
 dia      : 51G dung / 48G trong
 -------------------------------------------
-Adding debian:D-TRUST_BR_Root_CA_1_2020.pem
 Adding debian:SSL.com_Root_Certification_Authority_ECC.pem
 Adding debian:Autoridad_de_Certificacion_Firmaprofesional_CIF_A62634068.pem
 Adding debian:GTS_Root_R4.pem
@@ -252,3 +251,4 @@ OUT_DIR=out
 [ 28% 29091/101844] //external/libunwind:libunwind clang src/dwarf/global.c [linux_glibc]
 [ 28% 29391/101844] //system/core/libunwindstack:libunwindstack_dex static link libunwindstack_dex.a [arm]
 [ 29% 29678/101844] //external/vixl:libvixl-arm clang++ src/aarch32/assembler-aarch32.cc [linux_glibc x86]
+[ 29% 29978/101844] //external/libvpx:libvpx clang libvpx/vp8/common/blockd.c
