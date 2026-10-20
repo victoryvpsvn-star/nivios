@@ -1,9 +1,7 @@
-cap nhat : 2026-10-20 07:58:33 UTC
-tien do  : [ 76% 77856/101844]
+cap nhat : 2026-10-20 07:59:04 UTC
+tien do  : [ 76% 78411/101844]
 dia      : 85G dung / 14G trong
 -------------------------------------------
-[  6% 6199/101844] Install: out/target/product/generic_arm64_ab/system/fonts/NotoSansChakma-Regular.ttf
-[  6% 6499/101844] target Prebuilt: NotoSansSharada-Regular.otf (out/target/product/generic_arm64_ab/obj/ETC/NotoSansSharada-Regular.otf_intermediates/NotoSansSharada-Regular.otf)
 [  6% 6799/101844] Notice file: frameworks/base/cmds/appwidget/NOTICE -- out/target/product/generic_arm64_ab/obj/NOTICE_FILES/src/system/framework/appwidget.jar.txt
 [  6% 7099/101844] Check module type: out/target/product/generic_arm64_ab/obj_arm/SHARED_LIBRARIES/libopus_intermediates/link_type
 [  7% 7399/101844] target thumb C++: libv8src_32 <= external/v8/src/fast-accessor-assembler.cc
@@ -252,3 +250,5 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 75% 76928/101844] //external/libjpeg-turbo:libjpeg clang jdmarker.c [arm]
 [ 75% 77228/101844] //external/lzma/C:liblzma header-abi-dumper Aes.c
 [ 76% 77523/101844] //external/libmpeg2:libmpeg2dec clang common/icv_sad.c [arm]
+[ 76% 77823/101844] //external/libopus:libopus header-abi-dumper silk/resampler_down2_3.c
+[ 76% 78123/101844] //external/libopus:libopus clang silk/fixed/residual_energy_FIX.c [arm]
