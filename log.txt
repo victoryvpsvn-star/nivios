@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 04:37:46 UTC
-tien do  : [ 30% 31260/101844]
+cap nhat : 2026-10-20 04:38:17 UTC
+tien do  : [ 30% 31298/101844]
 dia      : 52G dung / 47G trong
 -------------------------------------------
 Adding debian:Microsoft_ECC_Root_Certificate_Authority_2017.pem
