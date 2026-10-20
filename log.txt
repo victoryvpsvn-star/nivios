@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 05:25:57 UTC
-tien do  : [ 59% 60263/101844]
+cap nhat : 2026-10-20 05:26:28 UTC
+tien do  : [ 59% 60357/101844]
 dia      : 60G dung / 39G trong
 -------------------------------------------
 including device/google/cuttlefish/vendorsetup.sh
