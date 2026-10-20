@@ -1,4 +1,4 @@
-cap nhat : 2026-10-20 03:23:07 UTC
+cap nhat : 2026-10-20 03:23:38 UTC
 tien do  : chua bat dau make
 dia      : 32G dung / 67G trong
 -------------------------------------------
