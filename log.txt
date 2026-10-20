@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 05:36:56 UTC
-tien do  : [ 60% 61489/101844]
+cap nhat : 2026-10-20 05:37:28 UTC
+tien do  : [ 60% 61509/101844]
 dia      : 61G dung / 38G trong
 -------------------------------------------
-including device/google/taimen/vendorsetup.sh
 including device/linaro/hikey/vendorsetup.sh
 including sdk/bash_completion/adb.bash
 
@@ -252,3 +251,4 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 59% 60536/101844] //frameworks/native/libs/gui:libgui clang++ bufferqueue/1.0/H2BGraphicBufferProducer.cpp [arm]
 [ 59% 60836/101844] //frameworks/base/libs/input:libinputservice clang++ SpriteController.cpp [arm]
 [ 60% 61136/101844] //frameworks/av/drm/libmediadrm:libmediadrm clang++ SharedLibrary.cpp [arm]
+[ 60% 61436/101844] //art/openjdkjvmti:libopenjdkjvmti clang++ ti_ddms.cc
