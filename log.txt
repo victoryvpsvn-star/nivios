@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 04:14:16 UTC
-tien do  : [ 24% 25310/101844]
+cap nhat : 2026-10-20 04:14:47 UTC
+tien do  : [ 25% 25492/101844]
 dia      : 49G dung / 50G trong
 -------------------------------------------
-Adding debian:Trustwave_Global_Certification_Authority.pem
 Adding debian:DigiCert_TLS_RSA4096_Root_G5.pem
 Adding debian:AC_RAIZ_FNMT-RCM.pem
 Adding debian:E-Tugra_Certification_Authority.pem
@@ -252,3 +251,4 @@ OUT_DIR=out
 [ 23% 24392/101844] //external/pdfium:libpdfium clang++ fpdfsdk/fpdf_transformpage.cpp
 [ 24% 24692/101844] //external/pdfium:libpdfiumfpdfapi clang++ core/fpdfapi/cmaps/Japan1/90msp-RKSJ-H_2.cpp [arm]
 [ 24% 24992/101844] //external/pdfium:libpdfiumfxcodec clang++ core/fxcodec/codec/ccodec_scanlinedecoder.cpp [arm]
+[ 24% 25292/101844] //external/pdfium:libpdfiumpwl clang++ fpdfsdk/pwl/cpwl_special_button.cpp [arm]
