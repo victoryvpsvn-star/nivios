@@ -1,9 +1,7 @@
-cap nhat : 2026-10-20 08:02:13 UTC
-tien do  : [ 77% 79195/101844]
+cap nhat : 2026-10-20 08:02:45 UTC
+tien do  : [ 78% 79858/101844]
 dia      : 85G dung / 14G trong
 -------------------------------------------
-[  7% 7699/101844] Export includes file:  -- out/target/product/generic_arm64_ab/obj_arm/SHARED_LIBRARIES/libstagefright_soft_avcdec_intermediates/export_includes
-[  7% 7999/101844] target Prebuilt: dialer-grpc-context-target (out/target/common/obj/JAVA_LIBRARIES/dialer-grpc-context-target_intermediates/classes.jar)
 [  8% 8264/101844] Install: out/target/product/generic_arm64_ab/system/usr/hyphen-data/hyph-ta.lic.txt
 [  8% 8544/101844] target  C: tcpdump <= external/tcpdump/print-m3ua.c
 [  8% 8844/101844] Copy: out/target/product/generic_arm64_ab/system/media/audio/notifications/Canopus.ogg
@@ -252,3 +250,5 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 77% 78423/101844] //external/protobuf:libprotobuf-cpp-full clang++ src/google/protobuf/stubs/time.cc
 [ 77% 78709/101844] //external/protobuf:libprotobuf-cpp-lite header-abi-dumper src/google/protobuf/stubs/atomicops_internals_x86_msvc.cc
 [ 77% 78989/101844] //external/selinux/libselinux:libselinux header-abi-dumper src/load_policy.c [arm]
+[ 77% 79244/101844] //frameworks/av/media/libstagefright/codecs/amrnb/common:libstagefright_amrnb_common clang++ src/bitno_tab.cpp
+[ 78% 79544/101844] //frameworks/av/media/libstagefright/codecs/amrnb/dec:libstagefright_amrnbdec clang++ src/wmf_to_ets.cpp [arm]
