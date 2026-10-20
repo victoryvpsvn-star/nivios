@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 06:04:12 UTC
-tien do  : [ 64% 65453/101844]
+cap nhat : 2026-10-20 06:04:43 UTC
+tien do  : [ 64% 65475/101844]
 dia      : 67G dung / 32G trong
 -------------------------------------------
 TARGET_2ND_ARCH_VARIANT=armv8-a
