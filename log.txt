@@ -1,5 +1,5 @@
-cap nhat : 2026-10-20 04:32:33 UTC
-tien do  : [ 29% 29753/101844]
+cap nhat : 2026-10-20 04:33:04 UTC
+tien do  : [ 29% 29790/101844]
 dia      : 51G dung / 48G trong
 -------------------------------------------
 Adding debian:D-TRUST_BR_Root_CA_1_2020.pem
