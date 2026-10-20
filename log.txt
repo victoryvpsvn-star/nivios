@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 05:01:20 UTC
-tien do  : [ 55% 56934/101844]
+cap nhat : 2026-10-20 05:01:51 UTC
+tien do  : [ 55% 57018/101844]
 dia      : 58G dung / 41G trong
 -------------------------------------------
-/dev/mapper/buildvg-buildlv   98G   31G   68G  32% /build
 [4] Prop Nivi
 [4] Che do nhe: chi dexpreopt boot image + system_server (van bat dexpreopt, userdebug yeu cau)
 [5] Build
@@ -252,3 +251,4 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 55% 56073/101844] //frameworks/base/tools/streaming_proto:protoc-gen-javastream link protoc-gen-javastream [linux_glibc]
 [ 55% 56356/101844] //frameworks/rs:rsg-generator clang lex/frameworks/rs/spec.c [linux_glibc]
 [ 55% 56636/101844] Export includes file: out/soong/.intermediates/system/libhidl/transport/manager/1.0/android.hidl.manager@1.0_genc++_headers/gen/android/hidl/manager/1.0/IServiceManager.h -- out/target/product/generic_arm64_ab/obj/SHARED_LIBRARIES/android.hardware.biometrics.fingerprint@2.1.vendor_intermediates/export_includes
+[ 55% 56936/101844] Import includes file: out/target/product/generic_arm64_ab/obj_arm/EXECUTABLES/audioserver_intermediates/import_includes
