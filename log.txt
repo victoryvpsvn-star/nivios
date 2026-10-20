@@ -1,8 +1,7 @@
-cap nhat : 2026-10-20 05:00:17 UTC
-tien do  : [ 54% 55949/101844]
-dia      : 57G dung / 42G trong
+cap nhat : 2026-10-20 05:00:48 UTC
+tien do  : [ 55% 56258/101844]
+dia      : 58G dung / 41G trong
 -------------------------------------------
-[3c] Xoa .repo (lich su git) de tiet kiem dia. Kich thuoc truoc khi xoa:
 15G	.repo
 [3c] giai phong khoang 14925 MB
 /dev/mapper/buildvg-buildlv   98G   31G   68G  32% /build
@@ -252,3 +251,4 @@ packages/apps/Dialer/java/com/android/dialer/calllogutils/res/values-te/strings.
 [ 54% 55192/101844] //external/llvm/lib/MC:libLLVMMC clang++ WinCOFFObjectWriter.cpp [arm]
 [ 54% 55473/101844] //external/llvm/lib/Transforms/IPO:libLLVMipo clang++ SampleProfile.cpp
 [ 54% 55773/101844] //frameworks/compile/mclinker/lib/Object:libmcldObject clang++ ObjectLinker.cpp [linux_glibc]
+[ 55% 56073/101844] //frameworks/base/tools/streaming_proto:protoc-gen-javastream link protoc-gen-javastream [linux_glibc]
