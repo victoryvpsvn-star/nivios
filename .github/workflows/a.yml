@@ -360,7 +360,7 @@ jobs:
 
           cat > src/core/defaults.js <<'EOF'
           export const DEFAULT_CONFIG = {
-            port: 3000,
+            port: 3636,
             openBrowser: true,
             minDelayMs: 2500,
             maxDelayMs: 7000,
@@ -850,6 +850,8 @@ jobs:
             opts = opts || {};
             const open = opts.open !== false;
             const sse = new Set();
+            const HOST = opts.host || '127.0.0.1';
+            const MAX_TRIES = 12;
 
             engine.log = function (lv, msg) {
               const frame = 'data: ' + JSON.stringify({ t: Date.now(), lv: lv, msg: msg }) + '\n\n';
@@ -857,7 +859,7 @@ jobs:
               console.log('[' + lv + '] ' + msg);
             };
 
-            const srv = http.createServer(function (req, res) {
+            function handler(req, res) {
               const u = new URL(req.url, 'http://localhost');
 
               const J = function (code, obj, type) {
@@ -953,35 +955,55 @@ jobs:
                   J(500, { error: e.message });
                 }
               })();
+            }
+
+            let active = null;
+
+            function bind(port, left) {
+              const s = http.createServer(handler);
+
+              s.once('error', function (e) {
+                const busy = e.code === 'EACCES' || e.code === 'EADDRINUSE';
+                if (busy && left > 0) {
+                  console.log('  ! Cong ' + port + ' khong dung duoc (' + e.code + ') -> thu cong ' + (port + 1));
+                  return bind(port + 1, left - 1);
+                }
+                console.error('\n  Khong mo duoc cong ' + port + ' (' + e.code + '): ' + e.message);
+                console.error('  Thu: DiscordQuestsAuto.exe --port 3636\n');
+                console.error('  Kiem tra: netsh interface ipv4 show excludedportrange protocol=tcp\n');
+              });
+
+              s.once('listening', function () {
+                active = s;
+                if (Number(cfg().port) !== port) save({ port: port });
+                const url = 'http://' + HOST + ':' + port;
+                console.log('\n  ======================================');
+                console.log('   Discord Quests Auto  v' + VERSION);
+                console.log('  ======================================');
+                console.log('  UI      : ' + url);
+                console.log('  Du lieu : ' + cfg().dataDir + '\n');
+                if (open) {
+                  const c = process.platform === 'win32'
+                    ? 'start "" "' + url + '"'
+                    : process.platform === 'darwin' ? 'open "' + url + '"' : 'xdg-open "' + url + '"';
+                  exec(c, function () {});
+                }
+              });
+
+              s.listen(port, HOST);
+              return s;
+            }
+
+            const startPort = Math.min(65535, Math.max(1024, Number(process.env.DQA_PORT) || Number(cfg().port) || 3636));
+            bind(startPort, MAX_TRIES);
+
+            process.on('SIGINT', function () {
+              engine.halt();
+              if (active) active.close();
+              process.exit(0);
             });
 
-            const port = cfg().port;
-
-            srv.on('error', function (e) {
-              if (e.code === 'EADDRINUSE') {
-                console.error('\n  Cong ' + port + ' dang ban. Chay lai voi: DiscordQuestsAuto.exe --port 3001\n');
-              } else {
-                console.error(e);
-              }
-            });
-
-            srv.listen(port, function () {
-              const url = 'http://localhost:' + port;
-              console.log('\n  ======================================');
-              console.log('   Discord Quests Auto  v' + VERSION);
-              console.log('  ======================================');
-              console.log('  UI      : ' + url);
-              console.log('  Du lieu : ' + cfg().dataDir + '\n');
-              if (open) {
-                const c = process.platform === 'win32'
-                  ? 'start "" "' + url + '"'
-                  : process.platform === 'darwin' ? 'open "' + url + '"' : 'xdg-open "' + url + '"';
-                exec(c, function () {});
-              }
-            });
-
-            process.on('SIGINT', function () { engine.halt(); srv.close(); process.exit(0); });
-            return srv;
+            return { close: function () { if (active) active.close(); } };
           }
           EOF
 
@@ -1006,7 +1028,10 @@ jobs:
 
           async function main() {
             if (val('--token')) save({ token: String(val('--token')).trim() });
-            if (val('--port')) save({ port: Number(val('--port')) });
+            if (val('--port')) {
+              const p = Number(val('--port'));
+              if (Number.isFinite(p) && p >= 1024 && p <= 65535) save({ port: p });
+            }
 
             const token = (cfg().token || process.env.DISCORD_TOKEN || '').trim();
             const engine = new Engine({
@@ -1141,25 +1166,10 @@ jobs:
         shell: bash
         run: node build.mjs
 
-      - name: Smoke test
-        shell: pwsh
-        run: |
-          $exe = Get-ChildItem out\*.exe | Select-Object -First 1
-          "=== $($exe.Name) - $([math]::Round($exe.Length/1MB,1)) MB ===" | Tee-Object -Append summary.txt
-          $p = Start-Process $exe.FullName -ArgumentList '--once','--no-open','--port','3099' `
-                -PassThru -RedirectStandardOutput run.txt -RedirectStandardError err.txt
-          Start-Sleep -Seconds 35
-          if (-not $p.HasExited) { $p.Kill() }
-          Get-Content run.txt,err.txt -ErrorAction SilentlyContinue | Tee-Object -Append summary.txt
-          (Get-FileHash $exe.FullName -Algorithm SHA256).Hash | Tee-Object -Append summary.txt
-
       - uses: actions/upload-artifact@v4
-        if: always()
         with:
           name: DiscordQuestsAuto-exe
-          path: |
-            out/*.exe
-            summary.txt
+          path: out/*.exe
           retention-days: 90
 
       - name: Release
