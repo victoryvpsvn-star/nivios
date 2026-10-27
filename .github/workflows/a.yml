@@ -5,7 +5,7 @@ on:
     inputs:
       version:
         description: 'Version'
-        default: '3.0.0'
+        default: '3.1.0'
   push:
     tags: ['v*']
 
@@ -17,7 +17,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  VERSION: ${{ inputs.version || '3.0.0' }}
+  VERSION: ${{ inputs.version || '3.1.0' }}
 
 jobs:
   build:
@@ -95,6 +95,7 @@ jobs:
           input:focus,select:focus{border-color:rgba(88,101,242,.6)}
           .btn{padding:11px 18px;border-radius:11px;border:0;background:linear-gradient(135deg,var(--b),#4752C4);color:#fff;font-size:13px;font-weight:600;cursor:pointer}
           .btn:hover{filter:brightness(1.12)}
+          .btn:disabled{opacity:.55;cursor:default}
           .btn.full{width:100%;margin-top:12px}
           .btn.gh{background:rgba(88,101,242,.12);border:1px solid rgba(88,101,242,.32);color:#aab3ff}
           .btn.sm{padding:7px 13px;font-size:11.5px}
@@ -109,6 +110,9 @@ jobs:
           .tag{padding:5px 12px;border-radius:20px;font-size:10.5px;font-weight:600;background:rgba(30,31,38,.62);border:1px solid rgba(88,101,242,.14);color:var(--m)}
           .tag.on{color:var(--g);border-color:rgba(87,242,135,.4)}
           .tag.orb{color:var(--y);border-color:rgba(254,231,92,.35)}
+          .tag.bad{color:var(--r);border-color:rgba(237,66,69,.4)}
+          .banner{display:none;margin-bottom:14px;padding:11px 14px;border-radius:12px;font-size:12px;line-height:1.6;background:rgba(237,66,69,.1);border:1px solid rgba(237,66,69,.35);color:#ffb3b5}
+          .banner.show{display:block}
           .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px}
           .stt{background:rgba(30,31,38,.62);border:1px solid rgba(88,101,242,.14);border-radius:14px;padding:14px}
           .stt b{display:block;font-size:24px;color:#fff}
@@ -123,6 +127,7 @@ jobs:
           .qn{font-size:13.5px;color:#fff;font-weight:600}
           .qm{font-size:11px;color:var(--m)}
           .tt{display:inline-block;font-size:9.5px;padding:2px 8px;border-radius:6px;background:rgba(88,101,242,.16);color:#8b95ff;margin-right:5px;font-weight:600}
+          .tt.hard{background:rgba(237,66,69,.16);color:#ff9a9c}
           .pg{height:4px;background:var(--bg3);border-radius:2px;margin-top:8px;overflow:hidden}
           .pg i{display:block;height:100%;background:linear-gradient(90deg,var(--b),var(--f))}
           .log{margin-top:16px;background:rgba(14,15,19,.82);border:1px solid rgba(88,101,242,.14);border-radius:14px;padding:13px;font-family:ui-monospace,monospace;font-size:11px;line-height:1.85;max-height:230px;overflow-y:auto}
@@ -166,6 +171,7 @@ jobs:
                 <button class="btn sm gh" id="out">Đổi token</button>
               </div>
             </div>
+            <div class="banner" id="ban"></div>
             <div class="stats">
               <div class="stt"><b id="s1">0</b><span>Quest đang mở</span></div>
               <div class="stt"><b id="s2" style="color:var(--g)">0</b><span>Đã claim</span></div>
@@ -187,10 +193,13 @@ jobs:
               <div class="frow">
                 <div><label>Delay min (ms)</label><input id="cMin" type="number"></div>
                 <div><label>Delay max (ms)</label><input id="cMax" type="number"></div>
-                <div><label>Chu kỳ heartbeat (giây)</label><input id="cHb" type="number"></div>
+                <div><label>Nhịp heartbeat (giây)</label><input id="cHb" type="number"></div>
+                <div><label>Nhịp video (ms)</label><input id="cVid" type="number"></div>
                 <div><label>Retry tối đa</label><input id="cRe" type="number"></div>
+                <div><label>Chạy song song tối đa</label><input id="cPar" type="number"></div>
                 <div><label>Tự nhận quest</label><select id="cEn"><option value="1">Bật</option><option value="0">Tắt</option></select></div>
-                <div><label>Tự claim</label><select id="cCl"><option value="1">Bật</option><option value="0">Tắt</option></select></div>
+                <div><label>Tự claim (dễ dính captcha)</label><select id="cCl"><option value="0">Tắt</option><option value="1">Bật</option></select></div>
+                <div><label>Bỏ qua STREAM_ON_DESKTOP</label><select id="cSk"><option value="1">Bật</option><option value="0">Tắt</option></select></div>
               </div>
               <label>Bỏ qua quest (ID, cách nhau dấu phẩy)</label>
               <input id="cEx">
@@ -291,6 +300,13 @@ jobs:
             $('#run').className = 'tag' + (st.running ? ' on' : '');
             $('#s4').textContent = st.orbs || 0;
 
+            var ban = $('#ban');
+            if (st.blockedUntil) {
+              ban.className = 'banner show';
+              ban.textContent = 'Quest bi tam khoa den ' + new Date(st.blockedUntil).toLocaleString('vi-VN') +
+                ' (quest_enrollment_blocked_until). Discord van nhan request, chi UI khoa.';
+            } else { ban.className = 'banner'; }
+
             var q = st.quests || [];
             $('#s1').textContent = q.length;
             $('#s2').textContent = q.filter(function (x) { return x.claimed; }).length;
@@ -298,28 +314,48 @@ jobs:
 
             $('#list').innerHTML = q.map(function (x) {
               var g = 'linear-gradient(135deg,' + (x.colors && x.colors.primary || '#5865F2') + ',' + (x.colors && x.colors.secondary || '#4752C4') + ')';
-              var t = x.claimed ? '<span class="tag on">ĐÃ CLAIM</span>'
-                : x.completed ? '<span class="tag" style="color:#FEE75C">SẴN SÀNG</span>'
-                : x.enrolled ? '<span class="tag" style="color:#8b95ff">ĐANG LÀM</span>'
-                : '<span class="tag">CHƯA NHẬN</span>';
-              var types = (x.types || []).map(function (ty) { return '<span class="tt">' + ty + '</span>'; }).join('');
+              var act = '';
+              if (x.completed && !x.claimed) act = '<button class="btn sm" data-claim="' + x.id + '">Claim</button>';
+              else if (x.claimed) act = '<span class="tag on">ĐÃ CLAIM</span>';
+              else if (x.enrolled) act = '<span class="tag" style="color:#8b95ff">ĐANG LÀM</span>';
+              else act = '<span class="tag">CHƯA NHẬN</span>';
+
+              var types = (x.types || []).map(function (ty) {
+                var hard = (ty === 'STREAM_ON_DESKTOP' || ty === 'ACHIEVEMENT_IN_GAME');
+                return '<span class="tt' + (hard ? ' hard' : '') + '">' + ty + '</span>';
+              }).join('');
+
               return '<div class="qc"><div class="qi" style="background:' + g + '">' + x.name.slice(0, 2).toUpperCase() + '</div>' +
                 '<div style="flex:1;min-width:0"><div class="qn">' + x.name + '</div>' +
                 '<div class="qm">' + types + ' thưởng ' + x.reward + '</div>' +
-                '<div class="pg"><i style="width:' + (x.pct || 0) + '%"></i></div></div>' + t + '</div>';
-            }).join('') || '<div class="qc"><div class="qm">Chưa có quest nào.</div></div>';
+                '<div class="pg"><i style="width:' + (x.pct || 0) + '%"></i></div></div>' + act + '</div>';
+            }).join('') || '<div class="qc"><div class="qm">Chưa có quest nào — bấm Quét lại, hoặc xem /api/debug.</div></div>';
 
             var c = st.settings || {};
             if (document.activeElement.tagName !== 'INPUT') {
               $('#cMin').value = c.minDelayMs;
               $('#cMax').value = c.maxDelayMs;
               $('#cHb').value = c.heartbeatSec;
+              $('#cVid').value = c.videoIntervalMs;
               $('#cRe').value = c.maxRetries;
+              $('#cPar').value = c.maxConcurrent;
               $('#cEn').value = c.autoEnroll ? '1' : '0';
               $('#cCl').value = c.autoClaim ? '1' : '0';
+              $('#cSk').value = c.skipStream ? '1' : '0';
               $('#cEx').value = (c.exclude || []).join(', ');
             }
           }
+
+          $('#list').onclick = function (e) {
+            var b = e.target.closest('[data-claim]');
+            if (!b || b.disabled) return;
+            b.disabled = true; b.textContent = '...';
+            j('/api/claim', { id: b.dataset.claim }).then(function (r) {
+              if (r && r.ok) log('ok', 'Da claim quest');
+              else log('err', 'Claim loi: ' + JSON.stringify(r));
+              refresh();
+            });
+          };
 
           $('#go').onclick = async function () {
             var t = $('#tk').value.trim();
@@ -335,8 +371,10 @@ jobs:
           $('#save').onclick = async function () {
             await j('/api/settings', {
               minDelayMs: +$('#cMin').value, maxDelayMs: +$('#cMax').value,
-              heartbeatSec: +$('#cHb').value, maxRetries: +$('#cRe').value,
+              heartbeatSec: +$('#cHb').value, videoIntervalMs: +$('#cVid').value,
+              maxRetries: +$('#cRe').value, maxConcurrent: +$('#cPar').value,
               autoEnroll: $('#cEn').value === '1', autoClaim: $('#cCl').value === '1',
+              skipStream: $('#cSk').value === '1',
               exclude: $('#cEx').value.split(',').map(function (s) { return s.trim(); }).filter(Boolean)
             });
             log('ok', 'Đã lưu cài đặt');
@@ -362,17 +400,23 @@ jobs:
           export const DEFAULT_CONFIG = {
             port: 3636,
             openBrowser: true,
-            minDelayMs: 2500,
-            maxDelayMs: 7000,
-            heartbeatSec: 20,
+            minDelayMs: 1200,
+            maxDelayMs: 3200,
+            heartbeatSec: 60,
+            heartbeatMaxFails: 5,
+            videoIntervalMs: 8000,
+            videoMaxLeadSec: 10,
+            maxTaskMinutes: 25,
+            maxConcurrent: 2,
             maxRetries: 5,
             backoffBaseMs: 1500,
             backoffMaxMs: 60000,
             timeoutMs: 30000,
             autoEnroll: true,
-            autoClaim: true,
+            autoClaim: false,
             skipExpired: true,
-            watchIntervalMs: 60000,
+            skipStream: true,
+            watchIntervalMs: 120000,
             exclude: [],
             token: ''
           };
@@ -434,14 +478,29 @@ jobs:
           EOF
 
           cat > src/discord/api.js <<'EOF'
+          // Endpoint theo docs.discord.food/resources/quests (cap nhat 2026)
           const API = 'https://discord.com/api/v9';
-          const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36';
+
+          const ELECTRON = '37.2.0';
+          const CHROME = '138.0.7204.251';
+          const APP = '1.0.9189';
+          // BAT BUOC co "Electron/x.y.z" trong UA, khong thi endpoint quests tra 401
+          const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
+                     '(KHTML, like Gecko) discord/' + APP + ' Chrome/' + CHROME +
+                     ' Electron/' + ELECTRON + ' Safari/537.36';
+
+          // location = quest content type; 11 = QUEST_HOME_DESKTOP
+          export const LOCATION = 11;
+          // platform: 0 = CROSS_PLATFORM
+          export const PLATFORM = 0;
 
           export const ENDPOINTS = {
             me:            { m: 'GET',  p: '/users/@me' },
             userGuilds:    { m: 'GET',  p: '/users/@me/guilds' },
             entitlements:  { m: 'GET',  p: '/users/@me/entitlements' },
             quests:        { m: 'GET',  p: '/quests/@me' },
+            claimed:       { m: 'GET',  p: '/quests/@me/claimed' },
+            questConfig:   { m: 'GET',  p: '/quests/{id}' },
             enroll:        { m: 'POST', p: '/quests/{id}/enroll' },
             videoProgress: { m: 'POST', p: '/quests/{id}/video-progress' },
             heartbeat:     { m: 'POST', p: '/quests/{id}/heartbeat' },
@@ -474,21 +533,51 @@ jobs:
             return Math.round(e * (0.5 + Math.random() * 0.5));
           }
 
-          export function progressSteps(target, n) {
-            const out = [];
-            let c = 0;
-            while (c < target) {
-              c = Math.min(target, c + Math.max(1, Math.round((target / n) * (0.6 + Math.random() * 0.9))));
-              out.push(c);
-            }
-            return out;
-          }
-
           export function rid() {
             return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
               const r = (Math.random() * 16) | 0;
               return (c === 'x' ? r : ((r & 3) | 8)).toString(16);
             });
+          }
+
+          // ───────── doc payload khoan dung ─────────
+          export function asArray(v) {
+            if (!v) return [];
+            if (Array.isArray(v)) return v;
+            if (typeof v === 'object') return Object.values(v);
+            return [];
+          }
+
+          export function extractQuests(p) {
+            if (!p) return [];
+            if (Array.isArray(p)) return p;
+            for (const k of ['quests', 'Quests', 'quest_list', 'items', 'entries']) {
+              const a = asArray(p[k]);
+              if (a.length) return a;
+            }
+            for (const k of Object.keys(p)) {
+              const v = p[k];
+              if (v && typeof v === 'object' && !Array.isArray(v)) {
+                for (const k2 of ['quests', 'items', 'entries', 'data']) {
+                  const a = asArray(v[k2]);
+                  if (a.length) return a;
+                }
+              }
+            }
+            return [];
+          }
+
+          export function describePayload(p) {
+            if (p === null || p === undefined) return 'null';
+            if (Array.isArray(p)) return 'array(' + p.length + ')';
+            if (typeof p !== 'object') return typeof p;
+            const parts = ['keys=' + (Object.keys(p).join(',') || '-')];
+            for (const k of ['quests', 'excluded_quests', 'items', 'data', 'entitlements']) {
+              if (Array.isArray(p[k])) parts.push(k + '=' + p[k].length);
+            }
+            if (p.message) parts.push('msg=' + String(p.message).slice(0, 60));
+            if (p._error) parts.push('err=' + p._error);
+            return parts.join(' | ');
           }
 
           export class DiscordClient {
@@ -500,6 +589,7 @@ jobs:
               this.build = 0;
               this.tokens = 60;
               this.last = Date.now();
+              this.lastQuestPayload = null;
             }
 
             log(lv, m) { this.onLog(lv, m); }
@@ -518,8 +608,7 @@ jobs:
               if (this.build) return this.build;
               const c = await this.storage.get('discordBuild');
               if (c && Date.now() - c.at < 21600000) return (this.build = c.build);
-              const urls = ['https://discord.com/app', 'https://discord.com/login'];
-              for (const u of urls) {
+              for (const u of ['https://discord.com/app', 'https://discord.com/login']) {
                 try {
                   const h = await (await fetch(u, { headers: { 'User-Agent': UA } })).text();
                   const m = h.match(/"buildNumber"\s*:\s*(\d+)/) || h.match(/assets\/(\d+)\//);
@@ -536,11 +625,20 @@ jobs:
             async headers() {
               const b = await this.buildNumber();
               const sp = Buffer.from(JSON.stringify({
-                os: 'Windows', browser: 'Chrome', device: '', system_locale: 'en-US',
-                browser_user_agent: UA, browser_version: '141.0.0.0', os_version: '10',
-                referrer: '', referring_domain: '', release_channel: 'stable',
-                client_build_number: b, client_event_source: null,
-                client_launch_id: rid(), client_heartbeat_session_id: rid(),
+                os: 'Windows',
+                browser: 'Discord Client',
+                device: '',
+                system_locale: 'en-US',
+                browser_user_agent: UA,
+                browser_version: ELECTRON,
+                os_version: '10',
+                referrer: '',
+                referring_domain: '',
+                release_channel: 'stable',
+                client_build_number: b,
+                client_event_source: null,
+                client_launch_id: rid(),
+                client_heartbeat_session_id: rid(),
                 client_app_state: 'focused'
               })).toString('base64');
               return {
@@ -557,12 +655,29 @@ jobs:
               };
             }
 
+            async raw(method, path, body) {
+              const url = /^https?:/.test(path) ? path : API + path;
+              await this.rateAcquire();
+              try {
+                const r = await fetch(url, {
+                  method: method,
+                  headers: await this.headers(),
+                  body: body ? JSON.stringify(body) : undefined
+                });
+                const t = await r.text();
+                let data = {};
+                try { data = t ? JSON.parse(t) : {}; } catch (e) { data = { _text: t.slice(0, 400) }; }
+                return { status: r.status, data: data };
+              } catch (e) {
+                return { status: 0, data: { _error: e.message } };
+              }
+            }
+
             async call(key, o) {
               o = o || {};
               const ep = ENDPOINTS[key];
               let url = API + ep.p;
-              const params = o.params || {};
-              for (const k of Object.keys(params)) url = url.replace('{' + k + '}', params[k]);
+              for (const k of Object.keys(o.params || {})) url = url.replace('{' + k + '}', o.params[k]);
               if (o.query) url += '?' + new URLSearchParams(o.query);
               const label = o.label || key;
               const c = this.getConfig();
@@ -590,7 +705,8 @@ jobs:
                     await sleep(w);
                     continue;
                   }
-                  if (r.status === 401) { this.log('err', label + ': token sai'); return p; }
+                  if (r.status === 401) { this.log('err', label + ': 401 - token sai hoac thieu Electron trong UA'); return p; }
+                  if (r.status === 403) { this.log('warn', label + ': 403 - task nay can OAuth/telemetry that'); return p; }
                   if (r.status === 404) return p;
                   if (a >= c.maxRetries) return p;
 
@@ -607,11 +723,58 @@ jobs:
             }
 
             me() { return this.call('me', { label: 'me' }); }
-            myQuests() { return this.call('quests', { query: { with_application: true }, label: 'quests' }); }
-            enroll(id) { return this.call('enroll', { params: { id: id }, body: { location: 11, is_targeted: false }, label: 'enroll' }); }
-            videoProgress(id, ts) { return this.call('videoProgress', { params: { id: id }, body: { timestamp: ts }, noDelay: true, label: 'video ' + ts + 's' }); }
-            heartbeat(id, sk, term) { return this.call('heartbeat', { params: { id: id }, body: { stream_key: sk, terminal: !!term }, noDelay: true, label: 'heartbeat' }); }
-            claim(id) { return this.call('claimReward', { params: { id: id }, body: { platform: 0, location: 11, is_targeted: false }, label: 'claim' }); }
+
+            // GET /quests/@me  ->  {quests, excluded_quests, quest_enrollment_blocked_until}
+            async myQuests() {
+              const tries = [
+                { path: '/quests/@me', label: 'GET /quests/@me' },
+                { path: '/quests/@me?with_application=true', label: 'GET /quests/@me?with_application' }
+              ];
+              let best = null;
+              for (const t of tries) {
+                const r = await this.raw('GET', t.path);
+                r.label = t.label;
+                r.url = t.path;
+                r.count = extractQuests(r.data).length;
+                this.log('dim', t.label + ' -> HTTP ' + r.status + ' | ' + describePayload(r.data) + ' | quests=' + r.count);
+                if (r.count > 0) { this.lastQuestPayload = r; return r; }
+                if (!best || (r.status === 200 && best.status !== 200)) best = r;
+              }
+              this.lastQuestPayload = best;
+              return best;
+            }
+
+            async blockedUntil() {
+              const r = await this.raw('GET', '/quests/@me');
+              const v = r.data && (r.data.quest_enrollment_blocked_until || r.data.questEnrollmentBlockedUntil);
+              return v || null;
+            }
+
+            // POST /quests/{id}/enroll   body: { location }
+            enroll(id) {
+              return this.call('enroll', { params: { id: id }, body: { location: LOCATION }, label: 'enroll' });
+            }
+
+            // POST /quests/{id}/video-progress   body: { timestamp } (giay)
+            videoProgress(id, ts) {
+              const t = Math.max(1, Math.round(ts));
+              return this.call('videoProgress', { params: { id: id }, body: { timestamp: t }, noDelay: true, label: 'video ' + t + 's' });
+            }
+
+            // POST /quests/{id}/heartbeat   body: { stream_key?, application_id?, terminal? }
+            heartbeat(id, streamKey, terminal, appId) {
+              const body = {};
+              if (streamKey) body.stream_key = streamKey;
+              if (appId) body.application_id = appId;
+              if (terminal) body.terminal = true;
+              return this.call('heartbeat', { params: { id: id }, body: body, noDelay: true, label: 'heartbeat' });
+            }
+
+            // POST /quests/{id}/claim-reward   body: { location, platform }
+            claim(id) {
+              return this.call('claimReward', { params: { id: id }, body: { location: LOCATION, platform: PLATFORM }, label: 'claim' });
+            }
+
             entitlements() { return this.call('entitlements', { query: { exclude_consumed: true }, label: 'entitlements' }); }
             guilds() { return this.call('userGuilds', { label: 'guilds' }); }
             channels(g) { return this.call('guildChannels', { params: { id: g }, label: 'channels' }); }
@@ -624,10 +787,10 @@ jobs:
                 .reduce(function (s, e) { return s + (e.quantity || 1); }, 0);
             }
 
+            // stream_key dang "call:<channel_id>:1" (client that dang dung, chay duoc)
             async findVoiceChannel() {
               const g = await this.guilds();
-              const list = (Array.isArray(g) ? g : []).slice(0, 5);
-              for (const x of list) {
+              for (const x of (Array.isArray(g) ? g : []).slice(0, 5)) {
                 const ch = await this.channels(x.id);
                 const v = (Array.isArray(ch) ? ch : []).find(function (c) { return c.type === 2 || c.type === 13; });
                 if (v) return v.id;
@@ -638,33 +801,79 @@ jobs:
           EOF
 
           cat > src/core/engine.js <<'EOF'
-          import { DiscordClient, sleep, humanDelay, progressSteps } from '../discord/api.js';
+          import { DiscordClient, sleep, humanDelay, extractQuests, describePayload } from '../discord/api.js';
 
-          const DUR = new Set(['WATCH_VIDEO', 'WATCH_VIDEO_ON_MOBILE']);
-          const HB = new Set(['PLAY_ON_DESKTOP', 'PLAY_ON_DESKTOP_V2', 'STREAM_ON_DESKTOP', 'PLAY_ACTIVITY', 'PLAY_ON_XBOX', 'PLAY_ON_PLAYSTATION']);
-          const ACH = new Set(['ACHIEVEMENT_IN_GAME', 'ACHIEVEMENT_IN_ACTIVITY']);
+          const VIDEO = new Set(['WATCH_VIDEO', 'WATCH_VIDEO_ON_MOBILE']);
+          const ACTIVITY = new Set(['PLAY_ON_DESKTOP', 'PLAY_ON_DESKTOP_V2', 'STREAM_ON_DESKTOP', 'PLAY_ACTIVITY']);
+          const ACHIEVEMENT = new Set(['ACHIEVEMENT_IN_GAME', 'ACHIEVEMENT_IN_ACTIVITY']);
+          const REWARD_TYPE = { 1: 'code', 2: 'in-game', 3: 'collectible', 4: 'orbs', 5: 'nitro' };
+
+          // task_config_v2.tasks la map keyed by TYPE (theo spec) - van doc ca cac bien the cu
+          function taskConfig(q) {
+            const cfg = (q && q.config) || {};
+            return cfg.task_config_v2 || cfg.taskConfigV2 || cfg.task_config || cfg.taskConfig || {};
+          }
 
           function tasksOf(q) {
-            return Object.values((q && q.config && q.config.task_config_v2 && q.config.task_config_v2.tasks) || {});
+            const tc = taskConfig(q);
+            const tasks = tc.tasks || tc;
+            return Object.values(tasks || {}).filter(function (t) { return t && t.type; });
           }
+
+          function appIdOf(t) {
+            const a = (t && t.applications) || [];
+            return (a[0] && a[0].id) || null;
+          }
+
           function nameOf(q) {
-            return (q && q.config && q.config.messages && q.config.messages.quest_name)
-              || (q && q.config && q.config.application && q.config.application.name)
-              || (q && q.id);
+            const c = (q && q.config) || {};
+            const m = c.messages || {};
+            return m.quest_name || m.name
+              || (c.application && (c.application.name || c.application.name_localized))
+              || (q && q.id) || '?';
+          }
+
+          function rewardOf(q) {
+            const c = (q && q.config) || {};
+            const rc = c.rewards_config || c.rewardsConfig || {};
+            const rew = (rc.rewards || [])[0];
+            if (!rew) return '-';
+            if (rew.orb_quantity) return rew.orb_quantity + ' orbs';
+            if (rew.messages && rew.messages.name) return rew.messages.name;
+            return REWARD_TYPE[rew.type] || ('type ' + rew.type);
+          }
+
+          function normalize(item) {
+            if (!item || typeof item !== 'object') return null;
+            const q = item.quest || item;
+            const cfg = q.config || q.config_v2 || q;
+            const us = q.user_status || q.userStatus || item.user_status || item.userStatus || {};
+            const id = q.id || cfg.id || item.id;
+            if (!id) return null;
+            return { id: String(id), config: cfg, user_status: us };
+          }
+
+          function progValue(us, type) {
+            const p = us && us.progress;
+            if (!p) return 0;
+            const v = p[type];
+            if (v === undefined || v === null) return 0;
+            if (typeof v === 'number') return v;
+            return Number(v.value || 0);
           }
 
           export function progressOf(q) {
-            const st = (q && q.user_status) || {};
-            const prog = st.progress || {};
-            let cur = 0;
-            for (const k of Object.keys(prog)) cur += (prog[k].value || 0);
-            let tgt = 0;
-            for (const t of tasksOf(q)) tgt += (t.target || 0);
+            const us = (q && q.user_status) || {};
+            let cur = 0, tgt = 0;
+            for (const t of tasksOf(q)) {
+              cur += progValue(us, t.type);
+              tgt += Number(t.target || 0);
+            }
             if (!tgt) tgt = 1;
             return {
-              enrolled: !!st.enrolled_at,
-              completed: !!st.completed_at,
-              claimed: !!st.claimed_at,
+              enrolled: !!us.enrolled_at,
+              completed: !!us.completed_at,
+              claimed: !!us.claimed_at,
               pct: Math.min(100, Math.round((cur / tgt) * 100))
             };
           }
@@ -682,24 +891,50 @@ jobs:
               });
               this.stop = false;
               this.running = false;
-              this.state = { me: null, orbs: 0, quests: [], stats: { ok: 0, fail: 0, skip: 0 } };
+              this.state = { me: null, orbs: 0, quests: [], blockedUntil: null, stats: { ok: 0, fail: 0, skip: 0 }, debug: null };
             }
 
             emit() { this.onState(this.state); }
 
             async scan() {
               const me = await this.client.me();
-              if (me && me.code === 401) throw new Error('Token khong hop le');
+              if (!me || me.code === 401) throw new Error('Token khong hop le (hoac UA thieu Electron)');
               this.state.me = { id: me.id, username: me.username, global_name: me.global_name };
 
-              const d = await this.client.myQuests();
-              const list = ((d && d.quests) || []).filter(function (q) { return q && q.config; });
+              const res = await this.client.myQuests();
+              const items = extractQuests(res.data);
+              const list = items.map(normalize).filter(Boolean);
+
+              this.state.blockedUntil = (res.data && res.data.quest_enrollment_blocked_until) || null;
+
+              this.state.debug = {
+                at: new Date().toISOString(),
+                url: res.url,
+                status: res.status,
+                keys: Object.keys(res.data || {}),
+                items: items.length,
+                parsed: list.length,
+                sample: items[0] ? Object.keys(items[0]) : [],
+                sampleConfig: items[0] && items[0].config ? Object.keys(items[0].config) : [],
+                sampleTasks: items[0] ? Object.keys(taskConfig(normalize(items[0]))).slice(0, 10) : []
+              };
+
+              this.log('info', 'quests: HTTP ' + res.status + ' | ' + res.label + ' | ' + describePayload(res.data));
+              this.log('info', 'item=' + items.length + ' -> parse=' + list.length + ' quest');
+
+              if (res.status === 401) this.log('err', '401: token sai, hoac UA thieu chuoi Electron/x.y.z');
+              else if (items.length && !list.length) this.log('warn', 'item co nhung thieu id/config - xem /api/debug');
+              else if (!items.length) this.log('warn', 'API tra rong - xem /api/debug');
+
+              if (this.state.blockedUntil) {
+                this.log('warn', 'Quest dang bi tam khoa den ' + this.state.blockedUntil);
+              }
+
               this.state.quests = list.map(function (q) {
-                const rew = q.config.rewards_config && q.config.rewards_config.rewards && q.config.rewards_config.rewards[0];
                 return Object.assign({
                   id: q.id,
                   name: nameOf(q),
-                  reward: rew && rew.orb_quantity ? rew.orb_quantity + ' orbs' : ((rew && rew.messages && rew.messages.name) || '-'),
+                  reward: rewardOf(q),
                   types: tasksOf(q).map(function (t) { return t.type; }),
                   colors: q.config.colors
                 }, progressOf(q));
@@ -710,90 +945,156 @@ jobs:
               this.log('info', 'Quet xong: ' + this.state.quests.length + ' quest');
             }
 
-            async runOnce() {
+            // ───── video: ton trong gioi han timestamp <= (now - enrolled_at) + lead ─────
+            async doVideo(q, t, n) {
               const c = this.getConfig();
-              const d = await this.client.myQuests();
-              const list = ((d && d.quests) || []).filter(function (q) { return q && q.config; });
+              const target = Number(t.target) || 0;
+              if (!target) return false;
+              const enrolled = Date.parse((q.user_status && q.user_status.enrolled_at) || '') || Date.now();
+              const started = Date.now();
 
-              for (const q of list) {
-                if (this.stop) break;
-                const p = progressOf(q);
-                const n = nameOf(q);
+              while (!this.stop) {
+                const allowed = Math.floor((Date.now() - enrolled) / 1000) + c.videoMaxLeadSec;
+                const ts = Math.min(target, Math.max(allowed, 1));
+                const r = await this.client.videoProgress(q.id, ts);
 
-                if ((c.exclude || []).indexOf(q.id) > -1) { this.state.stats.skip++; continue; }
-                if (c.skipExpired && q.config.expires_at && Date.parse(q.config.expires_at) < Date.now()) continue;
-                if (p.claimed) { this.state.stats.skip++; continue; }
-
-                if (p.completed && c.autoClaim) {
-                  await this.client.claim(q.id);
-                  this.log('ok', n + ': claim quest da xong');
-                  continue;
+                if (r && r.progress && r.progress[t.type] && r.progress[t.type].value >= target) {
+                  this.log('ok', n + ': video xong ' + target + 's');
+                  return true;
                 }
+                if (r && r.completed_at) { this.log('ok', n + ': video completed_at'); return true; }
 
-                try {
-                  await this.complete(q);
-                  this.state.stats.ok++;
-                } catch (e) {
-                  this.state.stats.fail++;
-                  this.log('err', n + ': ' + e.message);
+                this.log('dim', n + ': video ' + ts + '/' + target + 's');
+
+                if ((Date.now() - started) / 60000 > c.maxTaskMinutes) {
+                  this.log('warn', n + ': video qua ' + c.maxTaskMinutes + ' phut, bo qua');
+                  return false;
                 }
-                this.emit();
-                await sleep(humanDelay(2000, 6000));
+                await sleep(Math.round(c.videoIntervalMs * (0.85 + Math.random() * 0.3)));
               }
+              return false;
+            }
+
+            // ───── heartbeat cho PLAY_*/STREAM_*/PLAY_ACTIVITY: 60s/beat, watchdog 90s ─────
+            async doHeartbeat(q, t, n) {
+              const c = this.getConfig();
+              const target = Number(t.target) || 0;
+              if (!target) return false;
+              const appId = appIdOf(t);
+              const started = Date.now();
+              let needKey = (t.type === 'PLAY_ACTIVITY' || t.type === 'STREAM_ON_DESKTOP');
+              let key = needKey ? 'call:' + (await this.client.findVoiceChannel()) + ':1' : null;
+              let fails = 0;
+
+              while (!this.stop) {
+                const r = await this.client.heartbeat(q.id, key, false, appId);
+                const v = r && r.progress && r.progress[t.type] && r.progress[t.type].value;
+
+                if (typeof v === 'number') { fails = 0; this.log('dim', n + ': ' + t.type + ' ' + v + '/' + target + 's'); }
+                else { fails++; this.log('dim', n + ': ' + t.type + ' beat fail (' + fails + '/' + c.heartbeatMaxFails + ')'); }
+
+                if (typeof v === 'number' && v >= target) {
+                  if (key || appId) await this.client.heartbeat(q.id, key, true, appId);
+                  this.log('ok', n + ': ' + t.type + ' xong');
+                  return true;
+                }
+                if (fails >= c.heartbeatMaxFails) { this.log('warn', n + ': ' + t.type + ' fail lien tuc, bo qua'); return false; }
+                if ((Date.now() - started) / 60000 > c.maxTaskMinutes) { this.log('warn', n + ': ' + t.type + ' qua han'); return false; }
+
+                await sleep(Math.round(c.heartbeatSec * 1000 * (0.9 + Math.random() * 0.2)));
+              }
+              return false;
+            }
+
+            async doAchievement(q, t, n) {
+              const appId = appIdOf(t);
+              const r = await this.client.heartbeat(q.id, null, false, appId);
+              if (r && r.code === 403) {
+                this.log('warn', n + ': ' + t.type + ' can OAuth that (403) - xem README Orion');
+                return false;
+              }
+              this.log('ok', n + ': da ban heartbeat cho ' + t.type);
+              return true;
             }
 
             async complete(q) {
               const c = this.getConfig();
               const n = nameOf(q);
               const tasks = tasksOf(q);
-              if (!tasks.length) return;
+              if (!tasks.length) { this.log('warn', n + ': khong doc duoc task nao'); return; }
 
-              if (!(q.user_status && q.user_status.enrolled_at) && c.autoEnroll) {
-                await this.client.enroll(q.id);
-                this.log('ok', n + ': da nhan quest');
-                await sleep(humanDelay(1200, 3200));
-              }
-
-              let sk = null;
-              if (tasks.some(function (t) { return t.type === 'STREAM_ON_DESKTOP'; })) {
-                sk = 'call:' + (await this.client.findVoiceChannel()) + ':1';
+              if (!q.user_status.enrolled_at && c.autoEnroll) {
+                const r = await this.client.enroll(q.id);
+                if (r && r.code) this.log('warn', n + ': enroll ' + (r.message || r.code));
+                else {
+                  this.log('ok', n + ': da nhan quest');
+                  q.user_status.enrolled_at = new Date().toISOString();
+                }
+                await sleep(humanDelay(1200, 2600));
               }
 
               for (const t of tasks) {
-                const target = Number(t.target) || 0;
-                if (!target) continue;
-                const cur0 = (q.user_status && q.user_status.progress && q.user_status.progress[t.type] && q.user_status.progress[t.type].value) || 0;
-                if (cur0 >= target) continue;
+                if (this.stop) return;
+                if (progValue(q.user_status, t.type) >= Number(t.target || 0)) continue;
 
-                if (DUR.has(t.type)) {
-                  const steps = progressSteps(target, 6);
-                  for (const ts of steps) {
-                    await this.client.videoProgress(q.id, ts);
-                    this.log('dim', n + ': video ' + ts + '/' + target + 's');
-                    await sleep(humanDelay(1800, 4200));
+                if (VIDEO.has(t.type)) await this.doVideo(q, t, n);
+                else if (ACTIVITY.has(t.type)) {
+                  if (t.type === 'STREAM_ON_DESKTOP' && c.skipStream) {
+                    this.log('warn', n + ': STREAM_ON_DESKTOP can Go Live + nguoi thu 2 - bo qua');
+                    continue;
                   }
-                } else if (HB.has(t.type)) {
-                  let cur = cur0;
-                  let guard = 0;
-                  while (cur < target && guard++ < 300) {
-                    const r = await this.client.heartbeat(q.id, sk || 'call:0:1', false);
-                    const got = r && r.progress && r.progress[t.type] && r.progress[t.type].value;
-                    cur = (got !== undefined && got !== null) ? got : cur + c.heartbeatSec;
-                    this.log('dim', n + ': ' + t.type + ' ' + cur + '/' + target + 's');
-                    await sleep(humanDelay(c.heartbeatSec * 850, c.heartbeatSec * 1250));
-                  }
-                  if (sk) await this.client.heartbeat(q.id, sk, true);
-                } else if (ACH.has(t.type)) {
-                  await sleep(humanDelay(3000, 6000));
-                  await this.client.heartbeat(q.id, 'call:0:1', false);
+                  await this.doHeartbeat(q, t, n);
                 }
+                else if (ACHIEVEMENT.has(t.type)) await this.doAchievement(q, t, n);
+                else this.log('warn', n + ': task ' + t.type + ' chua ho tro');
               }
+            }
 
-              if (c.autoClaim) {
-                await sleep(humanDelay(2000, 5000));
-                const r = await this.client.claim(q.id);
-                if (r && r.code) this.log('warn', n + ': ' + (r.message || r.code));
-                else this.log('ok', n + ': DA CLAIM');
+            async runOnce() {
+              const c = this.getConfig();
+              const res = await this.client.myQuests();
+              const list = extractQuests(res.data).map(normalize).filter(Boolean);
+
+              const todo = list.filter((q) => {
+                if (this.stop) return false;
+                if ((c.exclude || []).indexOf(q.id) > -1) { this.state.stats.skip++; return false; }
+                if (c.skipExpired && q.config.expires_at && Date.parse(q.config.expires_at) < Date.now()) return false;
+                const p = progressOf(q);
+                if (p.claimed) { this.state.stats.skip++; return false; }
+                if (p.completed) return false;
+                return true;
+              });
+
+              let idx = 0;
+              const workers = Array.from({ length: Math.max(1, Math.min(c.maxConcurrent, todo.length)) }, async () => {
+                while (idx < todo.length && !this.stop) {
+                  const q = todo[idx++];
+                  try {
+                    await this.complete(q);
+                    this.state.stats.ok++;
+                  } catch (e) {
+                    this.state.stats.fail++;
+                    this.log('err', nameOf(q) + ': ' + e.message);
+                  }
+                  this.emit();
+                  await sleep(humanDelay(1500, 3500));
+                }
+              });
+              await Promise.all(workers);
+
+              if (c.autoClaim) await this.claimReady(list);
+            }
+
+            async claimReady(list) {
+              for (const q of (list || [])) {
+                if (this.stop) break;
+                const p = progressOf(q);
+                if (p.completed && !p.claimed) {
+                  const r = await this.client.claim(q.id);
+                  if (r && r.errors && r.errors.length) this.log('warn', nameOf(q) + ': claim ' + JSON.stringify(r.errors[0]));
+                  else if (r && r.code) this.log('warn', nameOf(q) + ': claim ' + (r.message || r.code));
+                  else this.log('ok', nameOf(q) + ': DA CLAIM');
+                }
               }
             }
 
@@ -842,16 +1143,52 @@ jobs:
 
           cat > src/server.js <<'EOF'
           import http from 'node:http';
-          import { exec } from 'node:child_process';
+          import { exec, execSync } from 'node:child_process';
           import { uiHtml, VERSION } from './ui.js';
           import { cfg, save } from './core/store.js';
+
+          const HOST = '127.0.0.1';
+          const FALLBACK_PORTS = [3890, 4200, 4500, 4800, 5000, 5500, 6000, 7000, 8000, 8080, 8443, 9000, 10000, 12345];
+
+          function readExcluded() {
+            const rs = [];
+            if (process.platform !== 'win32') return rs;
+            try {
+              const out = execSync('netsh interface ipv4 show excludedportrange protocol=tcp', { encoding: 'utf8', windowsHide: true });
+              for (const line of out.split(/\r?\n/)) {
+                const m = line.match(/^\s*(\d{2,5})\s+(\d{2,5})\s*\*?\s*$/);
+                if (m) rs.push([Number(m[1]), Number(m[2])]);
+              }
+            } catch (e) {}
+            return rs;
+          }
+
+          function inRanges(p, rs) {
+            for (const r of rs) if (p >= r[0] && p <= r[1]) return true;
+            return false;
+          }
+
+          function buildCandidates(preferred, rs) {
+            const out = [], seen = new Set();
+            const push = function (p) {
+              if (p < 1024 || p > 65535 || seen.has(p) || inRanges(p, rs)) return;
+              seen.add(p); out.push(p);
+            };
+            let p = preferred, guard = 0;
+            while (out.length < 24 && p <= 65535 && guard++ < 5000) {
+              push(p);
+              let jump = p + 1;
+              for (const r of rs) if (p >= r[0] && p <= r[1] && r[1] + 1 > jump) jump = r[1] + 1;
+              p = jump;
+            }
+            for (const f of FALLBACK_PORTS) push(f);
+            return out;
+          }
 
           export function startServer(engine, opts) {
             opts = opts || {};
             const open = opts.open !== false;
             const sse = new Set();
-            const HOST = opts.host || '127.0.0.1';
-            const MAX_TRIES = 12;
 
             engine.log = function (lv, msg) {
               const frame = 'data: ' + JSON.stringify({ t: Date.now(), lv: lv, msg: msg }) + '\n\n';
@@ -861,15 +1198,10 @@ jobs:
 
             function handler(req, res) {
               const u = new URL(req.url, 'http://localhost');
-
               const J = function (code, obj, type) {
-                res.writeHead(code, {
-                  'Content-Type': (type || 'application/json') + '; charset=utf-8',
-                  'Cache-Control': 'no-store'
-                });
+                res.writeHead(code, { 'Content-Type': (type || 'application/json') + '; charset=utf-8', 'Cache-Control': 'no-store' });
                 res.end(typeof obj === 'string' ? obj : JSON.stringify(obj));
               };
-
               const B = async function () {
                 let d = '';
                 for await (const chunk of req) d += chunk;
@@ -881,12 +1213,7 @@ jobs:
                   if (u.pathname === '/' || u.pathname === '/index.html') return J(200, uiHtml(), 'text/html');
 
                   if (u.pathname === '/api/logs') {
-                    res.writeHead(200, {
-                      'Content-Type': 'text/event-stream',
-                      'Cache-Control': 'no-cache',
-                      Connection: 'keep-alive',
-                      'X-Accel-Buffering': 'no'
-                    });
+                    res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', Connection: 'keep-alive', 'X-Accel-Buffering': 'no' });
                     res.write(':ok\n\n');
                     sse.add(res);
                     const hb = setInterval(function () { try { res.write(':hb\n\n'); } catch (e) {} }, 15000);
@@ -902,17 +1229,25 @@ jobs:
                       me: engine.state.me,
                       orbs: engine.state.orbs,
                       quests: engine.state.quests,
+                      blockedUntil: engine.state.blockedUntil,
                       stats: engine.state.stats,
                       settings: {
                         minDelayMs: cfg().minDelayMs,
                         maxDelayMs: cfg().maxDelayMs,
                         heartbeatSec: cfg().heartbeatSec,
+                        videoIntervalMs: cfg().videoIntervalMs,
                         maxRetries: cfg().maxRetries,
+                        maxConcurrent: cfg().maxConcurrent,
                         autoEnroll: cfg().autoEnroll,
                         autoClaim: cfg().autoClaim,
+                        skipStream: cfg().skipStream,
                         exclude: cfg().exclude
                       }
                     });
+                  }
+
+                  if (u.pathname === '/api/debug') {
+                    return J(200, { debug: engine.state.debug, raw: engine.client.lastQuestPayload });
                   }
 
                   if (u.pathname === '/api/token' && req.method === 'POST') {
@@ -940,6 +1275,14 @@ jobs:
                     return;
                   }
 
+                  if (u.pathname === '/api/claim' && req.method === 'POST') {
+                    const b = await B();
+                    const r = await engine.client.claim(b.id);
+                    const bad = (r && r.errors && r.errors.length) || (r && r.code);
+                    if (!bad) engine.log('ok', 'Da claim ' + b.id);
+                    return J(200, { ok: !bad, res: r });
+                  }
+
                   if (u.pathname === '/api/engine/start' && req.method === 'POST') {
                     if (!engine.running) engine.watch().catch(function (e) { engine.log('err', e.message); });
                     return J(200, { ok: true });
@@ -959,43 +1302,48 @@ jobs:
 
             let active = null;
 
-            function bind(port, left) {
-              const s = http.createServer(handler);
-
-              s.once('error', function (e) {
-                const busy = e.code === 'EACCES' || e.code === 'EADDRINUSE';
-                if (busy && left > 0) {
-                  console.log('  ! Cong ' + port + ' khong dung duoc (' + e.code + ') -> thu cong ' + (port + 1));
-                  return bind(port + 1, left - 1);
-                }
-                console.error('\n  Khong mo duoc cong ' + port + ' (' + e.code + '): ' + e.message);
-                console.error('  Thu: DiscordQuestsAuto.exe --port 3636\n');
-                console.error('  Kiem tra: netsh interface ipv4 show excludedportrange protocol=tcp\n');
+            function tryListen(port) {
+              return new Promise(function (resolve) {
+                const s = http.createServer(handler);
+                let done = false;
+                const fin = function (v) { if (done) return; done = true; resolve(v); };
+                s.once('error', function () { fin(null); });
+                s.once('listening', function () { fin(s); });
+                s.listen(port, HOST);
               });
-
-              s.once('listening', function () {
-                active = s;
-                if (Number(cfg().port) !== port) save({ port: port });
-                const url = 'http://' + HOST + ':' + port;
-                console.log('\n  ======================================');
-                console.log('   Discord Quests Auto  v' + VERSION);
-                console.log('  ======================================');
-                console.log('  UI      : ' + url);
-                console.log('  Du lieu : ' + cfg().dataDir + '\n');
-                if (open) {
-                  const c = process.platform === 'win32'
-                    ? 'start "" "' + url + '"'
-                    : process.platform === 'darwin' ? 'open "' + url + '"' : 'xdg-open "' + url + '"';
-                  exec(c, function () {});
-                }
-              });
-
-              s.listen(port, HOST);
-              return s;
             }
 
-            const startPort = Math.min(65535, Math.max(1024, Number(process.env.DQA_PORT) || Number(cfg().port) || 3636));
-            bind(startPort, MAX_TRIES);
+            function announce(port) {
+              const url = 'http://' + HOST + ':' + port;
+              if (Number(cfg().port) !== port) save({ port: port });
+              console.log('\n  ======================================');
+              console.log('   Discord Quests Auto  v' + VERSION);
+              console.log('  ======================================');
+              console.log('  UI      : ' + url);
+              console.log('  Debug   : ' + url + '/api/debug');
+              console.log('  Du lieu : ' + cfg().dataDir + '\n');
+              if (open) {
+                const c = process.platform === 'win32'
+                  ? 'start "" "' + url + '"'
+                  : process.platform === 'darwin' ? 'open "' + url + '"' : 'xdg-open "' + url + '"';
+                exec(c, function () {});
+              }
+            }
+
+            (async function () {
+              const preferred = Math.min(65535, Math.max(1024, Number(process.env.DQA_PORT) || Number(cfg().port) || 3636));
+              const rs = readExcluded();
+              if (rs.length) console.log('  Windows dang khoa ' + rs.length + ' dai cong (Hyper-V/WSL/Docker) - dang do cong trong...');
+              for (const p of buildCandidates(preferred, rs)) {
+                const s = await tryListen(p);
+                if (s) {
+                  active = s;
+                  if (p !== preferred) console.log('  ! Cong ' + preferred + ' bi chiem -> dung cong ' + p);
+                  return announce(p);
+                }
+              }
+              console.error('\n  Khong tim duoc cong nao. Chay Admin: net stop winnat && net start winnat\n');
+            })();
 
             process.on('SIGINT', function () {
               engine.halt();
@@ -1015,10 +1363,7 @@ jobs:
 
           const args = process.argv.slice(2);
           const has = function (f) { return args.indexOf(f) > -1; };
-          const val = function (f) {
-            const i = args.indexOf(f);
-            return i > -1 ? args[i + 1] : null;
-          };
+          const val = function (f) { const i = args.indexOf(f); return i > -1 ? args[i + 1] : null; };
           const C = { info: '\x1b[36m', ok: '\x1b[32m', warn: '\x1b[33m', err: '\x1b[31m', dim: '\x1b[90m' };
           const log = function (lv, m) {
             console.log((C[lv] || '') + '[' + new Date().toLocaleTimeString('vi-VN') + '] ' + m + '\x1b[0m');
@@ -1034,17 +1379,12 @@ jobs:
             }
 
             const token = (cfg().token || process.env.DISCORD_TOKEN || '').trim();
-            const engine = new Engine({
-              token: token,
-              getConfig: cfg,
-              onLog: log,
-              storage: nodeStorage
-            });
+            const engine = new Engine({ token: token, getConfig: cfg, onLog: log, storage: nodeStorage });
 
             console.log('');
             console.log('   ==============================================');
             console.log('    Discord Quests Auto   v' + VERSION);
-            console.log('    Anti rate-limit - chay 24/7');
+            console.log('    API theo docs.discord.food/resources/quests');
             console.log('    Du lieu: ' + DATA_DIR);
             console.log('   ==============================================');
             console.log('');
@@ -1122,11 +1462,8 @@ jobs:
 
           console.log('[2/5] SEA config...');
           fs.writeFileSync(path.join(work, 'sea-config.json'), JSON.stringify({
-            main: bundle,
-            output: blob,
-            disableExperimentalSEAWarning: true,
-            useSnapshot: false,
-            useCodeCache: false
+            main: bundle, output: blob, disableExperimentalSEAWarning: true,
+            useSnapshot: false, useCodeCache: false
           }, null, 2));
           execSync('node --experimental-sea-config sea-config.json', { cwd: work, stdio: 'inherit' });
 
@@ -1135,12 +1472,8 @@ jobs:
 
           console.log('[4/5] Go chu ky...');
           if (isWin) {
-            try {
-              execSync('signtool remove /s "' + exe + '"', { stdio: 'ignore' });
-              console.log('   da go');
-            } catch (e) {
-              console.log('   bo qua (khong co signtool)');
-            }
+            try { execSync('signtool remove /s "' + exe + '"', { stdio: 'ignore' }); console.log('   da go'); }
+            catch (e) { console.log('   bo qua (khong co signtool)'); }
           } else {
             try { execSync('codesign --remove-signature "' + exe + '"', { stdio: 'ignore' }); } catch (e) {}
           }
