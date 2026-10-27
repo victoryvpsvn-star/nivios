@@ -5,7 +5,7 @@ on:
     inputs:
       version:
         description: 'Version'
-        default: '3.1.0'
+        default: '3.2.0'
   push:
     tags: ['v*']
 
@@ -17,7 +17,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  VERSION: ${{ inputs.version || '3.1.0' }}
+  VERSION: ${{ inputs.version || '3.2.0' }}
 
 jobs:
   build:
@@ -42,6 +42,7 @@ jobs:
             "private": true,
             "type": "module",
             "scripts": { "build": "node build.mjs" },
+            "dependencies": { "ws": "^8.18.0" },
             "devDependencies": { "esbuild": "^0.24.0" }
           }
           EOF
@@ -166,6 +167,7 @@ jobs:
               <div class="av" id="av">?</div>
               <div><h2 id="un">...</h2><div class="s">Discord Quests Auto</div></div>
               <div class="tags">
+                <span class="tag" id="gw">GW: OFF</span>
                 <span class="tag orb" id="orb">0 orbs</span>
                 <span class="tag" id="run">ĐÃ DỪNG</span>
                 <button class="btn sm gh" id="out">Đổi token</button>
@@ -196,8 +198,11 @@ jobs:
                 <div><label>Delay max (ms)</label><input id="cMax" type="number"></div>
                 <div><label>Nhịp heartbeat (giây)</label><input id="cHb" type="number"></div>
                 <div><label>Nhịp video (ms)</label><input id="cVid" type="number"></div>
+                <div><label>Cộng dư mỗi task (giây)</label><input id="cOv" type="number"></div>
                 <div><label>Retry tối đa</label><input id="cRe" type="number"></div>
                 <div><label>Chạy song song tối đa</label><input id="cPar" type="number"></div>
+                <div><label>% vòng nghỉ ngẫu nhiên</label><input id="cIdle" type="number"></div>
+                <div><label>Dùng Gateway selfbot</label><select id="cGw"><option value="1">Bật</option><option value="0">Tắt</option></select></div>
                 <div><label>Tự nhận quest</label><select id="cEn"><option value="1">Bật</option><option value="0">Tắt</option></select></div>
                 <div><label>Tự claim (dễ dính captcha)</label><select id="cCl"><option value="0">Tắt</option><option value="1">Bật</option></select></div>
                 <div><label>Bỏ qua STREAM_ON_DESKTOP</label><select id="cSk"><option value="1">Bật</option><option value="0">Tắt</option></select></div>
@@ -205,6 +210,8 @@ jobs:
               </div>
               <label>Bỏ qua quest (ID, cách nhau dấu phẩy)</label>
               <input id="cEx">
+              <label style="margin-top:10px">Ghi đè client_build_number (trống = tự dò)</label>
+              <input id="cBd" placeholder="vd 355624">
               <button class="btn" style="margin-top:14px" id="save">Lưu cài đặt</button>
             </div>
             <div class="log" id="log"></div>
@@ -298,6 +305,8 @@ jobs:
               $('#av').textContent = (st.me.global_name || st.me.username || '?')[0].toUpperCase();
             }
             $('#orb').textContent = (st.orbs || 0) + ' orbs';
+            $('#gw').textContent = 'GW: ' + (st.gateway || 'OFF').toUpperCase();
+            $('#gw').className = 'tag' + (st.gateway === 'ready' ? ' on' : '');
             $('#run').textContent = st.running ? 'ĐANG FARM' : 'ĐÃ DỪNG';
             $('#run').className = 'tag' + (st.running ? ' on' : '');
             $('#s4').textContent = st.orbs || 0;
@@ -312,7 +321,7 @@ jobs:
               ban.textContent = 'Tạm khoá enroll đến ' + new Date(st.blockedUntil).toLocaleString('vi-VN') + '.';
             } else if (st.debug && st.debug.quests === 0) {
               ban.className = 'banner warn show';
-              ban.textContent = 'API trả 0 quest (excluded=' + (st.debug.excluded || 0) + '). Bấm Debug để xem raw.';
+              ban.textContent = 'API trả 0 quest (build=' + (st.debug.build || '?') + '). Thử đổi build hoặc bật Gateway.';
             } else { ban.className = 'banner'; }
 
             var q = st.quests || [];
@@ -345,13 +354,17 @@ jobs:
               $('#cMax').value = c.maxDelayMs;
               $('#cHb').value = c.heartbeatSec;
               $('#cVid').value = c.videoIntervalMs;
+              $('#cOv').value = c.overshootSec;
               $('#cRe').value = c.maxRetries;
               $('#cPar').value = c.maxConcurrent;
+              $('#cIdle').value = Math.round((c.idleGapChance || 0) * 100);
+              $('#cGw').value = c.useGateway ? '1' : '0';
               $('#cEn').value = c.autoEnroll ? '1' : '0';
               $('#cCl').value = c.autoClaim ? '1' : '0';
               $('#cSk').value = c.skipStream ? '1' : '0';
               $('#cPa').value = c.pauseWhenSuspended ? '1' : '0';
               $('#cEx').value = (c.exclude || []).join(', ');
+              $('#cBd').value = c.buildNumber || '';
             }
           }
 
@@ -381,9 +394,13 @@ jobs:
             await j('/api/settings', {
               minDelayMs: +$('#cMin').value, maxDelayMs: +$('#cMax').value,
               heartbeatSec: +$('#cHb').value, videoIntervalMs: +$('#cVid').value,
+              overshootSec: +$('#cOv').value,
               maxRetries: +$('#cRe').value, maxConcurrent: +$('#cPar').value,
+              idleGapChance: Math.max(0, Math.min(100, +$('#cIdle').value)) / 100,
+              useGateway: $('#cGw').value === '1',
               autoEnroll: $('#cEn').value === '1', autoClaim: $('#cCl').value === '1',
               skipStream: $('#cSk').value === '1', pauseWhenSuspended: $('#cPa').value === '1',
+              buildNumber: +$('#cBd').value || 0,
               exclude: $('#cEx').value.split(',').map(function (s) { return s.trim(); }).filter(Boolean)
             });
             log('ok', 'Đã lưu cài đặt');
@@ -409,24 +426,36 @@ jobs:
           export const DEFAULT_CONFIG = {
             port: 3636,
             openBrowser: true,
+            useGateway: true,
+
+            // nhip & jitter
             minDelayMs: 1200,
             maxDelayMs: 3200,
             heartbeatSec: 60,
             heartbeatMaxFails: 5,
             videoIntervalMs: 8000,
             videoMaxLeadSec: 10,
-            maxTaskMinutes: 25,
+
+            // anti-ban
+            overshootSec: 45,
+            maxTaskMinutes: 30,
             maxConcurrent: 2,
+            idleGapChance: 0.25,
+            idleGapMaxSec: 300,
+
             maxRetries: 5,
             backoffBaseMs: 1500,
             backoffMaxMs: 60000,
             timeoutMs: 30000,
+
             autoEnroll: true,
             autoClaim: false,
             skipExpired: true,
             skipStream: true,
             pauseWhenSuspended: false,
             watchIntervalMs: 120000,
+
+            buildNumber: 0,
             exclude: [],
             token: ''
           };
@@ -491,18 +520,15 @@ jobs:
           // Endpoint theo docs.discord.food/resources/quests (2026)
           const API = 'https://discord.com/api/v9';
 
-          const ELECTRON = '37.2.0';
-          const CHROME = '138.0.7204.251';
-          const APP = '1.0.9189';
-          // BAT BUOC co "Electron/x.y.z" trong UA, khong thi endpoint quests tra 401
-          const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
-                     '(KHTML, like Gecko) discord/' + APP + ' Chrome/' + CHROME +
-                     ' Electron/' + ELECTRON + ' Safari/537.36';
+          export const ELECTRON = '37.2.0';
+          export const CHROME = '138.0.7204.251';
+          export const APP = '1.0.9189';
+          export const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
+                             '(KHTML, like Gecko) discord/' + APP + ' Chrome/' + CHROME +
+                             ' Electron/' + ELECTRON + ' Safari/537.36';
 
-          // location = quest content type; 11 = QUEST_HOME_DESKTOP
-          export const LOCATION = 11;
-          // platform: 0 = CROSS_PLATFORM
-          export const PLATFORM = 0;
+          export const LOCATION = 11;   // QUEST_HOME_DESKTOP
+          export const PLATFORM = 0;    // CROSS_PLATFORM
 
           export const ENDPOINTS = {
             me:            { m: 'GET',  p: '/users/@me' },
@@ -511,6 +537,9 @@ jobs:
             quests:        { m: 'GET',  p: '/quests/@me' },
             claimed:       { m: 'GET',  p: '/quests/@me/claimed' },
             questConfig:   { m: 'GET',  p: '/quests/{id}' },
+            decision:      { m: 'GET',  p: '/quests/decision' },
+            getDecisions:  { m: 'GET',  p: '/quests/get-decisions' },
+            earned:        { m: 'GET',  p: '/quests/earned-decision' },
             enroll:        { m: 'POST', p: '/quests/{id}/enroll' },
             videoProgress: { m: 'POST', p: '/quests/{id}/video-progress' },
             heartbeat:     { m: 'POST', p: '/quests/{id}/heartbeat' },
@@ -525,6 +554,7 @@ jobs:
           };
 
           export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+          export const rand = (a, b) => a + Math.random() * (b - a);
 
           export function gauss() {
             let u = 0, v = 0;
@@ -548,6 +578,15 @@ jobs:
               const r = (Math.random() * 16) | 0;
               return (c === 'x' ? r : ((r & 3) | 8)).toString(16);
             });
+          }
+
+          export function shuffle(a) {
+            const x = a.slice();
+            for (let i = x.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [x[i], x[j]] = [x[j], x[i]];
+            }
+            return x;
           }
 
           // ───────── doc payload khoan dung ─────────
@@ -577,12 +616,28 @@ jobs:
             return [];
           }
 
+          // /quests/decision va /quests/get-decisions tra {decisions:[{quest:{...}}]}
+          export function questsFromDecisions(p) {
+            const out = [];
+            if (!p) return out;
+            for (const x of asArray(p.decisions || p.quests || p.items)) {
+              const q = x && (x.quest || x.quests);
+              if (q && q.id) out.push(q);
+              else if (x && x.id && (x.config || x.task_config_v2 || x.taskConfigV2)) out.push(x);
+            }
+            const m = p.quests;
+            if (!out.length && m && !Array.isArray(m) && typeof m === 'object') {
+              for (const q of Object.values(m)) if (q && q.id) out.push(q);
+            }
+            return out;
+          }
+
           export function describePayload(p) {
             if (p === null || p === undefined) return 'null';
             if (Array.isArray(p)) return 'array(' + p.length + ')';
             if (typeof p !== 'object') return typeof p;
             const parts = ['keys=' + (Object.keys(p).join(',') || '-')];
-            for (const k of ['quests', 'excluded_quests', 'items', 'data', 'entitlements']) {
+            for (const k of ['quests', 'excluded_quests', 'decisions', 'items', 'data']) {
               if (Array.isArray(p[k])) parts.push(k + '=' + p[k].length);
             }
             if (p.quest_access_suspended_until) parts.push('SUSPENDED=' + p.quest_access_suspended_until);
@@ -599,9 +654,15 @@ jobs:
               this.storage = opts.storage || memoryStorage;
               this.onLog = opts.onLog || function () {};
               this.build = 0;
+              this.buildUsed = 0;
+              this.buildSource = '-';
               this.tokens = 60;
               this.last = Date.now();
               this.lastQuestPayload = null;
+              // phai ON DINH (tai lieu: client reuse ad session 30 phut)
+              this.launchId = rid();
+              this.hbSessionId = rid();
+              this.adSessionId = rid();
             }
 
             log(lv, m) { this.onLog(lv, m); }
@@ -618,41 +679,67 @@ jobs:
 
             async buildNumber() {
               if (this.build) return this.build;
+
+              const forced = Number(this.getConfig().buildNumber) || 0;
+              if (forced) { this.buildUsed = forced; this.buildSource = 'override'; return (this.build = forced); }
+
               const c = await this.storage.get('discordBuild');
-              if (c && Date.now() - c.at < 21600000) return (this.build = c.build);
+              if (c && c.build && Date.now() - c.at < 21600000) {
+                this.buildUsed = c.build; this.buildSource = 'cache';
+                return (this.build = c.build);
+              }
+
+              // GLOBAL_ENV la JSON da escape, key la BUILD_NUMBER
+              const pats = [
+                /BUILD_NUMBER\\?"?\s*:\s*\\?"?(\d{5,7})/i,
+                /"build_?number\\?"?\s*:\s*\\?"?(\d{5,7})/i,
+                /assets\/(\d{5,7})\//
+              ];
+
               for (const u of ['https://discord.com/app', 'https://discord.com/login']) {
                 try {
                   const h = await (await fetch(u, { headers: { 'User-Agent': UA } })).text();
-                  const m = h.match(/"buildNumber"\s*:\s*(\d+)/) || h.match(/assets\/(\d+)\//);
-                  if (m) {
-                    const b = Number(m[1]);
-                    await this.storage.set('discordBuild', { build: b, at: Date.now() });
-                    return (this.build = b);
+                  for (const p of pats) {
+                    const m = h.match(p);
+                    if (m && Number(m[1]) > 100000) {
+                      const b = Number(m[1]);
+                      await this.storage.set('discordBuild', { build: b, at: Date.now() });
+                      this.buildUsed = b; this.buildSource = 'web';
+                      return (this.build = b);
+                    }
                   }
                 } catch (e) {}
               }
+
+              this.buildUsed = 350000; this.buildSource = 'fallback';
               return (this.build = 350000);
             }
 
-            async headers() {
+            // dung chung cho ca REST header va IDENTIFY cua gateway
+            async clientProperties() {
               const b = await this.buildNumber();
-              const sp = Buffer.from(JSON.stringify({
+              return {
                 os: 'Windows',
                 browser: 'Discord Client',
                 device: '',
                 system_locale: 'en-US',
                 browser_user_agent: UA,
                 browser_version: ELECTRON,
-                os_version: '10',
+                os_version: '10.0.22631',
+                client_version: APP,
                 referrer: '',
                 referring_domain: '',
                 release_channel: 'stable',
                 client_build_number: b,
                 client_event_source: null,
-                client_launch_id: rid(),
-                client_heartbeat_session_id: rid(),
+                client_launch_id: this.launchId,
+                client_heartbeat_session_id: this.hbSessionId,
                 client_app_state: 'focused'
-              })).toString('base64');
+              };
+            }
+
+            async headers() {
+              const sp = Buffer.from(JSON.stringify(await this.clientProperties())).toString('base64');
               return {
                 Authorization: this.token,
                 'User-Agent': UA,
@@ -662,6 +749,9 @@ jobs:
                 'X-Discord-Locale': 'en-US',
                 'X-Discord-Timezone': 'Asia/Bangkok',
                 'X-Debug-Options': 'bugReporterEnabled',
+                'Sec-Fetch-Dest': 'empty',
+                'Sec-Fetch-Mode': 'cors',
+                'Sec-Fetch-Site': 'same-origin',
                 Origin: 'https://discord.com',
                 Referer: 'https://discord.com/channels/@me'
               };
@@ -684,6 +774,8 @@ jobs:
                 return { status: 0, data: { _error: e.message } };
               }
             }
+
+            probe(path) { return this.raw('GET', path); }
 
             async call(key, o) {
               o = o || {};
@@ -714,11 +806,11 @@ jobs:
                   if (r.status === 429) {
                     const w = (p.retry_after !== undefined ? p.retry_after : 2) * 1000;
                     this.log('warn', label + ': 429 -> nghi ' + Math.round(w) + 'ms');
-                    await sleep(w);
+                    await sleep(w + rand(100, 500));
                     continue;
                   }
                   if (r.status === 401) { this.log('err', label + ': 401 - token sai hoac UA thieu Electron'); return p; }
-                  if (r.status === 403) { this.log('warn', label + ': 403 - task nay can OAuth/telemetry that'); return p; }
+                  if (r.status === 403) { this.log('warn', label + ': 403 - can OAuth/telemetry that'); return p; }
                   if (r.status === 404) return p;
                   if (a >= c.maxRetries) return p;
 
@@ -736,68 +828,81 @@ jobs:
 
             me() { return this.call('me', { label: 'me' }); }
 
-            // GET /quests/@me  ->  {quests, excluded_quests, quest_enrollment_blocked_until, quest_access_suspended_until}
             async questsInfo() {
               const r = await this.raw('GET', '/quests/@me');
               const d = r.data || {};
               return {
-                status: r.status,
-                url: '/quests/@me',
+                status: r.status, url: '/quests/@me',
                 quests: extractQuests(d),
                 excluded: Array.isArray(d.excluded_quests) ? d.excluded_quests : [],
                 blockedUntil: d.quest_enrollment_blocked_until || null,
                 suspendedUntil: d.quest_access_suspended_until || null,
-                keys: Object.keys(d),
-                raw: d
+                keys: Object.keys(d), raw: d
               };
             }
 
-            // thu bien the 2 CHI khi that su rong, cho 1.5s de khong tu ban 429
+            // gom quest tu NHIEU nguon, merge theo id, uu tien ban co user_status
             async myQuests(depth) {
               depth = depth || 0;
-              const a = await this.raw('GET', '/quests/@me');
-              a.count = extractQuests(a.data).length;
-              a.label = 'GET /quests/@me';
-              a.url = '/quests/@me';
-              this.log('dim', a.label + ' -> HTTP ' + a.status + ' | ' + describePayload(a.data));
 
-              if (a.status === 429 && depth < 3) {
-                const w = (a.data.retry_after || 5) * 1000;
-                this.log('warn', 'quests 429 -> nghi ' + Math.round(w) + 'ms');
-                await sleep(w + 400);
-                return this.myQuests(depth + 1);
-              }
+              const sources = [
+                { path: '/quests/@me', label: 'GET /quests/@me', pick: extractQuests },
+                { path: '/quests/get-decisions?placement=11&num_decisions_requested=15', label: 'GET /quests/get-decisions?placement=11', pick: questsFromDecisions },
+                { path: '/quests/decision?placement=11', label: 'GET /quests/decision?placement=11', pick: questsFromDecisions },
+                { path: '/quests/@me?with_application=true', label: 'GET /quests/@me?with_application', pick: extractQuests }
+              ];
 
-              if (a.status === 200) {
-                this.lastQuestPayload = a;
-                if (a.count === 0) {
-                  await sleep(1500);
-                  const b = await this.raw('GET', '/quests/@me?with_application=true');
-                  b.count = extractQuests(b.data).length;
-                  b.label = 'GET /quests/@me?with_application';
-                  b.url = '/quests/@me?with_application=true';
-                  this.log('dim', b.label + ' -> HTTP ' + b.status + ' | ' + describePayload(b.data));
-                  if (b.status === 200 && b.count > a.count) { this.lastQuestPayload = b; return b; }
+              const byId = new Map();
+              let main = null, last = null, retried = false;
+
+              for (const s of sources) {
+                const r = await this.raw('GET', s.path);
+                r.label = s.label; r.url = s.path;
+
+                let found = [];
+                try { found = s.pick(r.data) || []; } catch (e) { found = []; }
+                r.count = found.length;
+
+                this.log('dim', s.label + ' -> HTTP ' + r.status + ' | ' + describePayload(r.data) + ' | found=' + r.count);
+
+                if (r.status === 429 && !retried) {
+                  retried = true;
+                  const w = (r.data.retry_after || 5) * 1000;
+                  this.log('warn', '429 -> nghi ' + Math.round(w) + 'ms roi thu lai');
+                  await sleep(w + 400);
+                  return this.myQuests(depth + 1);
                 }
-                return a;
+                if (r.status !== 200) { last = r; await sleep(rand(400, 800)); continue; }
+                if (!main) main = r;
+
+                for (const q of found) {
+                  if (!q || !q.id) continue;
+                  const prev = byId.get(q.id);
+                  if (!prev) { byId.set(q.id, q); continue; }
+                  if (!prev.user_status && q.user_status) byId.set(q.id, q);
+                }
+
+                if (byId.size && s.path === '/quests/@me') break;
+                await sleep(byId.size ? rand(700, 1200) : rand(400, 800));
               }
 
-              this.lastQuestPayload = a;
-              return a;
+              const out = main || last || { status: 0, data: {}, url: '-', label: '-' };
+              out.data = Object.assign({}, (main && main.data) || {}, { quests: Array.from(byId.values()) });
+              out.count = byId.size;
+              out.fromDecisions = byId.size > 0 && !(main && main.data && Array.isArray(main.data.quests) && main.data.quests.length);
+              this.lastQuestPayload = out;
+              return out;
             }
 
-            // POST /quests/{id}/enroll   body: { location }
             enroll(id) {
               return this.call('enroll', { params: { id: id }, body: { location: LOCATION }, label: 'enroll' });
             }
 
-            // POST /quests/{id}/video-progress   body: { timestamp } (giay)
             videoProgress(id, ts) {
               const t = Math.max(1, Math.round(ts));
               return this.call('videoProgress', { params: { id: id }, body: { timestamp: t }, noDelay: true, label: 'video ' + t + 's' });
             }
 
-            // POST /quests/{id}/heartbeat   body: { stream_key?, application_id?, terminal? }
             heartbeat(id, streamKey, terminal, appId) {
               const body = {};
               if (streamKey) body.stream_key = streamKey;
@@ -806,7 +911,6 @@ jobs:
               return this.call('heartbeat', { params: { id: id }, body: body, noDelay: true, label: 'heartbeat' });
             }
 
-            // POST /quests/{id}/claim-reward   body: { location, platform }
             claim(id) {
               return this.call('claimReward', { params: { id: id }, body: { location: LOCATION, platform: PLATFORM }, label: 'claim' });
             }
@@ -823,7 +927,6 @@ jobs:
                 .reduce(function (s, e) { return s + (e.quantity || 1); }, 0);
             }
 
-            // stream_key dang "call:<channel_id>:1" - format client dang dung, chay duoc
             async findVoiceChannel() {
               const g = await this.guilds();
               for (const x of (Array.isArray(g) ? g : []).slice(0, 5)) {
@@ -836,768 +939,4 @@ jobs:
           }
           EOF
 
-          cat > src/core/engine.js <<'EOF'
-          import { DiscordClient, sleep, humanDelay, extractQuests, describePayload } from '../discord/api.js';
-
-          const VIDEO = new Set(['WATCH_VIDEO', 'WATCH_VIDEO_ON_MOBILE']);
-          const ACTIVITY = new Set(['PLAY_ON_DESKTOP', 'PLAY_ON_DESKTOP_V2', 'STREAM_ON_DESKTOP', 'PLAY_ACTIVITY']);
-          const ACHIEVEMENT = new Set(['ACHIEVEMENT_IN_GAME', 'ACHIEVEMENT_IN_ACTIVITY']);
-          const REWARD_TYPE = { 1: 'code', 2: 'in-game', 3: 'collectible', 4: 'orbs', 5: 'nitro' };
-
-          // task_config_v2.tasks la map keyed by TYPE (theo spec)
-          function taskConfig(q) {
-            const cfg = (q && q.config) || {};
-            return cfg.task_config_v2 || cfg.taskConfigV2 || cfg.task_config || cfg.taskConfig || {};
-          }
-
-          function tasksOf(q) {
-            const tc = taskConfig(q);
-            const tasks = tc.tasks || tc;
-            return Object.values(tasks || {}).filter(function (t) { return t && t.type; });
-          }
-
-          // tu 07/2026 app id nam o task.applications[0].id
-          function appIdOf(t) {
-            const a = (t && t.applications) || [];
-            return (a[0] && a[0].id) || null;
-          }
-
-          function nameOf(q) {
-            const c = (q && q.config) || {};
-            const m = c.messages || {};
-            return m.quest_name || m.name
-              || (c.application && (c.application.name || c.application.name_localized))
-              || (q && q.id) || '?';
-          }
-
-          function rewardOf(q) {
-            const c = (q && q.config) || {};
-            const rc = c.rewards_config || c.rewardsConfig || {};
-            const rew = (rc.rewards || [])[0];
-            if (!rew) return '-';
-            if (rew.orb_quantity) return rew.orb_quantity + ' orbs';
-            if (rew.messages && rew.messages.name) return rew.messages.name;
-            return REWARD_TYPE[rew.type] || ('type ' + rew.type);
-          }
-
-          function normalize(item) {
-            if (!item || typeof item !== 'object') return null;
-            const q = item.quest || item;
-            const cfg = q.config || q.config_v2 || q;
-            const us = q.user_status || q.userStatus || item.user_status || item.userStatus || {};
-            const id = q.id || cfg.id || item.id;
-            if (!id) return null;
-            return { id: String(id), config: cfg, user_status: us };
-          }
-
-          function progValue(us, type) {
-            const p = us && us.progress;
-            if (!p) return 0;
-            const v = p[type];
-            if (v === undefined || v === null) return 0;
-            if (typeof v === 'number') return v;
-            return Number(v.value || 0);
-          }
-
-          function future(ts) {
-            if (!ts) return false;
-            const t = Date.parse(ts);
-            return Number.isFinite(t) && t > Date.now();
-          }
-
-          export function progressOf(q) {
-            const us = (q && q.user_status) || {};
-            let cur = 0, tgt = 0;
-            for (const t of tasksOf(q)) {
-              cur += progValue(us, t.type);
-              tgt += Number(t.target || 0);
-            }
-            if (!tgt) tgt = 1;
-            return {
-              enrolled: !!us.enrolled_at,
-              completed: !!us.completed_at,
-              claimed: !!us.claimed_at,
-              pct: Math.min(100, Math.round((cur / tgt) * 100))
-            };
-          }
-
-          export class Engine {
-            constructor(opts) {
-              this.getConfig = opts.getConfig;
-              this.log = opts.onLog || function () {};
-              this.onState = opts.onState || function () {};
-              this.client = new DiscordClient({
-                token: opts.token,
-                getConfig: opts.getConfig,
-                onLog: this.log,
-                storage: opts.storage
-              });
-              this.stop = false;
-              this.running = false;
-              this.state = {
-                me: null, orbs: 0, quests: [],
-                blockedUntil: null, suspendedUntil: null,
-                excludedCount: 0, excludedIds: [],
-                questsRaw: null, questsAt: 0,
-                stats: { ok: 0, fail: 0, skip: 0 }, debug: null
-              };
-            }
-
-            emit() { this.onState(this.state); }
-
-            async scan() {
-              const me = await this.client.me();
-              if (!me || me.code === 401) throw new Error('Token khong hop le (hoac UA thieu Electron)');
-              this.state.me = { id: me.id, username: me.username, global_name: me.global_name };
-
-              const res = await this.client.myQuests();
-              const d = res.data || {};
-              const items = extractQuests(d);
-              const list = items.map(normalize).filter(Boolean);
-
-              this.state.blockedUntil = d.quest_enrollment_blocked_until || null;
-              this.state.suspendedUntil = d.quest_access_suspended_until || null;
-              this.state.excludedCount = Array.isArray(d.excluded_quests) ? d.excluded_quests.length : 0;
-              this.state.excludedIds = (Array.isArray(d.excluded_quests) ? d.excluded_quests : [])
-                .slice(0, 10).map(function (x) { return x && x.id; }).filter(Boolean);
-              this.state.questsRaw = d;
-              this.state.questsAt = Date.now();
-
-              this.state.debug = {
-                at: new Date().toISOString(),
-                url: res.url, status: res.status, keys: Object.keys(d),
-                quests: items.length,
-                excluded: this.state.excludedCount,
-                excludedIds: this.state.excludedIds,
-                blockedUntil: this.state.blockedUntil,
-                suspendedUntil: this.state.suspendedUntil,
-                parsed: list.length,
-                sample: items[0] ? Object.keys(items[0]) : [],
-                raw: d
-              };
-
-              this.log('info', 'quests: HTTP ' + res.status + ' | quests=' + items.length +
-                ' | excluded=' + this.state.excludedCount);
-              if (this.state.suspendedUntil) this.log('err', 'QUEST ACCESS SUSPENDED den ' + this.state.suspendedUntil);
-              if (this.state.blockedUntil) this.log('warn', 'Enrollment blocked den ' + this.state.blockedUntil);
-              if (!items.length) this.log('warn', 'quests RONG. raw=' + JSON.stringify(d).slice(0, 500));
-
-              this.state.quests = list.map(function (q) {
-                return Object.assign({
-                  id: q.id, name: nameOf(q), reward: rewardOf(q),
-                  types: tasksOf(q).map(function (t) { return t.type; }),
-                  colors: q.config.colors
-                }, progressOf(q));
-              });
-
-              try { this.state.orbs = await this.client.orbs(); } catch (e) {}
-              this.emit();
-              this.log('info', 'Quet xong: ' + this.state.quests.length + ' quest');
-            }
-
-            // ───── video: timestamp <= (now - enrolled_at)/1000 + lead ─────
-            async doVideo(q, t, n) {
-              const c = this.getConfig();
-              const target = Number(t.target) || 0;
-              if (!target) return false;
-              const enrolled = Date.parse((q.user_status && q.user_status.enrolled_at) || '') || Date.now();
-              const started = Date.now();
-
-              while (!this.stop) {
-                const allowed = Math.floor((Date.now() - enrolled) / 1000) + c.videoMaxLeadSec;
-                const ts = Math.min(target, Math.max(allowed, 1));
-                const r = await this.client.videoProgress(q.id, ts);
-
-                if (r && r.progress && r.progress[t.type] && r.progress[t.type].value >= target) {
-                  this.log('ok', n + ': video xong ' + target + 's');
-                  return true;
-                }
-                if (r && r.completed_at) { this.log('ok', n + ': video completed_at'); return true; }
-
-                this.log('dim', n + ': video ' + ts + '/' + target + 's');
-
-                if ((Date.now() - started) / 60000 > c.maxTaskMinutes) {
-                  this.log('warn', n + ': video qua ' + c.maxTaskMinutes + ' phut, bo qua');
-                  return false;
-                }
-                await sleep(Math.round(c.videoIntervalMs * (0.85 + Math.random() * 0.3)));
-              }
-              return false;
-            }
-
-            // ───── heartbeat: 60s/beat, 5 fail lien tuc thi bo, tran 25 phut ─────
-            async doHeartbeat(q, t, n) {
-              const c = this.getConfig();
-              const target = Number(t.target) || 0;
-              if (!target) return false;
-              const appId = appIdOf(t);
-              const started = Date.now();
-              const needKey = (t.type === 'PLAY_ACTIVITY' || t.type === 'STREAM_ON_DESKTOP');
-              const key = needKey ? 'call:' + (await this.client.findVoiceChannel()) + ':1' : null;
-              let fails = 0;
-
-              while (!this.stop) {
-                const r = await this.client.heartbeat(q.id, key, false, appId);
-                const v = r && r.progress && r.progress[t.type] && r.progress[t.type].value;
-
-                if (typeof v === 'number') { fails = 0; this.log('dim', n + ': ' + t.type + ' ' + v + '/' + target + 's'); }
-                else { fails++; this.log('dim', n + ': ' + t.type + ' beat fail (' + fails + '/' + c.heartbeatMaxFails + ')'); }
-
-                if (typeof v === 'number' && v >= target) {
-                  if (key || appId) await this.client.heartbeat(q.id, key, true, appId);
-                  this.log('ok', n + ': ' + t.type + ' xong');
-                  return true;
-                }
-                if (fails >= c.heartbeatMaxFails) { this.log('warn', n + ': ' + t.type + ' fail lien tuc, bo qua'); return false; }
-                if ((Date.now() - started) / 60000 > c.maxTaskMinutes) { this.log('warn', n + ': ' + t.type + ' qua han'); return false; }
-
-                await sleep(Math.round(c.heartbeatSec * 1000 * (0.9 + Math.random() * 0.2)));
-              }
-              return false;
-            }
-
-            async doAchievement(q, t, n) {
-              const r = await this.client.heartbeat(q.id, null, false, appIdOf(t));
-              if (r && r.code === 403) {
-                this.log('warn', n + ': ' + t.type + ' can OAuth that (403)');
-                return false;
-              }
-              this.log('ok', n + ': da ban heartbeat cho ' + t.type);
-              return true;
-            }
-
-            async complete(q) {
-              const c = this.getConfig();
-              const n = nameOf(q);
-              const tasks = tasksOf(q);
-              if (!tasks.length) { this.log('warn', n + ': khong doc duoc task nao'); return; }
-
-              if (!q.user_status.enrolled_at && c.autoEnroll) {
-                const r = await this.client.enroll(q.id);
-                if (r && r.code) this.log('warn', n + ': enroll ' + (r.message || r.code));
-                else {
-                  this.log('ok', n + ': da nhan quest');
-                  q.user_status.enrolled_at = new Date().toISOString();
-                }
-                await sleep(humanDelay(1200, 2600));
-              }
-
-              for (const t of tasks) {
-                if (this.stop) return;
-                if (progValue(q.user_status, t.type) >= Number(t.target || 0)) continue;
-
-                if (VIDEO.has(t.type)) await this.doVideo(q, t, n);
-                else if (ACTIVITY.has(t.type)) {
-                  if (t.type === 'STREAM_ON_DESKTOP' && c.skipStream) {
-                    this.log('warn', n + ': STREAM_ON_DESKTOP can Go Live + nguoi thu 2 - bo qua');
-                    continue;
-                  }
-                  await this.doHeartbeat(q, t, n);
-                }
-                else if (ACHIEVEMENT.has(t.type)) await this.doAchievement(q, t, n);
-                else this.log('warn', n + ': task ' + t.type + ' chua ho tro');
-              }
-            }
-
-            async runOnce() {
-              const c = this.getConfig();
-
-              if (c.pauseWhenSuspended && future(this.state.suspendedUntil)) {
-                this.log('warn', 'Dang bi treo quest den ' + this.state.suspendedUntil + ' - tam nghi');
-                return;
-              }
-
-              let d = this.state.questsRaw;
-              if (!d || Date.now() - (this.state.questsAt || 0) > 60000) {
-                const res = await this.client.myQuests();
-                d = res.data || {};
-                this.state.questsRaw = d;
-                this.state.questsAt = Date.now();
-              }
-
-              const list = extractQuests(d).map(normalize).filter(Boolean);
-
-              const todo = list.filter((q) => {
-                if ((c.exclude || []).indexOf(q.id) > -1) { this.state.stats.skip++; return false; }
-                if (c.skipExpired && q.config.expires_at && Date.parse(q.config.expires_at) < Date.now()) return false;
-                const p = progressOf(q);
-                if (p.claimed) { this.state.stats.skip++; return false; }
-                if (p.completed) return false;
-                return true;
-              });
-
-              let idx = 0;
-              const workers = Array.from({ length: Math.max(1, Math.min(c.maxConcurrent, todo.length)) }, async () => {
-                while (idx < todo.length && !this.stop) {
-                  const q = todo[idx++];
-                  try {
-                    await this.complete(q);
-                    this.state.stats.ok++;
-                  } catch (e) {
-                    this.state.stats.fail++;
-                    this.log('err', nameOf(q) + ': ' + e.message);
-                  }
-                  this.emit();
-                  await sleep(humanDelay(1500, 3500));
-                }
-              });
-              await Promise.all(workers);
-
-              if (c.autoClaim) await this.claimReady(list);
-            }
-
-            async claimReady(list) {
-              for (const q of (list || [])) {
-                if (this.stop) break;
-                const p = progressOf(q);
-                if (!p.completed || p.claimed) continue;
-                const r = await this.client.claim(q.id);
-                if (r && r.errors && r.errors.length) this.log('warn', nameOf(q) + ': claim ' + JSON.stringify(r.errors[0]));
-                else if (r && r.code) this.log('warn', nameOf(q) + ': claim ' + (r.message || r.code));
-                else this.log('ok', nameOf(q) + ': DA CLAIM');
-              }
-            }
-
-            async watch() {
-              this.running = true;
-              this.stop = false;
-              this.log('ok', 'Vong lap 24/7 bat');
-              while (!this.stop) {
-                try {
-                  await this.scan();
-                  await this.runOnce();
-                } catch (e) {
-                  this.log('err', 'vong lap: ' + e.message);
-                }
-                await sleep(this.getConfig().watchIntervalMs);
-              }
-              this.running = false;
-            }
-
-            halt() { this.stop = true; this.log('warn', 'Da dung'); }
-          }
-          EOF
-
-          cat > src/ui.js <<'EOF'
-          import fs from 'node:fs';
-          import path from 'node:path';
-
-          const INLINE = typeof __INDEX_HTML__ === 'string' ? __INDEX_HTML__ : null;
-          let cache = null;
-
-          export function uiHtml() {
-            if (cache) return cache;
-            if (INLINE) return (cache = INLINE);
-            const cands = [
-              path.join(process.cwd(), 'index.html'),
-              path.join(path.dirname(process.execPath), 'index.html')
-            ];
-            for (const p of cands) {
-              try { return (cache = fs.readFileSync(p, 'utf8')); } catch (e) {}
-            }
-            return (cache = '<h1>Thieu index.html</h1>');
-          }
-
-          export const VERSION = typeof __BUILD_VERSION__ === 'string' ? __BUILD_VERSION__ : 'dev';
-          EOF
-
-          cat > src/server.js <<'EOF'
-          import http from 'node:http';
-          import { exec, execSync } from 'node:child_process';
-          import { uiHtml, VERSION } from './ui.js';
-          import { cfg, save } from './core/store.js';
-
-          const HOST = '127.0.0.1';
-          const FALLBACK_PORTS = [3890, 4200, 4500, 4800, 5000, 5500, 6000, 7000, 8000, 8080, 8443, 9000, 10000, 12345];
-
-          function readExcluded() {
-            const rs = [];
-            if (process.platform !== 'win32') return rs;
-            try {
-              const out = execSync('netsh interface ipv4 show excludedportrange protocol=tcp', { encoding: 'utf8', windowsHide: true });
-              for (const line of out.split(/\r?\n/)) {
-                const m = line.match(/^\s*(\d{2,5})\s+(\d{2,5})\s*\*?\s*$/);
-                if (m) rs.push([Number(m[1]), Number(m[2])]);
-              }
-            } catch (e) {}
-            return rs;
-          }
-
-          function inRanges(p, rs) {
-            for (const r of rs) if (p >= r[0] && p <= r[1]) return true;
-            return false;
-          }
-
-          function buildCandidates(preferred, rs) {
-            const out = [], seen = new Set();
-            const push = function (p) {
-              if (p < 1024 || p > 65535 || seen.has(p) || inRanges(p, rs)) return;
-              seen.add(p); out.push(p);
-            };
-            let p = preferred, guard = 0;
-            while (out.length < 24 && p <= 65535 && guard++ < 5000) {
-              push(p);
-              let jump = p + 1;
-              for (const r of rs) if (p >= r[0] && p <= r[1] && r[1] + 1 > jump) jump = r[1] + 1;
-              p = jump;
-            }
-            for (const f of FALLBACK_PORTS) push(f);
-            return out;
-          }
-
-          export function startServer(engine, opts) {
-            opts = opts || {};
-            const open = opts.open !== false;
-            const sse = new Set();
-
-            engine.log = function (lv, msg) {
-              const frame = 'data: ' + JSON.stringify({ t: Date.now(), lv: lv, msg: msg }) + '\n\n';
-              for (const r of sse) { try { r.write(frame); } catch (e) {} }
-              console.log('[' + lv + '] ' + msg);
-            };
-
-            function handler(req, res) {
-              const u = new URL(req.url, 'http://localhost');
-              const J = function (code, obj, type) {
-                res.writeHead(code, { 'Content-Type': (type || 'application/json') + '; charset=utf-8', 'Cache-Control': 'no-store' });
-                res.end(typeof obj === 'string' ? obj : JSON.stringify(obj, null, type === 'pretty' ? 2 : 0));
-              };
-              const B = async function () {
-                let d = '';
-                for await (const chunk of req) d += chunk;
-                try { return JSON.parse(d || '{}'); } catch (e) { return {}; }
-              };
-
-              (async function () {
-                try {
-                  if (u.pathname === '/' || u.pathname === '/index.html') return J(200, uiHtml(), 'text/html');
-
-                  if (u.pathname === '/api/logs') {
-                    res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', Connection: 'keep-alive', 'X-Accel-Buffering': 'no' });
-                    res.write(':ok\n\n');
-                    sse.add(res);
-                    const hb = setInterval(function () { try { res.write(':hb\n\n'); } catch (e) {} }, 15000);
-                    req.on('close', function () { clearInterval(hb); sse.delete(res); });
-                    return;
-                  }
-
-                  if (u.pathname === '/api/state') {
-                    return J(200, {
-                      version: VERSION,
-                      token: cfg().token,
-                      running: engine.running,
-                      me: engine.state.me,
-                      orbs: engine.state.orbs,
-                      quests: engine.state.quests,
-                      blockedUntil: engine.state.blockedUntil,
-                      suspendedUntil: engine.state.suspendedUntil,
-                      debug: engine.state.debug ? { quests: engine.state.debug.quests, excluded: engine.state.debug.excluded } : null,
-                      stats: engine.state.stats,
-                      settings: {
-                        minDelayMs: cfg().minDelayMs,
-                        maxDelayMs: cfg().maxDelayMs,
-                        heartbeatSec: cfg().heartbeatSec,
-                        videoIntervalMs: cfg().videoIntervalMs,
-                        maxRetries: cfg().maxRetries,
-                        maxConcurrent: cfg().maxConcurrent,
-                        autoEnroll: cfg().autoEnroll,
-                        autoClaim: cfg().autoClaim,
-                        skipStream: cfg().skipStream,
-                        pauseWhenSuspended: cfg().pauseWhenSuspended,
-                        exclude: cfg().exclude
-                      }
-                    });
-                  }
-
-                  if (u.pathname === '/api/debug') {
-                    const a = await engine.client.questsInfo();
-                    return J(200, {
-                      debug: engine.state.debug,
-                      lastQuestPayload: engine.client.lastQuestPayload,
-                      live: {
-                        status: a.status,
-                        keys: a.keys,
-                        quests: a.quests.length,
-                        excluded: a.excluded.length,
-                        excludedIds: a.excluded.slice(0, 20).map(function (x) { return x && x.id; }),
-                        blockedUntil: a.blockedUntil,
-                        suspendedUntil: a.suspendedUntil,
-                        raw: a.raw
-                      }
-                    });
-                  }
-
-                  if (u.pathname === '/api/token' && req.method === 'POST') {
-                    const b = await B();
-                    save({ token: String(b.token || '').trim() });
-                    engine.client.token = cfg().token;
-                    engine.log('ok', 'Da luu token');
-                    if (!engine.running && cfg().token) engine.watch().catch(function (e) { engine.log('err', e.message); });
-                    return J(200, { ok: true });
-                  }
-
-                  if (u.pathname === '/api/settings' && req.method === 'POST') {
-                    save(await B());
-                    return J(200, { ok: true });
-                  }
-
-                  if (u.pathname === '/api/scan' && req.method === 'POST') {
-                    await engine.scan();
-                    return J(200, { ok: true });
-                  }
-
-                  if (u.pathname === '/api/run' && req.method === 'POST') {
-                    J(200, { ok: true });
-                    engine.runOnce().catch(function (e) { engine.log('err', e.message); });
-                    return;
-                  }
-
-                  if (u.pathname === '/api/claim' && req.method === 'POST') {
-                    const b = await B();
-                    const r = await engine.client.claim(b.id);
-                    const bad = (r && r.errors && r.errors.length) || (r && r.code);
-                    if (!bad) engine.log('ok', 'Da claim ' + b.id);
-                    return J(200, { ok: !bad, res: r });
-                  }
-
-                  if (u.pathname === '/api/engine/start' && req.method === 'POST') {
-                    if (!engine.running) engine.watch().catch(function (e) { engine.log('err', e.message); });
-                    return J(200, { ok: true });
-                  }
-
-                  if (u.pathname === '/api/engine/stop' && req.method === 'POST') {
-                    engine.halt();
-                    return J(200, { ok: true });
-                  }
-
-                  J(404, { error: 'not found' });
-                } catch (e) {
-                  J(500, { error: e.message });
-                }
-              })();
-            }
-
-            let active = null;
-
-            function tryListen(port) {
-              return new Promise(function (resolve) {
-                const s = http.createServer(handler);
-                let done = false;
-                const fin = function (v) { if (done) return; done = true; resolve(v); };
-                s.once('error', function () { fin(null); });
-                s.once('listening', function () { fin(s); });
-                s.listen(port, HOST);
-              });
-            }
-
-            function announce(port) {
-              const url = 'http://' + HOST + ':' + port;
-              if (Number(cfg().port) !== port) save({ port: port });
-              console.log('\n  ======================================');
-              console.log('   Discord Quests Auto  v' + VERSION);
-              console.log('  ======================================');
-              console.log('  UI      : ' + url);
-              console.log('  Debug   : ' + url + '/api/debug');
-              console.log('  Du lieu : ' + cfg().dataDir + '\n');
-              if (open) {
-                const c = process.platform === 'win32'
-                  ? 'start "" "' + url + '"'
-                  : process.platform === 'darwin' ? 'open "' + url + '"' : 'xdg-open "' + url + '"';
-                exec(c, function () {});
-              }
-            }
-
-            (async function () {
-              const preferred = Math.min(65535, Math.max(1024, Number(process.env.DQA_PORT) || Number(cfg().port) || 3636));
-              const rs = readExcluded();
-              if (rs.length) console.log('  Windows dang khoa ' + rs.length + ' dai cong (Hyper-V/WSL/Docker) - dang do cong trong...');
-              for (const p of buildCandidates(preferred, rs)) {
-                const s = await tryListen(p);
-                if (s) {
-                  active = s;
-                  if (p !== preferred) console.log('  ! Cong ' + preferred + ' bi chiem -> dung cong ' + p);
-                  return announce(p);
-                }
-              }
-              console.error('\n  Khong tim duoc cong nao. Chay Admin: net stop winnat && net start winnat\n');
-            })();
-
-            process.on('SIGINT', function () {
-              engine.halt();
-              if (active) active.close();
-              process.exit(0);
-            });
-
-            return { close: function () { if (active) active.close(); } };
-          }
-          EOF
-
-          cat > src/cli.js <<'EOF'
-          import { cfg, save, nodeStorage, DATA_DIR } from './core/store.js';
-          import { Engine } from './core/engine.js';
-          import { startServer } from './server.js';
-          import { VERSION } from './ui.js';
-
-          const args = process.argv.slice(2);
-          const has = function (f) { return args.indexOf(f) > -1; };
-          const val = function (f) { const i = args.indexOf(f); return i > -1 ? args[i + 1] : null; };
-          const C = { info: '\x1b[36m', ok: '\x1b[32m', warn: '\x1b[33m', err: '\x1b[31m', dim: '\x1b[90m' };
-          const log = function (lv, m) {
-            console.log((C[lv] || '') + '[' + new Date().toLocaleTimeString('vi-VN') + '] ' + m + '\x1b[0m');
-          };
-
-          main().catch(function (e) { console.error(e); process.exit(1); });
-
-          async function main() {
-            if (val('--token')) save({ token: String(val('--token')).trim() });
-            if (val('--port')) {
-              const p = Number(val('--port'));
-              if (Number.isFinite(p) && p >= 1024 && p <= 65535) save({ port: p });
-            }
-
-            const token = (cfg().token || process.env.DISCORD_TOKEN || '').trim();
-            const engine = new Engine({ token: token, getConfig: cfg, onLog: log, storage: nodeStorage });
-
-            console.log('');
-            console.log('   ==============================================');
-            console.log('    Discord Quests Auto   v' + VERSION);
-            console.log('    API theo docs.discord.food/resources/quests');
-            console.log('    Du lieu: ' + DATA_DIR);
-            console.log('   ==============================================');
-            console.log('');
-
-            // chan doan nhanh: in thang response cua /quests/@me
-            if (has('--dump')) {
-              if (!token) { console.error('Thieu token'); process.exit(1); }
-              const r = await engine.client.questsInfo();
-              console.log('HTTP ' + r.status);
-              console.log('keys: ' + r.keys.join(', '));
-              console.log('quests: ' + r.quests.length + ' | excluded: ' + r.excluded.length);
-              console.log('blockedUntil  : ' + r.blockedUntil);
-              console.log('suspendedUntil: ' + r.suspendedUntil);
-              console.log(JSON.stringify(r.raw, null, 2).slice(0, 8000));
-              process.exit(0);
-            }
-
-            if (has('--once')) {
-              if (!token) { console.error('Thieu token'); process.exit(1); }
-              try { await engine.scan(); } catch (e) { log('err', 'scan: ' + e.message); }
-              try { await engine.runOnce(); } catch (e) { log('err', 'run: ' + e.message); }
-              log('ok', 'Xong. ok=' + engine.state.stats.ok + ' fail=' + engine.state.stats.fail);
-              process.exit(0);
-            }
-
-            if (has('--watch') && !has('--server')) {
-              if (!token) { console.error('Thieu token'); process.exit(1); }
-              await engine.scan();
-              await engine.watch();
-              return;
-            }
-
-            startServer(engine, { open: !has('--no-open') });
-
-            if (token) {
-              try { await engine.scan(); } catch (e) { log('err', e.message); }
-              engine.watch().catch(function (e) { log('err', e.message); });
-            } else {
-              log('warn', 'Chua co token - dan vao web roi bam Luu token.');
-            }
-          }
-          EOF
-
-      # ══════════════ 4. build.mjs ══════════════
-      - name: Tạo build.mjs
-        shell: bash
-        run: |
-          cat > build.mjs <<'EOF'
-          import fs from 'node:fs';
-          import path from 'node:path';
-          import { execSync } from 'node:child_process';
-          import * as esbuild from 'esbuild';
-
-          const root = process.cwd();
-          const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
-          const work = path.join(root, 'out', '.build');
-          const outDir = path.join(root, 'out');
-
-          fs.rmSync(work, { recursive: true, force: true });
-          fs.mkdirSync(work, { recursive: true });
-          fs.mkdirSync(outDir, { recursive: true });
-
-          const isWin = process.platform === 'win32';
-          const bundle = path.join(work, 'bundle.cjs');
-          const blob = path.join(work, 'sea-prep.blob');
-          const exe = path.join(outDir, isWin
-            ? 'DiscordQuestsAuto-v' + pkg.version + '.exe'
-            : 'DiscordQuestsAuto-v' + pkg.version + '-' + process.platform + '-' + process.arch);
-
-          console.log('[1/5] Bundle code + index.html...');
-          const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-
-          await esbuild.build({
-            entryPoints: [path.join(root, 'src', 'cli.js')],
-            bundle: true,
-            platform: 'node',
-            target: 'node20',
-            format: 'cjs',
-            outfile: bundle,
-            minify: true,
-            legalComments: 'none',
-            loader: { '.html': 'text' },
-            define: {
-              __INDEX_HTML__: JSON.stringify(html),
-              __BUILD_VERSION__: JSON.stringify(pkg.version)
-            }
-          });
-
-          console.log('[2/5] SEA config...');
-          fs.writeFileSync(path.join(work, 'sea-config.json'), JSON.stringify({
-            main: bundle, output: blob, disableExperimentalSEAWarning: true,
-            useSnapshot: false, useCodeCache: false
-          }, null, 2));
-          execSync('node --experimental-sea-config sea-config.json', { cwd: work, stdio: 'inherit' });
-
-          console.log('[3/5] Copy runtime Node...');
-          fs.copyFileSync(process.execPath, exe);
-
-          console.log('[4/5] Go chu ky...');
-          if (isWin) {
-            try { execSync('signtool remove /s "' + exe + '"', { stdio: 'ignore' }); console.log('   da go'); }
-            catch (e) { console.log('   bo qua (khong co signtool)'); }
-          } else {
-            try { execSync('codesign --remove-signature "' + exe + '"', { stdio: 'ignore' }); } catch (e) {}
-          }
-
-          console.log('[5/5] Inject blob...');
-          execSync(
-            'npx --yes postject "' + exe + '" NODE_SEA_BLOB "' + blob +
-            '" --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2',
-            { stdio: 'inherit' }
-          );
-
-          fs.rmSync(work, { recursive: true, force: true });
-          console.log('');
-          console.log('OK: ' + path.basename(exe) + '  (' + (fs.statSync(exe).size / 1048576).toFixed(1) + ' MB)');
-          EOF
-
-      # ══════════════ 5. BUILD ══════════════
-      - name: Cài esbuild
-        shell: bash
-        run: npm install --no-audit --no-fund
-
-      - name: Build exe
-        shell: bash
-        run: node build.mjs
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: DiscordQuestsAuto-exe
-          path: out/*.exe
-          retention-days: 90
-
-      - name: Release
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: out/*.exe
-          generate_release_notes: true
+          cat > src/discord/gateway
