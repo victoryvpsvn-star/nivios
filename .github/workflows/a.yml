@@ -110,9 +110,9 @@ jobs:
           .tag{padding:5px 12px;border-radius:20px;font-size:10.5px;font-weight:600;background:rgba(30,31,38,.62);border:1px solid rgba(88,101,242,.14);color:var(--m)}
           .tag.on{color:var(--g);border-color:rgba(87,242,135,.4)}
           .tag.orb{color:var(--y);border-color:rgba(254,231,92,.35)}
-          .tag.bad{color:var(--r);border-color:rgba(237,66,69,.4)}
           .banner{display:none;margin-bottom:14px;padding:11px 14px;border-radius:12px;font-size:12px;line-height:1.6;background:rgba(237,66,69,.1);border:1px solid rgba(237,66,69,.35);color:#ffb3b5}
           .banner.show{display:block}
+          .banner.warn{background:rgba(254,231,92,.08);border-color:rgba(254,231,92,.3);color:#ffeaa0}
           .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px}
           .stt{background:rgba(30,31,38,.62);border:1px solid rgba(88,101,242,.14);border-radius:14px;padding:14px}
           .stt b{display:block;font-size:24px;color:#fff}
@@ -183,6 +183,7 @@ jobs:
               <button class="btn gh" id="stop">Dừng</button>
               <button class="btn gh" id="scan">Quét lại</button>
               <button class="btn gh" id="once">Chạy 1 vòng</button>
+              <a class="btn gh" id="dbg" href="/api/debug" target="_blank" style="text-decoration:none">Debug</a>
             </div>
             <div class="tabs">
               <span class="tb on" data-t="q">Nhiệm vụ</span>
@@ -200,6 +201,7 @@ jobs:
                 <div><label>Tự nhận quest</label><select id="cEn"><option value="1">Bật</option><option value="0">Tắt</option></select></div>
                 <div><label>Tự claim (dễ dính captcha)</label><select id="cCl"><option value="0">Tắt</option><option value="1">Bật</option></select></div>
                 <div><label>Bỏ qua STREAM_ON_DESKTOP</label><select id="cSk"><option value="1">Bật</option><option value="0">Tắt</option></select></div>
+                <div><label>Tạm dừng khi bị treo quest</label><select id="cPa"><option value="0">Tắt</option><option value="1">Bật</option></select></div>
               </div>
               <label>Bỏ qua quest (ID, cách nhau dấu phẩy)</label>
               <input id="cEx">
@@ -301,10 +303,16 @@ jobs:
             $('#s4').textContent = st.orbs || 0;
 
             var ban = $('#ban');
-            if (st.blockedUntil) {
+            if (st.suspendedUntil) {
               ban.className = 'banner show';
-              ban.textContent = 'Quest bi tam khoa den ' + new Date(st.blockedUntil).toLocaleString('vi-VN') +
-                ' (quest_enrollment_blocked_until). Discord van nhan request, chi UI khoa.';
+              ban.textContent = 'QUEST ACCESS SUSPENDED đến ' + new Date(st.suspendedUntil).toLocaleString('vi-VN') +
+                ' — Discord khoá mặt quest do automation. Hết hạn là tự mở lại.';
+            } else if (st.blockedUntil) {
+              ban.className = 'banner warn show';
+              ban.textContent = 'Tạm khoá enroll đến ' + new Date(st.blockedUntil).toLocaleString('vi-VN') + '.';
+            } else if (st.debug && st.debug.quests === 0) {
+              ban.className = 'banner warn show';
+              ban.textContent = 'API trả 0 quest (excluded=' + (st.debug.excluded || 0) + '). Bấm Debug để xem raw.';
             } else { ban.className = 'banner'; }
 
             var q = st.quests || [];
@@ -329,7 +337,7 @@ jobs:
                 '<div style="flex:1;min-width:0"><div class="qn">' + x.name + '</div>' +
                 '<div class="qm">' + types + ' thưởng ' + x.reward + '</div>' +
                 '<div class="pg"><i style="width:' + (x.pct || 0) + '%"></i></div></div>' + act + '</div>';
-            }).join('') || '<div class="qc"><div class="qm">Chưa có quest nào — bấm Quét lại, hoặc xem /api/debug.</div></div>';
+            }).join('') || '<div class="qc"><div class="qm">Chưa có quest nào — bấm Quét lại, hoặc xem Debug.</div></div>';
 
             var c = st.settings || {};
             if (document.activeElement.tagName !== 'INPUT') {
@@ -342,6 +350,7 @@ jobs:
               $('#cEn').value = c.autoEnroll ? '1' : '0';
               $('#cCl').value = c.autoClaim ? '1' : '0';
               $('#cSk').value = c.skipStream ? '1' : '0';
+              $('#cPa').value = c.pauseWhenSuspended ? '1' : '0';
               $('#cEx').value = (c.exclude || []).join(', ');
             }
           }
@@ -351,8 +360,8 @@ jobs:
             if (!b || b.disabled) return;
             b.disabled = true; b.textContent = '...';
             j('/api/claim', { id: b.dataset.claim }).then(function (r) {
-              if (r && r.ok) log('ok', 'Da claim quest');
-              else log('err', 'Claim loi: ' + JSON.stringify(r));
+              if (r && r.ok) log('ok', 'Đã claim quest');
+              else log('err', 'Claim lỗi: ' + JSON.stringify(r.res || r));
               refresh();
             });
           };
@@ -374,7 +383,7 @@ jobs:
               heartbeatSec: +$('#cHb').value, videoIntervalMs: +$('#cVid').value,
               maxRetries: +$('#cRe').value, maxConcurrent: +$('#cPar').value,
               autoEnroll: $('#cEn').value === '1', autoClaim: $('#cCl').value === '1',
-              skipStream: $('#cSk').value === '1',
+              skipStream: $('#cSk').value === '1', pauseWhenSuspended: $('#cPa').value === '1',
               exclude: $('#cEx').value.split(',').map(function (s) { return s.trim(); }).filter(Boolean)
             });
             log('ok', 'Đã lưu cài đặt');
@@ -416,6 +425,7 @@ jobs:
             autoClaim: false,
             skipExpired: true,
             skipStream: true,
+            pauseWhenSuspended: false,
             watchIntervalMs: 120000,
             exclude: [],
             token: ''
@@ -478,7 +488,7 @@ jobs:
           EOF
 
           cat > src/discord/api.js <<'EOF'
-          // Endpoint theo docs.discord.food/resources/quests (cap nhat 2026)
+          // Endpoint theo docs.discord.food/resources/quests (2026)
           const API = 'https://discord.com/api/v9';
 
           const ELECTRON = '37.2.0';
@@ -575,6 +585,8 @@ jobs:
             for (const k of ['quests', 'excluded_quests', 'items', 'data', 'entitlements']) {
               if (Array.isArray(p[k])) parts.push(k + '=' + p[k].length);
             }
+            if (p.quest_access_suspended_until) parts.push('SUSPENDED=' + p.quest_access_suspended_until);
+            if (p.quest_enrollment_blocked_until) parts.push('BLOCKED=' + p.quest_enrollment_blocked_until);
             if (p.message) parts.push('msg=' + String(p.message).slice(0, 60));
             if (p._error) parts.push('err=' + p._error);
             return parts.join(' | ');
@@ -705,7 +717,7 @@ jobs:
                     await sleep(w);
                     continue;
                   }
-                  if (r.status === 401) { this.log('err', label + ': 401 - token sai hoac thieu Electron trong UA'); return p; }
+                  if (r.status === 401) { this.log('err', label + ': 401 - token sai hoac UA thieu Electron'); return p; }
                   if (r.status === 403) { this.log('warn', label + ': 403 - task nay can OAuth/telemetry that'); return p; }
                   if (r.status === 404) return p;
                   if (a >= c.maxRetries) return p;
@@ -724,30 +736,54 @@ jobs:
 
             me() { return this.call('me', { label: 'me' }); }
 
-            // GET /quests/@me  ->  {quests, excluded_quests, quest_enrollment_blocked_until}
-            async myQuests() {
-              const tries = [
-                { path: '/quests/@me', label: 'GET /quests/@me' },
-                { path: '/quests/@me?with_application=true', label: 'GET /quests/@me?with_application' }
-              ];
-              let best = null;
-              for (const t of tries) {
-                const r = await this.raw('GET', t.path);
-                r.label = t.label;
-                r.url = t.path;
-                r.count = extractQuests(r.data).length;
-                this.log('dim', t.label + ' -> HTTP ' + r.status + ' | ' + describePayload(r.data) + ' | quests=' + r.count);
-                if (r.count > 0) { this.lastQuestPayload = r; return r; }
-                if (!best || (r.status === 200 && best.status !== 200)) best = r;
-              }
-              this.lastQuestPayload = best;
-              return best;
+            // GET /quests/@me  ->  {quests, excluded_quests, quest_enrollment_blocked_until, quest_access_suspended_until}
+            async questsInfo() {
+              const r = await this.raw('GET', '/quests/@me');
+              const d = r.data || {};
+              return {
+                status: r.status,
+                url: '/quests/@me',
+                quests: extractQuests(d),
+                excluded: Array.isArray(d.excluded_quests) ? d.excluded_quests : [],
+                blockedUntil: d.quest_enrollment_blocked_until || null,
+                suspendedUntil: d.quest_access_suspended_until || null,
+                keys: Object.keys(d),
+                raw: d
+              };
             }
 
-            async blockedUntil() {
-              const r = await this.raw('GET', '/quests/@me');
-              const v = r.data && (r.data.quest_enrollment_blocked_until || r.data.questEnrollmentBlockedUntil);
-              return v || null;
+            // thu bien the 2 CHI khi that su rong, cho 1.5s de khong tu ban 429
+            async myQuests(depth) {
+              depth = depth || 0;
+              const a = await this.raw('GET', '/quests/@me');
+              a.count = extractQuests(a.data).length;
+              a.label = 'GET /quests/@me';
+              a.url = '/quests/@me';
+              this.log('dim', a.label + ' -> HTTP ' + a.status + ' | ' + describePayload(a.data));
+
+              if (a.status === 429 && depth < 3) {
+                const w = (a.data.retry_after || 5) * 1000;
+                this.log('warn', 'quests 429 -> nghi ' + Math.round(w) + 'ms');
+                await sleep(w + 400);
+                return this.myQuests(depth + 1);
+              }
+
+              if (a.status === 200) {
+                this.lastQuestPayload = a;
+                if (a.count === 0) {
+                  await sleep(1500);
+                  const b = await this.raw('GET', '/quests/@me?with_application=true');
+                  b.count = extractQuests(b.data).length;
+                  b.label = 'GET /quests/@me?with_application';
+                  b.url = '/quests/@me?with_application=true';
+                  this.log('dim', b.label + ' -> HTTP ' + b.status + ' | ' + describePayload(b.data));
+                  if (b.status === 200 && b.count > a.count) { this.lastQuestPayload = b; return b; }
+                }
+                return a;
+              }
+
+              this.lastQuestPayload = a;
+              return a;
             }
 
             // POST /quests/{id}/enroll   body: { location }
@@ -787,7 +823,7 @@ jobs:
                 .reduce(function (s, e) { return s + (e.quantity || 1); }, 0);
             }
 
-            // stream_key dang "call:<channel_id>:1" (client that dang dung, chay duoc)
+            // stream_key dang "call:<channel_id>:1" - format client dang dung, chay duoc
             async findVoiceChannel() {
               const g = await this.guilds();
               for (const x of (Array.isArray(g) ? g : []).slice(0, 5)) {
@@ -808,7 +844,7 @@ jobs:
           const ACHIEVEMENT = new Set(['ACHIEVEMENT_IN_GAME', 'ACHIEVEMENT_IN_ACTIVITY']);
           const REWARD_TYPE = { 1: 'code', 2: 'in-game', 3: 'collectible', 4: 'orbs', 5: 'nitro' };
 
-          // task_config_v2.tasks la map keyed by TYPE (theo spec) - van doc ca cac bien the cu
+          // task_config_v2.tasks la map keyed by TYPE (theo spec)
           function taskConfig(q) {
             const cfg = (q && q.config) || {};
             return cfg.task_config_v2 || cfg.taskConfigV2 || cfg.task_config || cfg.taskConfig || {};
@@ -820,6 +856,7 @@ jobs:
             return Object.values(tasks || {}).filter(function (t) { return t && t.type; });
           }
 
+          // tu 07/2026 app id nam o task.applications[0].id
           function appIdOf(t) {
             const a = (t && t.applications) || [];
             return (a[0] && a[0].id) || null;
@@ -862,6 +899,12 @@ jobs:
             return Number(v.value || 0);
           }
 
+          function future(ts) {
+            if (!ts) return false;
+            const t = Date.parse(ts);
+            return Number.isFinite(t) && t > Date.now();
+          }
+
           export function progressOf(q) {
             const us = (q && q.user_status) || {};
             let cur = 0, tgt = 0;
@@ -891,7 +934,13 @@ jobs:
               });
               this.stop = false;
               this.running = false;
-              this.state = { me: null, orbs: 0, quests: [], blockedUntil: null, stats: { ok: 0, fail: 0, skip: 0 }, debug: null };
+              this.state = {
+                me: null, orbs: 0, quests: [],
+                blockedUntil: null, suspendedUntil: null,
+                excludedCount: 0, excludedIds: [],
+                questsRaw: null, questsAt: 0,
+                stats: { ok: 0, fail: 0, skip: 0 }, debug: null
+              };
             }
 
             emit() { this.onState(this.state); }
@@ -902,39 +951,40 @@ jobs:
               this.state.me = { id: me.id, username: me.username, global_name: me.global_name };
 
               const res = await this.client.myQuests();
-              const items = extractQuests(res.data);
+              const d = res.data || {};
+              const items = extractQuests(d);
               const list = items.map(normalize).filter(Boolean);
 
-              this.state.blockedUntil = (res.data && res.data.quest_enrollment_blocked_until) || null;
+              this.state.blockedUntil = d.quest_enrollment_blocked_until || null;
+              this.state.suspendedUntil = d.quest_access_suspended_until || null;
+              this.state.excludedCount = Array.isArray(d.excluded_quests) ? d.excluded_quests.length : 0;
+              this.state.excludedIds = (Array.isArray(d.excluded_quests) ? d.excluded_quests : [])
+                .slice(0, 10).map(function (x) { return x && x.id; }).filter(Boolean);
+              this.state.questsRaw = d;
+              this.state.questsAt = Date.now();
 
               this.state.debug = {
                 at: new Date().toISOString(),
-                url: res.url,
-                status: res.status,
-                keys: Object.keys(res.data || {}),
-                items: items.length,
+                url: res.url, status: res.status, keys: Object.keys(d),
+                quests: items.length,
+                excluded: this.state.excludedCount,
+                excludedIds: this.state.excludedIds,
+                blockedUntil: this.state.blockedUntil,
+                suspendedUntil: this.state.suspendedUntil,
                 parsed: list.length,
                 sample: items[0] ? Object.keys(items[0]) : [],
-                sampleConfig: items[0] && items[0].config ? Object.keys(items[0].config) : [],
-                sampleTasks: items[0] ? Object.keys(taskConfig(normalize(items[0]))).slice(0, 10) : []
+                raw: d
               };
 
-              this.log('info', 'quests: HTTP ' + res.status + ' | ' + res.label + ' | ' + describePayload(res.data));
-              this.log('info', 'item=' + items.length + ' -> parse=' + list.length + ' quest');
-
-              if (res.status === 401) this.log('err', '401: token sai, hoac UA thieu chuoi Electron/x.y.z');
-              else if (items.length && !list.length) this.log('warn', 'item co nhung thieu id/config - xem /api/debug');
-              else if (!items.length) this.log('warn', 'API tra rong - xem /api/debug');
-
-              if (this.state.blockedUntil) {
-                this.log('warn', 'Quest dang bi tam khoa den ' + this.state.blockedUntil);
-              }
+              this.log('info', 'quests: HTTP ' + res.status + ' | quests=' + items.length +
+                ' | excluded=' + this.state.excludedCount);
+              if (this.state.suspendedUntil) this.log('err', 'QUEST ACCESS SUSPENDED den ' + this.state.suspendedUntil);
+              if (this.state.blockedUntil) this.log('warn', 'Enrollment blocked den ' + this.state.blockedUntil);
+              if (!items.length) this.log('warn', 'quests RONG. raw=' + JSON.stringify(d).slice(0, 500));
 
               this.state.quests = list.map(function (q) {
                 return Object.assign({
-                  id: q.id,
-                  name: nameOf(q),
-                  reward: rewardOf(q),
+                  id: q.id, name: nameOf(q), reward: rewardOf(q),
                   types: tasksOf(q).map(function (t) { return t.type; }),
                   colors: q.config.colors
                 }, progressOf(q));
@@ -945,7 +995,7 @@ jobs:
               this.log('info', 'Quet xong: ' + this.state.quests.length + ' quest');
             }
 
-            // ───── video: ton trong gioi han timestamp <= (now - enrolled_at) + lead ─────
+            // ───── video: timestamp <= (now - enrolled_at)/1000 + lead ─────
             async doVideo(q, t, n) {
               const c = this.getConfig();
               const target = Number(t.target) || 0;
@@ -975,15 +1025,15 @@ jobs:
               return false;
             }
 
-            // ───── heartbeat cho PLAY_*/STREAM_*/PLAY_ACTIVITY: 60s/beat, watchdog 90s ─────
+            // ───── heartbeat: 60s/beat, 5 fail lien tuc thi bo, tran 25 phut ─────
             async doHeartbeat(q, t, n) {
               const c = this.getConfig();
               const target = Number(t.target) || 0;
               if (!target) return false;
               const appId = appIdOf(t);
               const started = Date.now();
-              let needKey = (t.type === 'PLAY_ACTIVITY' || t.type === 'STREAM_ON_DESKTOP');
-              let key = needKey ? 'call:' + (await this.client.findVoiceChannel()) + ':1' : null;
+              const needKey = (t.type === 'PLAY_ACTIVITY' || t.type === 'STREAM_ON_DESKTOP');
+              const key = needKey ? 'call:' + (await this.client.findVoiceChannel()) + ':1' : null;
               let fails = 0;
 
               while (!this.stop) {
@@ -1007,10 +1057,9 @@ jobs:
             }
 
             async doAchievement(q, t, n) {
-              const appId = appIdOf(t);
-              const r = await this.client.heartbeat(q.id, null, false, appId);
+              const r = await this.client.heartbeat(q.id, null, false, appIdOf(t));
               if (r && r.code === 403) {
-                this.log('warn', n + ': ' + t.type + ' can OAuth that (403) - xem README Orion');
+                this.log('warn', n + ': ' + t.type + ' can OAuth that (403)');
                 return false;
               }
               this.log('ok', n + ': da ban heartbeat cho ' + t.type);
@@ -1052,11 +1101,23 @@ jobs:
 
             async runOnce() {
               const c = this.getConfig();
-              const res = await this.client.myQuests();
-              const list = extractQuests(res.data).map(normalize).filter(Boolean);
+
+              if (c.pauseWhenSuspended && future(this.state.suspendedUntil)) {
+                this.log('warn', 'Dang bi treo quest den ' + this.state.suspendedUntil + ' - tam nghi');
+                return;
+              }
+
+              let d = this.state.questsRaw;
+              if (!d || Date.now() - (this.state.questsAt || 0) > 60000) {
+                const res = await this.client.myQuests();
+                d = res.data || {};
+                this.state.questsRaw = d;
+                this.state.questsAt = Date.now();
+              }
+
+              const list = extractQuests(d).map(normalize).filter(Boolean);
 
               const todo = list.filter((q) => {
-                if (this.stop) return false;
                 if ((c.exclude || []).indexOf(q.id) > -1) { this.state.stats.skip++; return false; }
                 if (c.skipExpired && q.config.expires_at && Date.parse(q.config.expires_at) < Date.now()) return false;
                 const p = progressOf(q);
@@ -1089,12 +1150,11 @@ jobs:
               for (const q of (list || [])) {
                 if (this.stop) break;
                 const p = progressOf(q);
-                if (p.completed && !p.claimed) {
-                  const r = await this.client.claim(q.id);
-                  if (r && r.errors && r.errors.length) this.log('warn', nameOf(q) + ': claim ' + JSON.stringify(r.errors[0]));
-                  else if (r && r.code) this.log('warn', nameOf(q) + ': claim ' + (r.message || r.code));
-                  else this.log('ok', nameOf(q) + ': DA CLAIM');
-                }
+                if (!p.completed || p.claimed) continue;
+                const r = await this.client.claim(q.id);
+                if (r && r.errors && r.errors.length) this.log('warn', nameOf(q) + ': claim ' + JSON.stringify(r.errors[0]));
+                else if (r && r.code) this.log('warn', nameOf(q) + ': claim ' + (r.message || r.code));
+                else this.log('ok', nameOf(q) + ': DA CLAIM');
               }
             }
 
@@ -1200,7 +1260,7 @@ jobs:
               const u = new URL(req.url, 'http://localhost');
               const J = function (code, obj, type) {
                 res.writeHead(code, { 'Content-Type': (type || 'application/json') + '; charset=utf-8', 'Cache-Control': 'no-store' });
-                res.end(typeof obj === 'string' ? obj : JSON.stringify(obj));
+                res.end(typeof obj === 'string' ? obj : JSON.stringify(obj, null, type === 'pretty' ? 2 : 0));
               };
               const B = async function () {
                 let d = '';
@@ -1230,6 +1290,8 @@ jobs:
                       orbs: engine.state.orbs,
                       quests: engine.state.quests,
                       blockedUntil: engine.state.blockedUntil,
+                      suspendedUntil: engine.state.suspendedUntil,
+                      debug: engine.state.debug ? { quests: engine.state.debug.quests, excluded: engine.state.debug.excluded } : null,
                       stats: engine.state.stats,
                       settings: {
                         minDelayMs: cfg().minDelayMs,
@@ -1241,13 +1303,28 @@ jobs:
                         autoEnroll: cfg().autoEnroll,
                         autoClaim: cfg().autoClaim,
                         skipStream: cfg().skipStream,
+                        pauseWhenSuspended: cfg().pauseWhenSuspended,
                         exclude: cfg().exclude
                       }
                     });
                   }
 
                   if (u.pathname === '/api/debug') {
-                    return J(200, { debug: engine.state.debug, raw: engine.client.lastQuestPayload });
+                    const a = await engine.client.questsInfo();
+                    return J(200, {
+                      debug: engine.state.debug,
+                      lastQuestPayload: engine.client.lastQuestPayload,
+                      live: {
+                        status: a.status,
+                        keys: a.keys,
+                        quests: a.quests.length,
+                        excluded: a.excluded.length,
+                        excludedIds: a.excluded.slice(0, 20).map(function (x) { return x && x.id; }),
+                        blockedUntil: a.blockedUntil,
+                        suspendedUntil: a.suspendedUntil,
+                        raw: a.raw
+                      }
+                    });
                   }
 
                   if (u.pathname === '/api/token' && req.method === 'POST') {
@@ -1388,6 +1465,19 @@ jobs:
             console.log('    Du lieu: ' + DATA_DIR);
             console.log('   ==============================================');
             console.log('');
+
+            // chan doan nhanh: in thang response cua /quests/@me
+            if (has('--dump')) {
+              if (!token) { console.error('Thieu token'); process.exit(1); }
+              const r = await engine.client.questsInfo();
+              console.log('HTTP ' + r.status);
+              console.log('keys: ' + r.keys.join(', '));
+              console.log('quests: ' + r.quests.length + ' | excluded: ' + r.excluded.length);
+              console.log('blockedUntil  : ' + r.blockedUntil);
+              console.log('suspendedUntil: ' + r.suspendedUntil);
+              console.log(JSON.stringify(r.raw, null, 2).slice(0, 8000));
+              process.exit(0);
+            }
 
             if (has('--once')) {
               if (!token) { console.error('Thieu token'); process.exit(1); }
