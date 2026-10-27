@@ -1,0 +1,792 @@
+name: Build EXE
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version'
+        default: '3.0.0'
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-exe-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  VERSION: ${{ inputs.version || '3.0.0' }}
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 25
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+
+      # ═══════════════ 1. package.json ═══════════════
+      - name: Tạo package.json
+        shell: bash
+        run: |
+          cat > package.json <<EOF
+          {
+            "name": "discord-quests-auto",
+            "version": "${VERSION}",
+            "private": true,
+            "type": "module",
+            "scripts": { "build": "node build.mjs" },
+            "devDependencies": { "esbuild": "^0.24.0" }
+          }
+          EOF
+
+      # ═══════════════ 2. index.html ═══════════════
+      - name: Tạo index.html
+        shell: bash
+        run: |
+          cat > index.html <<'HTML'
+          <!doctype html>
+          <html lang="vi"><head><meta charset="utf-8">
+          <meta name="viewport" content="width=device-width,initial-scale=1">
+          <title>Discord Quests Auto</title>
+          <style>
+          :root{--b:#5865F2;--f:#EB459E;--g:#57F287;--y:#FEE75C;--r:#ED4245;--bg:#0E0F13;--bg3:#25262C;--m:#6D7080;--t:#C8CAD0}
+          *{margin:0;padding:0;box-sizing:border-box}
+          html,body{background:var(--bg);color:var(--t);font-family:'Segoe UI',system-ui,sans-serif;min-height:100dvh;overflow-x:hidden}
+          .bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+          .aur{position:absolute;border-radius:50%;filter:blur(90px);opacity:0;animation:ain 2s .2s ease forwards}
+          .a1{width:60vmax;height:60vmax;top:-26vmax;left:-16vmax;background:radial-gradient(circle,rgba(88,101,242,.28),transparent 65%);animation:ain 2s .2s ease forwards,af1 26s ease-in-out infinite alternate}
+          .a2{width:52vmax;height:52vmax;bottom:-22vmax;right:-12vmax;background:radial-gradient(circle,rgba(235,69,158,.22),transparent 65%);animation:ain 2.4s .45s ease forwards,af2 32s ease-in-out infinite alternate}
+          .a3{width:42vmax;height:42vmax;top:32%;left:42%;background:radial-gradient(circle,rgba(87,242,135,.11),transparent 65%);animation:ain 2.8s .7s ease forwards}
+          @keyframes ain{to{opacity:1}}@keyframes af1{to{transform:translate(6vmax,4vmax) scale(1.15)}}@keyframes af2{to{transform:translate(-5vmax,-4vmax) scale(1.2)}}
+          .grid{position:absolute;inset:0;background-image:linear-gradient(rgba(88,101,242,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(88,101,242,.035) 1px,transparent 1px);background-size:60px 60px}
+          #pc{position:fixed;inset:0;z-index:1;pointer-events:none}
+          .wrap{position:relative;z-index:2;max-width:1100px;margin:0 auto;padding:22px 18px 60px}
+          #boot{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;background:var(--bg);transition:opacity .7s,transform .7s}
+          #boot.out{opacity:0;pointer-events:none;transform:scale(1.04)}
+          .logo{position:relative;width:106px;height:106px}
+          .ring{position:absolute;border-radius:50%;background:conic-gradient(from 0deg,transparent 30%,var(--b) 68%,var(--f) 88%,transparent);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 5px),#000 calc(100% - 4px));mask:radial-gradient(farthest-side,transparent calc(100% - 5px),#000 calc(100% - 4px));animation:spin 1.4s linear infinite}
+          .r1{inset:-14px}.r2{inset:-30px;animation:spin 2.4s linear infinite reverse}
+          .core{position:absolute;inset:0;border-radius:24px;background:linear-gradient(135deg,var(--b),var(--f));display:flex;align-items:center;justify-content:center;box-shadow:0 0 40px rgba(88,101,242,.5)}
+          .core svg{width:58px;height:58px;fill:#fff}
+          @keyframes spin{to{transform:rotate(360deg)}}
+          .ttl{font-size:29px;font-weight:700;color:#fff;text-align:center}
+          .ttl i{font-style:normal;display:inline-block;opacity:0;animation:ch .5s cubic-bezier(.25,1.2,.35,1) forwards}
+          @keyframes ch{from{opacity:0;transform:translateY(22px) rotate(5deg) scale(.75)}to{opacity:1;transform:none}}
+          .ttl .g{background:linear-gradient(135deg,var(--b),var(--f));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+          .st{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--m);text-align:center}
+          .pbar{width:280px;max-width:78vw;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden}
+          .pbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--b),var(--f));animation:grow 2.1s cubic-bezier(.4,0,.2,1) forwards}
+          @keyframes grow{to{width:100%}}
+          #login{display:none;min-height:100dvh;align-items:center;justify-content:center;position:relative;z-index:2}
+          .card{background:rgba(30,31,38,.62);border:1px solid rgba(88,101,242,.14);border-radius:20px;padding:30px;backdrop-filter:blur(20px);width:min(430px,92vw);text-align:center}
+          .card h1{font-size:19px;color:#fff;font-weight:600;margin-bottom:6px}
+          .card p{font-size:12.5px;color:var(--m);line-height:1.6;margin-bottom:18px}
+          input,select{width:100%;padding:12px 14px;border-radius:11px;border:1px solid rgba(88,101,242,.16);background:rgba(14,15,19,.75);color:var(--t);font-size:13px;outline:none}
+          input:focus,select:focus{border-color:rgba(88,101,242,.6)}
+          .btn{padding:11px 18px;border-radius:11px;border:0;background:linear-gradient(135deg,var(--b),#4752C4);color:#fff;font-size:13px;font-weight:600;cursor:pointer}
+          .btn:hover{filter:brightness(1.12)}
+          .btn.full{width:100%;margin-top:12px}
+          .btn.gh{background:rgba(88,101,242,.12);border:1px solid rgba(88,101,242,.32);color:#aab3ff}
+          .btn.sm{padding:7px 13px;font-size:11.5px}
+          .hint{font-size:11px;color:var(--m);margin-top:14px;line-height:1.7}
+          .err{color:var(--r);font-size:12px;margin-top:10px;min-height:16px}
+          #app{display:none}
+          .top{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+          .av{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--b),var(--f));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600}
+          .top h2{font-size:15px;color:#fff;font-weight:600}
+          .top .s{font-size:10.5px;color:var(--m);letter-spacing:1.4px;text-transform:uppercase}
+          .tags{margin-left:auto;display:flex;gap:7px;flex-wrap:wrap}
+          .tag{padding:5px 12px;border-radius:20px;font-size:10.5px;font-weight:600;background:rgba(30,31,38,.62);border:1px solid rgba(88,101,242,.14);color:var(--m)}
+          .tag.on{color:var(--g);border-color:rgba(87,242,135,.4)}
+          .tag.orb{color:var(--y);border-color:rgba(254,231,92,.35)}
+          .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px}
+          .stt{background:rgba(30,31,38,.62);border:1px solid rgba(88,101,242,.14);border-radius:14px;padding:14px}
+          .stt b{display:block;font-size:24px;color:#fff}
+          .stt span{font-size:10.5px;color:var(--m);text-transform:uppercase}
+          .bar2{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:16px}
+          .tabs{display:flex;gap:7px;margin-bottom:14px;border-bottom:1px solid rgba(88,101,242,.14);padding-bottom:10px;flex-wrap:wrap}
+          .tb{padding:6px 14px;border-radius:9px;font-size:12px;color:var(--m);cursor:pointer}
+          .tb.on{background:rgba(88,101,242,.16);color:#aab3ff;border:1px solid rgba(88,101,242,.32)}
+          .ql{display:grid;gap:10px}
+          .qc{display:flex;gap:13px;align-items:center;background:rgba(30,31,38,.62);border:1px solid rgba(88,101,242,.14);border-radius:14px;padding:13px}
+          .qi{width:46px;height:46px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff}
+          .qn{font-size:13.5px;color:#fff;font-weight:600}
+          .qm{font-size:11px;color:var(--m)}
+          .tt{display:inline-block;font-size:9.5px;padding:2px 8px;border-radius:6px;background:rgba(88,101,242,.16);color:#8b95ff;margin-right:5px;font-weight:600}
+          .pg{height:4px;background:var(--bg3);border-radius:2px;margin-top:8px;overflow:hidden}
+          .pg i{display:block;height:100%;background:linear-gradient(90deg,var(--b),var(--f))}
+          .log{margin-top:16px;background:rgba(14,15,19,.82);border:1px solid rgba(88,101,242,.14);border-radius:14px;padding:13px;font-family:ui-monospace,monospace;font-size:11px;line-height:1.85;max-height:230px;overflow-y:auto}
+          .ok{color:var(--g)}.wr{color:var(--y)}.er{color:var(--r)}.di{color:var(--m)}
+          .panel{display:none;background:rgba(30,31,38,.62);border:1px solid rgba(88,101,242,.14);border-radius:16px;padding:18px}
+          .panel.on{display:block}
+          .frow{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+          label{display:block;font-size:11px;color:var(--m);margin-bottom:6px}
+          @media(max-width:640px){.frow{grid-template-columns:1fr}.ttl{font-size:23px}}
+          </style></head><body>
+          <div class="bg"><div class="aur a1"></div><div class="aur a2"></div><div class="aur a3"></div><div class="grid"></div></div>
+          <canvas id="pc"></canvas>
+
+          <div id="boot">
+            <div class="logo"><div class="ring r2"></div><div class="ring r1"></div>
+              <div class="core"><svg viewBox="0 0 24 24"><path d="M19.27 5.33C17.94 4.71 16.5 4.26 15 4a.09.09 0 0 0-.07.03c-.18.33-.39.76-.53 1.09a16.09 16.09 0 0 0-4.8 0c-.14-.34-.35-.76-.54-1.09-.01-.02-.04-.03-.07-.03-1.5.26-2.93.71-4.27 1.33l-.03.02c-2.72 4.07-3.47 8.03-3.1 11.95 0 .02.01.04.03.05 1.8 1.32 3.53 2.12 5.24 2.65.03.01.06 0 .07-.02.4-.55.76-1.13 1.07-1.74.02-.04 0-.08-.04-.09-.57-.22-1.11-.48-1.64-.78-.04-.02-.04-.08-.01-.11.11-.08.22-.17.33-.25.02-.02.05-.02.07-.01 3.44 1.57 7.15 1.57 10.55 0 .02-.01.05-.01.07.01.11.09.22.17.33.26.04.03.04.09-.01.11-.52.31-1.07.56-1.64.78-.04.01-.05.06-.04.09.32.61.68 1.19 1.07 1.74.03.01.06.02.09.01 1.72-.53 3.45-1.33 5.25-2.65.02-.01.03-.03.03-.05.44-4.53-.73-8.46-3.1-11.95-.01-.01-.02-.02-.04-.02zM8.52 14.91c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12 0 1.17-.84 2.12-1.89 2.12zm6.97 0c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12 0 1.17-.83 2.12-1.89 2.12z"/></svg></div>
+            </div>
+            <div><div class="ttl" id="ttl"></div><div class="st" style="margin-top:6px">Discord Quests Auto</div></div>
+            <div class="pbar"><i></i></div>
+            <div class="st" id="bmsg" style="letter-spacing:0;text-transform:none;font-size:12.5px">Đang khởi chạy...</div>
+          </div>
+
+          <div id="login">
+            <div class="card">
+              <h1>Tự động hoàn thành Discord Quests</h1>
+              <p>Nhập Discord User Token. Tool chạy ngầm trên máy bạn, đóng tab vẫn farm.</p>
+              <input id="tk" type="password" placeholder="Dán Discord User Token" autocomplete="off">
+              <button class="btn full" id="go">Đăng nhập</button>
+              <div class="err" id="err"></div>
+              <div class="hint">Lấy token: Discord → <b>Ctrl+Shift+I</b> → tab Network → F5 → chọn request bất kỳ → copy header <b>authorization</b>.</div>
+            </div>
+          </div>
+
+          <div id="app" class="wrap">
+            <div class="top">
+              <div class="av" id="av">?</div>
+              <div><h2 id="un">...</h2><div class="s">Discord Quests Auto</div></div>
+              <div class="tags">
+                <span class="tag orb" id="orb">0 orbs</span>
+                <span class="tag" id="run">ĐÃ DỪNG</span>
+                <button class="btn sm gh" id="out">Đổi token</button>
+              </div>
+            </div>
+            <div class="stats">
+              <div class="stt"><b id="s1">0</b><span>Quest đang mở</span></div>
+              <div class="stt"><b id="s2" style="color:var(--g)">0</b><span>Đã claim</span></div>
+              <div class="stt"><b id="s3" style="color:var(--y)">0</b><span>Sẵn sàng claim</span></div>
+              <div class="stt"><b id="s4">0</b><span>Orbs</span></div>
+            </div>
+            <div class="bar2">
+              <button class="btn" id="start">Bắt đầu farm</button>
+              <button class="btn gh" id="stop">Dừng</button>
+              <button class="btn gh" id="scan">Quét lại</button>
+              <button class="btn gh" id="once">Chạy 1 vòng</button>
+            </div>
+            <div class="tabs">
+              <span class="tb on" data-t="q">Nhiệm vụ</span>
+              <span class="tb" data-t="s">Cài đặt &amp; Anti-ban</span>
+            </div>
+            <div id="tab-q"><div class="ql" id="list"></div></div>
+            <div class="panel" id="tab-s">
+              <div class="frow">
+                <div><label>Delay min (ms)</label><input id="cMin" type="number"></div>
+                <div><label>Delay max (ms)</label><input id="cMax" type="number"></div>
+                <div><label>Chu kỳ heartbeat (giây)</label><input id="cHb" type="number"></div>
+                <div><label>Retry tối đa</label><input id="cRe" type="number"></div>
+                <div><label>Tự nhận quest</label><select id="cEn"><option value="1">Bật</option><option value="0">Tắt</option></select></div>
+                <div><label>Tự claim</label><select id="cCl"><option value="1">Bật</option><option value="0">Tắt</option></select></div>
+              </div>
+              <label>Bỏ qua quest (ID, cách nhau dấu phẩy)</label>
+              <input id="cEx">
+              <button class="btn" style="margin-top:14px" id="save">Lưu cài đặt</button>
+            </div>
+            <div class="log" id="log"></div>
+          </div>
+
+          <script>
+          const $=s=>document.querySelector(s);
+          const j=(u,b)=>fetch(u,{method:b===undefined?'GET':'POST',headers:{'Content-Type':'application/json'},body:b===undefined?undefined:JSON.stringify(b)}).then(r=>r.json());
+          let TOKEN='';
+
+          (()=>{const s='AutoQuest';$('#ttl').innerHTML=[...s].map((c,i)=>`<i style="animation-delay:${.7+i*.06}s" class="${i>=4?'g':''}">${c}</i>`).join('');
+          const m=['Đang khởi chạy hệ thống','Đang xác thực dữ liệu','Đang tải tài nguyên','Đang kết nối Discord'];let i=0;
+          const iv=setInterval(()=>{if(i<m.length)$('#bmsg').textContent=m[i++]+'...';else clearInterval(iv)},600);
+          const cv=$('#pc'),cx=cv.getContext('2d');const rs=()=>{cv.width=innerWidth;cv.height=innerHeight};rs();addEventListener('resize',rs);
+          const col=[[88,101,242],[235,69,158],[87,242,135],[254,231,92],[255,255,255]];
+          const ps=Array.from({length:38},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,s:Math.random()*1.8+.5,vx:(Math.random()-.5)*.18,vy:(Math.random()-.5)*.18,c:col[Math.floor(Math.random()*col.length)],a:Math.random()*.35+.1}));
+          (function lp(){requestAnimationFrame(lp);cx.clearRect(0,0,cv.width,cv.height);
+          for(const p of ps){p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>cv.width)p.vx*=-1;if(p.y<0||p.y>cv.height)p.vy*=-1;cx.beginPath();cx.arc(p.x,p.y,p.s,0,7);cx.fillStyle=`rgba(${p.c.join(',')},${p.a})`;cx.fill()}})();
+          setTimeout(()=>{$('#boot').classList.add('out');setTimeout(()=>{$('#boot').style.display='none';boot()},700)},2400)})();
+
+          function log(lv,msg){const d=document.createElement('div');d.className={ok:'ok',warn:'wr',err:'er'}[lv]||'di';d.textContent=`[${new Date().toLocaleTimeString('vi-VN')}] ${msg}`;$('#log').appendChild(d);while($('#log').children.length>250)$('#log').firstChild.remove();$('#log').scrollTop=$('#log').scrollHeight}
+
+          async function boot(){const st=await j('/api/state');if(st.token){TOKEN=st.token;show()}else{$('#login').style.display='flex'}
+            try{new EventSource('/api/logs').onmessage=e=>{const d=JSON.parse(e.data);if(d.msg)log(d.lv,d.msg)}}catch{}}
+
+          function show(){$('#login').style.display='none';$('#app').style.display='block';refresh();setInterval(refresh,3000)}
+
+          async function refresh(){const st=await j('/api/state');apply(st)}
+          function apply(st){
+            if(st.me){$('#un').textContent=st.me.global_name||st.me.username;$('#av').textContent=(st.me.global_name||st.me.username||'?')[0].toUpperCase()}
+            $('#orb').textContent=(st.orbs||0)+' orbs';$('#run').textContent=st.running?'ĐANG FARM':'ĐÃ DỪNG';$('#run').className='tag'+(st.running?' on':'');
+            $('#s4').textContent=st.orbs||0;
+            const q=st.quests||[];$('#s1').textContent=q.length;$('#s2').textContent=q.filter(x=>x.claimed).length;$('#s3').textContent=q.filter(x=>x.completed&&!x.claimed).length;
+            $('#list').innerHTML=q.map(x=>{const g=`linear-gradient(135deg,${x.colors?.primary||'#5865F2'},${x.colors?.secondary||'#4752C4'})`;
+              const t=x.claimed?'<span class="tag on">ĐÃ CLAIM</span>':x.completed?'<span class="tag" style="color:#FEE75C">SẴN SÀNG</span>':x.enrolled?'<span class="tag" style="color:#8b95ff">ĐANG LÀM</span>':'<span class="tag">CHƯA NHẬN</span>';
+              return `<div class="qc"><div class="qi" style="background:${g}">${x.name.slice(0,2).toUpperCase()}</div>
+              <div style="flex:1;min-width:0"><div class="qn">${x.name}</div><div class="qm">${(x.types||[]).map(t=>`<span class="tt">${t}</span>`).join('')} thưởng ${x.reward}</div><div class="pg"><i style="width:${x.pct||0}%"></i></div></div>${t}</div>`}).join('')||'<div class="qc"><div class="qm">Chưa có quest nào.</div></div>';
+            const c=st.settings||{};if(document.activeElement.tagName!=='INPUT'){$('#cMin').value=c.minDelayMs;$('#cMax').value=c.maxDelayMs;$('#cHb').value=c.heartbeatSec;$('#cRe').value=c.maxRetries;$('#cEn').value=c.autoEnroll?'1':'0';$('#cCl').value=c.autoClaim?'1':'0';$('#cEx').value=(c.exclude||[]).join(', ')}
+          }
+
+          $('#go').onclick=async()=>{const t=$('#tk').value.trim();if(!t)return $('#err').textContent='Nhập token đã';await j('/api/token',{token:t});TOKEN=t;show()};
+          $('#out').onclick=()=>{$('#login').style.display='flex';$('#app').style.display='none'};
+          $('#start').onclick=()=>j('/api/engine/start',{}).then(refresh);
+          $('#stop').onclick=()=>j('/api/engine/stop',{}).then(refresh);
+          $('#scan').onclick=()=>j('/api/scan',{}).then(refresh);
+          $('#once').onclick=()=>j('/api/run',{}).then(refresh);
+          $('#save').onclick=async()=>{await j('/api/settings',{minDelayMs:+$('#cMin').value,maxDelayMs:+$('#cMax').value,heartbeatSec:+$('#cHb').value,maxRetries:+$('#cRe').value,autoEnroll:$('#cEn').value==='1',autoClaim:$('#cCl').value==='1',exclude:$('#cEx').value.split(',').map(s=>s.trim()).filter(Boolean)});log('ok','Đã lưu cài đặt')};
+          document.querySelectorAll('.tb').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tb').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+            $('#tab-q').style.display=b.dataset.t==='q'?'block':'none';$('#tab-s').classList.toggle('on',b.dataset.t==='s')});
+          </script></body></html>
+          HTML
+
+      # ═══════════════ 3. src ═══════════════
+      - name: Tạo src
+        shell: bash
+        run: |
+          mkdir -p src/core src/discord
+
+          cat > src/core/defaults.js <<'EOF'
+          export const DEFAULT_CONFIG = {
+            port: 3000,
+            openBrowser: true,
+            minDelayMs: 2500,
+            maxDelayMs: 7000,
+            heartbeatSec: 20,
+            maxRetries: 5,
+            backoffBaseMs: 1500,
+            backoffMaxMs: 60000,
+            timeoutMs: 30000,
+            autoEnroll: true,
+            autoClaim: true,
+            skipExpired: true,
+            watchIntervalMs: 60000,
+            exclude: [],
+            token: ''
+          };
+          export function merge(base, patch) {
+            const out = { ...base };
+            for (const [k, v] of Object.entries(patch || {})) {
+              if (v !== undefined && v !== null && v !== '') out[k] = v;
+              else if (v === false || v === 0) out[k] = v;
+            }
+            return out;
+          }
+          EOF
+
+          cat > src/core/store.js <<'EOF'
+          import fs from 'node:fs';
+          import os from 'node:os';
+          import path from 'node:path';
+          import { DEFAULT_CONFIG, merge } from './defaults.js';
+
+          const HOME = process.env.APPDATA || process.env.XDG_CONFIG_HOME || path.join(os.homedir(), '.config');
+          export const DATA_DIR = process.env.DQA_DATA ? path.resolve(process.env.DQA_DATA) : path.join(HOME, 'DiscordQuestsAuto');
+          fs.mkdirSync(DATA_DIR, { recursive: true });
+
+          const cfgPath = path.join(DATA_DIR, 'config.json');
+          let cache = null;
+
+          export function cfg() {
+            if (cache) return cache;
+            let disk = {};
+            try { disk = JSON.parse(fs.readFileSync(cfgPath, 'utf8')); } catch {}
+            cache = merge(DEFAULT_CONFIG, disk);
+            cache.dataDir = DATA_DIR;
+            if (process.env.DISCORD_TOKEN) cache.token = process.env.DISCORD_TOKEN;
+            return cache;
+          }
+          export function save(patch = {}) {
+            cache = merge(cfg(), patch);
+            const tmp = cfgPath + '.tmp';
+            fs.writeFileSync(tmp, JSON.stringify(cache, null, 2));
+            fs.renameSync(tmp, cfgPath);
+            return cache;
+          }
+          export const nodeStorage = {
+            get(k) { try { return JSON.parse(fs.readFileSync(path.join(DATA_DIR, k + '.json'), 'utf8')); } catch { return null; } },
+            set(k, v) { try { fs.writeFileSync(path.join(DATA_DIR, k + '.json'), JSON.stringify(v)); } catch {} }
+          };
+          EOF
+
+          cat > src/discord/api.js <<'EOF'
+          const API = 'https://discord.com/api/v9';
+          const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36';
+
+          export const ENDPOINTS = {
+            me:            { m: 'GET',  p: '/users/@me' },
+            userGuilds:    { m: 'GET',  p: '/users/@me/guilds' },
+            entitlements:  { m: 'GET',  p: '/users/@me/entitlements' },
+            quests:        { m: 'GET',  p: '/quests/@me' },
+            enroll:        { m: 'POST', p: '/quests/{id}/enroll' },
+            videoProgress: { m: 'POST', p: '/quests/{id}/video-progress' },
+            heartbeat:     { m: 'POST', p: '/quests/{id}/heartbeat' },
+            claimReward:   { m: 'POST', p: '/quests/{id}/claim-reward' },
+            guildChannels: { m: 'GET',  p: '/guilds/{id}/channels' }
+          };
+          export const LOCATION = { DESKTOP: 11 };
+
+          const mem = new Map();
+          export const memoryStorage = { get: k => mem.get(k) ?? null, set: (k, v) => mem.set(k, v) };
+
+          export const sleep = ms => new Promise(r => setTimeout(r, ms));
+          export function gauss() { let u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+          export function humanDelay(a, b) { const m = (a + b) / 2, s = (b - a) / 6; return Math.max(a * .5, Math.round(m + gauss() * s)); }
+          export function backoff(base, att, max) { const e = Math.min(max, base * 2 ** att); return Math.round(e * (0.5 + Math.random() * 0.5)); }
+          export function progressSteps(target, n) { const o = []; let c = 0; while (c < target) { c = Math.min(target, c + Math.max(1, Math.round(target / n * (0.6 + Math.random() * 0.9)))); o.push(c); } return o; }
+          export function rid() { return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 3 | 8)).toString(16); }); }
+
+          export class DiscordClient {
+            constructor({ token, getConfig, onLog, storage }) {
+              this.token = token;
+              this.getConfig = getConfig;
+              this.storage = storage || memoryStorage;
+              this.onLog = onLog || (() => {});
+              this.build = 0;
+              this.tokens = 60; this.last = Date.now();
+            }
+            log(lv, m) { this.onLog(lv, m); }
+            async rateAcquire() {
+              for (;;) {
+                const now = Date.now();
+                this.tokens = Math.min(60, this.tokens + (now - this.last) * 0.001);
+                this.last = now;
+                if (this.tokens >= 1) { this.tokens--; return; }
+                await sleep(Math.ceil((1 - this.tokens) * 1000) + 25);
+              }
+            }
+            async buildNumber() {
+              if (this.build) return this.build;
+              const c = await this.storage.get('discordBuild');
+              if (c && Date.now() - c.at < 21600000) return (this.build = c.build);
+              for (const u of ['https://discord.com/app', 'https://discord.com/login']) {
+                try {
+                  const h = await (await fetch(u, { headers: { 'User-Agent': UA } })).text();
+                  const m = h.match(/"buildNumber"\s*:\s*(\d+)/) || h.match(/assets\/(\d+)\//);
+                  if (m) { const b = Number(m[1]); await this.storage.set('discordBuild', { build: b, at: Date.now() }); return (this.build = b); }
+                } catch {}
+              }
+              return (this.build = 350000);
+            }
+            async headers() {
+              const b = await this.buildNumber();
+              const sp = Buffer.from(JSON.stringify({
+                os: 'Windows', browser: 'Chrome', device: '', system_locale: 'en-US',
+                browser_user_agent: UA, browser_version: '141.0.0.0', os_version: '10',
+                referrer: '', referring_domain: '', release_channel: 'stable',
+                client_build_number: b, client_event_source: null,
+                client_launch_id: rid(), client_heartbeat_session_id: rid(), client_app_state: 'focused'
+              })).toString('base64');
+              return {
+                Authorization: this.token, 'User-Agent': UA, Accept: '*/*',
+                'Accept-Language': 'en-US,en;q=0.9', 'X-Super-Properties': sp,
+                'X-Discord-Locale': 'en-US', 'X-Discord-Timezone': 'Asia/Bangkok',
+                'X-Debug-Options': 'bugReporterEnabled',
+                Origin: 'https://discord.com', Referer: 'https://discord.com/channels/@me'
+              };
+            }
+            async call(key, o = {}) {
+              const ep = ENDPOINTS[key];
+              let url = API + ep.p;
+              for (const [k, v] of Object.entries(o.params || {})) url = url.replace('{' + k + '}', v);
+              if (o.query) url += '?' + new URLSearchParams(o.query);
+              const label = o.label || key;
+              const c = this.getConfig();
+              let last = null;
+              for (let a = 0; a <= c.maxRetries; a++) {
+                if (a === 0 && !o.noDelay) await sleep(humanDelay(c.minDelayMs, c.maxDelayMs));
+                await this.rateAcquire();
+                try {
+                  const r = await fetch(url, { method: ep.m, headers: await this.headers(), body: o.body ? JSON.stringify(o.body) : undefined });
+                  if (r.ok) { const t = await r.text(); return t ? JSON.parse(t) : {}; }
+                  const p = await r.json().catch(() => ({})); last = p;
+                  if (r.status === 429) { const w = (p.retry_after ?? 2) * 1000; this.log('warn', label + ': 429 -> nghỉ ' + Math.round(w) + 'ms'); await sleep(w); continue; }
+                  if (r.status === 401) { this.log('err', label + ': token sai'); return p; }
+                  if (r.status === 404) return p;
+                  if (a >= c.maxRetries) return p;
+                  const w = backoff(c.backoffBaseMs, a, c.backoffMaxMs);
+                  this.log('dim', label + ': ' + r.status + ' -> backoff ' + w + 'ms');
+                  await sleep(w);
+                } catch (e) {
+                  this.log('warn', label + ': lỗi mạng -> thử lại');
+                  if (a >= c.maxRetries) throw e;
+                  await sleep(backoff(c.backoffBaseMs, a, c.backoffMaxMs));
+                }
+              }
+              return last || {};
+            }
+            me() { return this.call('me', { label: 'me' }); }
+            myQuests() { return this.call('quests', { query: { with_application: true }, label: 'quests' }); }
+            enroll(id) { return this.call('enroll', { params: { id }, body: { location: 11, is_targeted: false }, label: 'enroll' }); }
+            videoProgress(id, ts) { return this.call('videoProgress', { params: { id }, body: { timestamp: ts }, noDelay: true, label: 'video ' + ts + 's' }); }
+            heartbeat(id, sk, term) { return this.call('heartbeat', { params: { id }, body: { stream_key: sk, terminal: !!term }, noDelay: true, label: 'heartbeat' }); }
+            claim(id) { return this.call('claimReward', { params: { id }, body: { platform: 0, location: 11, is_targeted: false }, label: 'claim' }); }
+            entitlements() { return this.call('entitlements', { query: { exclude_consumed: true }, label: 'entitlements' }); }
+            guilds() { return this.call('userGuilds', { label: 'guilds' }); }
+            channels(g) { return this.call('guildChannels', { params: { id: g }, label: 'channels' }); }
+            async orbs() {
+              const l = await this.entitlements();
+              const arr = Array.isArray(l) ? l : (l?.entitlements || []);
+              return arr.filter(e => String(e.application_id) === '1004729762109481020' || e.sku_id).reduce((s, e) => s + (e.quantity || 1), 0);
+            }
+            async findVoiceChannel() {
+              const g = await this.guilds();
+              for (const x of (Array.isArray(g) ? g : []).slice(0, 5)) {
+                const ch = await this.channels(x.id);
+                const v = (Array.isArray(ch) ? ch : []).find(c => c.type === 2 || c.type === 13);
+                if (v) return v.id;
+              }
+              return '1';
+            }
+          }
+          EOF
+
+          cat > src/core/engine.js <<'EOF'
+          import { DiscordClient, sleep, humanDelay, progressSteps } from '../discord/api.js';
+
+          const DUR = new Set(['WATCH_VIDEO', 'WATCH_VIDEO_ON_MOBILE']);
+          const HB = new Set(['PLAY_ON_DESKTOP', 'PLAY_ON_DESKTOP_V2', 'STREAM_ON_DESKTOP', 'PLAY_ACTIVITY', 'PLAY_ON_XBOX', 'PLAY_ON_PLAYSTATION']);
+          const ACH = new Set(['ACHIEVEMENT_IN_GAME', 'ACHIEVEMENT_IN_ACTIVITY']);
+
+          const tasksOf = q => Object.values(q?.config?.task_config_v2?.tasks || q?.config?.task_config?.tasks || {});
+          const nameOf = q => q?.config?.messages?.quest_name || q?.config?.application?.name || q?.id;
+
+          export function progressOf(q) {
+            const st = q?.user_status || {};
+            const cur = Object.values(st.progress || {}).reduce((a, p) => a + (p.value || 0), 0);
+            const tgt = tasksOf(q).reduce((a, t) => a + (t.target || 0), 0) || 1;
+            return { enrolled: !!st.enrolled_at, completed: !!st.completed_at, claimed: !!st.claimed_at, pct: Math.min(100, Math.round(cur / tgt * 100)) };
+          }
+
+          export class Engine {
+            constructor({ token, getConfig, onLog, storage, onState }) {
+              this.getConfig = getConfig;
+              this.log = onLog || (() => {});
+              this.onState = onState || (() => {});
+              this.client = new DiscordClient({ token, getConfig, onLog: this.log, storage });
+              this.stop = false;
+              this.running = false;
+              this.state = { me: null, orbs: 0, quests: [], stats: { ok: 0, fail: 0, skip: 0 } };
+            }
+            emit() { this.onState(this.state); }
+            async scan() {
+              const me = await this.client.me();
+              if (me?.code === 401) throw new Error('Token không hợp lệ');
+              this.state.me = { id: me.id, username: me.username, global_name: me.global_name };
+              const d = await this.client.myQuests();
+              this.state.quests = (d?.quests || []).filter(q => q?.config).map(q => ({
+                id: q.id, name: nameOf(q),
+                reward: q.config?.rewards_config?.rewards?.[0]?.orb_quantity
+                  ? q.config.rewards_config.rewards[0].orb_quantity + ' orbs'
+                  : (q.config?.rewards_config?.rewards?.[0]?.messages?.name || '—'),
+                types: tasksOf(q).map(t => t.type), colors: q.config?.colors, ...progressOf(q)
+              }));
+              try { this.state.orbs = await this.client.orbs(); } catch {}
+              this.emit();
+              this.log('info', 'Quét xong: ' + this.state.quests.length + ' quest');
+            }
+            async runOnce() {
+              const c = this.getConfig();
+              const d = await this.client.myQuests();
+              for (const q of (d?.quests || []).filter(x => x?.config)) {
+                if (this.stop) break;
+                const p = progressOf(q), n = nameOf(q);
+                if ((c.exclude || []).includes(q.id)) { this.state.stats.skip++; continue; }
+                if (c.skipExpired && q.config.expires_at && Date.parse(q.config.expires_at) < Date.now()) continue;
+                if (p.claimed) { this.state.stats.skip++; continue; }
+                if (p.completed && c.autoClaim) { await this.client.claim(q.id); this.log('ok', n + ': claim quest đã xong'); continue; }
+                try { await this.complete(q); this.state.stats.ok++; }
+                catch (e) { this.state.stats.fail++; this.log('err', n + ': ' + e.message); }
+                this.emit();
+                await sleep(humanDelay(2000, 6000));
+              }
+            }
+            async complete(q) {
+              const c = this.getConfig(), n = nameOf(q), tasks = tasksOf(q);
+              if (!tasks.length) return;
+              if (!q.user_status?.enrolled_at && c.autoEnroll) {
+                await this.client.enroll(q.id);
+                this.log('ok', n + ': đã nhận quest');
+                await sleep(humanDelay(1200, 3200));
+              }
+              const sk = tasks.some(t => t.type === 'STREAM_ON_DESKTOP') ? 'call:' + await this.client.findVoiceChannel() + ':1' : null;
+              for (const t of tasks) {
+                const target = Number(t.target) || 0;
+                if (!target || (q.user_status?.progress?.[t.type]?.value || 0) >= target) continue;
+                if (DUR.has(t.type)) {
+                  for (const ts of progressSteps(target, 6)) {
+                    await this.client.videoProgress(q.id, ts);
+                    this.log('dim', n + ': video ' + ts + '/' + target + 's');
+                    await sleep(humanDelay(1800, 4200));
+                  }
+                } else if (HB.has(t.type)) {
+                  let cur = q.user_status?.progress?.[t.type]?.value || 0, g = 0;
+                  while (cur < target && g++ < 300) {
+                    const r = await this.client.heartbeat(q.id, sk || 'call:0:1', false);
+                    cur = r?.progress?.[t.type]?.value ?? cur + c.heartbeatSec;
+                    this.log('dim', n + ': ' + t.type + ' ' + cur + '/' + target + 's');
+                    await sleep(humanDelay(c.heartbeatSec * 850, c.heartbeatSec * 1250));
+                  }
+                  if (sk) await this.client.heartbeat(q.id, sk, true);
+                } else if (ACH.has(t.type)) {
+                  await sleep(humanDelay(3000, 6000));
+                  await this.client.heartbeat(q.id, 'call:0:1', false);
+                }
+              }
+              if (c.autoClaim) {
+                await sleep(humanDelay(2000, 5000));
+                const r = await this.client.claim(q.id);
+                this.log(r?.code ? 'warn' : 'ok', n + ': ' + (r?.code ? r.message || r.code : 'ĐÃ CLAIM'));
+              }
+            }
+            async watch() {
+              this.running = true; this.stop = false;
+              this.log('ok', 'Vòng lặp 24/7 bật');
+              while (!this.stop) {
+                try { await this.scan(); await this.runOnce(); }
+                catch (e) { this.log('err', 'vòng lặp: ' + e.message); }
+                await sleep(this.getConfig().watchIntervalMs);
+              }
+              this.running = false;
+            }
+            halt() { this.stop = true; this.log('warn', 'Đã dừng'); }
+          }
+          EOF
+
+          cat > src/ui.js <<'EOF'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          const INLINE = typeof __INDEX_HTML__ === 'string' ? __INDEX_HTML__ : null;
+          let cache = null;
+          export function uiHtml() {
+            if (cache) return cache;
+            if (INLINE) return (cache = INLINE);
+            for (const p of [path.join(process.cwd(), 'index.html'), path.join(path.dirname(process.execPath), 'index.html')]) {
+              try { return (cache = fs.readFileSync(p, 'utf8')); } catch {}
+            }
+            return (cache = '<h1>Thiếu index.html</h1>');
+          }
+          export const VERSION = typeof __BUILD_VERSION__ === 'string' ? __BUILD_VERSION__ : 'dev';
+          EOF
+
+          cat > src/server.js <<'EOF'
+          import http from 'node:http';
+          import { exec } from 'node:child_process';
+          import { uiHtml, VERSION } from './ui.js';
+          import { cfg, save } from './core/store.js';
+
+          export function startServer(engine, { open = true } = {}) {
+            const sse = new Set();
+            engine.log = (lv, msg) => {
+              const f = 'data: ' + JSON.stringify({ t: Date.now(), lv, msg }) + '\n\n';
+              for (const r of sse) { try { r.write(f); } catch {} }
+              console.log('[' + lv + '] ' + msg);
+            };
+            const srv = http.createServer(async (req, res) => {
+              const u = new URL(req.url, 'http://localhost');
+              const J = (code, o, type) => { res.writeHead(code, { 'Content-Type': (type || 'application/json') + '; charset=utf-8', 'Cache-Control': 'no-store' }); res.end(typeof o === 'string' ? o : JSON.stringify(o)); };
+              const B = async () => { let d = ''; for await (const c of req) d += c; try { return JSON.parse(d || '{}'); } catch { return {}; } };
+              try {
+                if (u.pathname === '/' || u.pathname === '/index.html') return J(200, uiHtml(), 'text/html');
+                if (u.pathname === '/api/logs') {
+                  res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', Connection: 'keep-alive' });
+                  res.write(':ok\n\n'); sse.add(res);
+                  const hb = setInterval(() => { try { res.write(':hb\n\n'); } catch {} }, 15000);
+                  req.on('close', () => { clearInterval(hb); sse.delete(res); });
+                  return;
+                }
+                if (u.pathname === '/api/state') return J(200, {
+                  version: VERSION, token: cfg().token, running: engine.running,
+                  me: engine.state.me, orbs: engine.state.orbs, quests: engine.state.quests, stats: engine.state.stats,
+                  settings: {
+                    minDelayMs: cfg().minDelayMs, maxDelayMs: cfg().maxDelayMs, heartbeatSec: cfg().heartbeatSec,
+                    maxRetries: cfg().maxRetries, autoEnroll: cfg().autoEnroll, autoClaim: cfg().autoClaim, exclude: cfg().exclude
+                  }
+                });
+                if (u.pathname === '/api/token' && req.method === 'POST') {
+                  const { token } = await B();
+                  save({ token: String(token || '').trim() });
+                  engine.client.token = cfg().token;
+                  engine.log('ok', 'Đã lưu token');
+                  if (!engine.running && cfg().token) engine.watch().catch(e => engine.log('err', e.message));
+                  return J(200, { ok: true });
+                }
+                if (u.pathname === '/api/settings' && req.method === 'POST') { save(await B()); return J(200, { ok: true }); }
+                if (u.pathname === '/api/scan' && req.method === 'POST') { await engine.scan(); return J(200, { ok: true }); }
+                if (u.pathname === '/api/run' && req.method === 'POST') { J(200, { ok: true }); engine.runOnce().catch(e => engine.log('err', e.message)); return; }
+                if (u.pathname === '/api/engine/start' && req.method === 'POST') { if (!engine.running) engine.watch().catch(e => engine.log('err', e.message)); return J(200, { ok: true }); }
+                if (u.pathname === '/api/engine/stop' && req.method === 'POST') { engine.halt(); return J(200, { ok: true }); }
+                J(404, { error: 'not found' });
+              } catch (e) { J(500, { error: e.message }); }
+            });
+            const port = cfg().port;
+            srv.on('error', (e) => {
+              if (e.code === 'EADDRINUSE') console.error('\n  Cổng ' + port + ' bận. Chạy: DiscordQuestsAuto.exe --port 3001\n');
+              else console.error(e);
+            });
+            srv.listen(port, () => {
+              const url = 'http://localhost:' + port;
+              console.log('\n  ╔══════════════════════════════════════╗');
+              console.log('  ║   Discord Quests Auto  v' + VERSION);
+              console.log('  ╚══════════════════════════════════════╝');
+              console.log('  UI      : ' + url);
+              console.log('  Dữ liệu : ' + cfg().dataDir + '\n');
+              if (open) exec(process.platform === 'win32' ? 'start "" "' + url + '"' : process.platform === 'darwin' ? 'open "' + url + '"' : 'xdg-open "' + url + '"', () => {});
+            });
+            process.on('SIGINT', () => { engine.halt(); srv.close(); process.exit(0); });
+            return srv;
+          }
+          EOF
+
+          cat > src/cli.js <<'EOF'
+          import { cfg, save, nodeStorage, DATA_DIR } from './core/store.js';
+          import { Engine } from './core/engine.js';
+          import { VERSION } from './ui.js';
+
+          const args = process.argv.slice(2);
+          const has = f => args.includes(f);
+          const val = f => { const i = args.indexOf(f); return i > -1 ? args[i + 1] : null; };
+          const C = { info: '\x1b[36m', ok: '\x1b[32m', warn: '\x1b[33m', err: '\x1b[31m', dim: '\x1b[90m' };
+          const log = (lv, m) => console.log((C[lv] || '') + '[' + new Date().toLocaleTimeString('vi-VN') + '] ' + m + '\x1b[0m');
+
+          if (val('--token')) save({ token: val('--token').trim() });
+          if (val('--port')) save({ port: Number(val('--port')) });
+
+          const token = (cfg().token || process.env.DISCORD_TOKEN || '').trim();
+          const engine = new Engine({ token, getConfig: cfg, onLog: log, storage: nodeStorage });
+
+          console.log('\n   ██████╗  ██████╗  █████╗     Discord Quests Auto  v' + VERSION + '\n   ██╔══██╗██╔═══██╗██╔══██╗    Anti rate-limit · 24/7\n   ██████╔╝╚██████╔╝██║  ██║    Dữ liệu: ' + DATA_DIR + '\n   ╚═════╝  ╚═════╝ ╚═╝  ╚═╝');
+
+          if (has('--once')) {
+            if (!token) { console.error('Thiếu token'); process.exit(1); }
+            await engine.scan();
+            await engine.runOnce();
+            log('ok', 'Xong. ok=' + engine.state.stats.ok + ' fail=' + engine.state.stats.fail);
+            process.exit(0);
+          }
+
+          if (has('--watch') && !has('--server')) {
+            if (!token) { console.error('Thiếu token'); process.exit(1); }
+            await engine.scan();
+            await engine.watch();
+          } else {
+            const { startServer } = await import('./server.js');
+            startServer(engine, { open: !has('--no-open') });
+            if (token) {
+              await engine.scan().catch(e => log('err', e.message));
+              engine.watch().catch(e => log('err', e.message));
+            } else {
+              log('warn', 'Chưa có token — dán vào web rồi bấm Lưu token.');
+            }
+          }
+          EOF
+
+      # ═══════════════ 4. build.mjs ═══════════════
+      - name: Tạo build.mjs
+        shell: bash
+        run: |
+          cat > build.mjs <<'EOF'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          import { execSync } from 'node:child_process';
+          import * as esbuild from 'esbuild';
+
+          const root = process.cwd();
+          const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
+          const work = path.join(root, 'out', '.build');
+          const outDir = path.join(root, 'out');
+
+          fs.rmSync(work, { recursive: true, force: true });
+          fs.mkdirSync(work, { recursive: true });
+          fs.mkdirSync(outDir, { recursive: true });
+
+          const isWin = process.platform === 'win32';
+          const bundle = path.join(work, 'bundle.cjs');
+          const blob = path.join(work, 'sea-prep.blob');
+          const exe = path.join(outDir, isWin
+            ? 'DiscordQuestsAuto-v' + pkg.version + '.exe'
+            : 'DiscordQuestsAuto-v' + pkg.version + '-' + process.platform + '-' + process.arch);
+
+          console.log('[1/5] Bundle code + index.html...');
+          const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+
+          await esbuild.build({
+            entryPoints: [path.join(root, 'src', 'cli.js')],
+            bundle: true,
+            platform: 'node',
+            target: 'node20',
+            format: 'cjs',
+            outfile: bundle,
+            minify: true,
+            legalComments: 'none',
+            loader: { '.html': 'text' },
+            define: {
+              __INDEX_HTML__: JSON.stringify(html),
+              __BUILD_VERSION__: JSON.stringify(pkg.version)
+            }
+          });
+
+          console.log('[2/5] SEA config...');
+          fs.writeFileSync(path.join(work, 'sea-config.json'), JSON.stringify({
+            main: bundle, output: blob,
+            disableExperimentalSEAWarning: true,
+            useSnapshot: false, useCodeCache: false
+          }, null, 2));
+          execSync('node --experimental-sea-config sea-config.json', { cwd: work, stdio: 'inherit' });
+
+          console.log('[3/5] Copy runtime Node...');
+          fs.copyFileSync(process.execPath, exe);
+
+          console.log('[4/5] Gỡ chữ ký...');
+          if (isWin) {
+            try { execSync('signtool remove /s "' + exe + '"', { stdio: 'ignore' }); console.log('   đã gỡ'); }
+            catch { console.log('   bỏ qua (không có signtool)'); }
+          } else {
+            try { execSync('codesign --remove-signature "' + exe + '"', { stdio: 'ignore' }); } catch {}
+          }
+
+          console.log('[5/5] Inject blob...');
+          execSync('npx --yes postject "' + exe + '" NODE_SEA_BLOB "' + blob +
+            '" --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2', { stdio: 'inherit' });
+
+          fs.rmSync(work, { recursive: true, force: true });
+          console.log('\n✓ ' + path.basename(exe) + '  (' + (fs.statSync(exe).size / 1048576).toFixed(1) + ' MB)');
+          EOF
+
+      # ═══════════════ 5. BUILD ═══════════════
+      - name: Cài esbuild
+        shell: bash
+        run: npm install --no-audit --no-fund
+
+      - name: Build exe
+        shell: bash
+        run: node build.mjs
+
+      - name: Kiểm tra exe chạy được
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem out\*.exe | Select-Object -First 1
+          "=== $($exe.Name) - $([math]::Round($exe.Length/1MB,1)) MB ===" | Tee-Object -Append summary.txt
+          $p = Start-Process $exe.FullName -ArgumentList '--once','--no-open','--port','3099' `
+                -PassThru -RedirectStandardOutput run.txt -RedirectStandardError err.txt
+          Start-Sleep -Seconds 35
+          if (-not $p.HasExited) { $p.Kill() }
+          Get-Content run.txt,err.txt -ErrorAction SilentlyContinue | Tee-Object -Append summary.txt
+          (Get-FileHash $exe.FullName -Algorithm SHA256).Hash | Tee-Object -Append summary.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DiscordQuestsAuto-exe
+          path: |
+            out/*.exe
+            summary.txt
+          retention-days: 90
+
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: out/*.exe
+          generate_release_notes: true
